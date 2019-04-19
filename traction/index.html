@@ -1,0 +1,594 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+ xmlns:v="urn:schemas-microsoft-com:vml"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:w="urn:schemas-microsoft-com:office:word">
+<head>
+  <title>Traction coding sample</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!--[if !mso]><!-- -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<!--<![endif]-->
+
+  <style type="text/css">
+    /* CLIENT-SPECIFIC STYLES */
+
+    #outlook a {
+      padding: 0;
+    }
+
+    /* Hotmail */
+    .ReadMsgBody {
+      width: 100%;
+    }
+
+    .ExternalClass {
+      width: 100%;
+    }
+
+    .ExternalClass,
+    .ExternalClass p,
+    .ExternalClass span,
+    .ExternalClass font,
+    .ExternalClass td,
+    .ExternalClass div {
+      line-height: 100%;
+    }
+
+    body,
+    table,
+    td,
+    a {
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    table,
+    td {
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
+    }
+
+    img {
+      -ms-interpolation-mode: bicubic;
+    }
+
+    /* RESET */
+
+    body, h1, h2, h3, p {
+      margin: 0;
+      padding: 0;
+      color: #333333;
+      font-family: "Osaka", Arial, sans-serif;
+    }
+
+    img {
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+    }
+
+    table {
+      border-collapse: collapse !important;
+    }
+
+    body {
+      height: 100% !important;
+      margin: 0;
+      padding: 0;
+      width: 100% !important;
+    }
+
+    .appleBody a {
+      color: #0088cc;
+      text-decoration: none;
+    }
+
+    .appleFooter a {
+      color: #999999;
+      text-decoration: none;
+    }
+</style>
+<style type="text/css">
+    h1 {
+      font-size:30px;
+      line-height: 32px;
+      font-weight:100;
+    }
+    h2 {
+      font-size:20px;
+      line-height:22px;
+      font-weight:normal;
+    }
+    h3, .text-large {
+     font-size: 20px;
+     line-height: 24px;
+    }
+
+    .graybg {
+      background-color:#eeeeee;
+    }
+
+    .mobileOnly {
+      display: none !important;
+      Height: 0px;
+    }
+
+    .para2 {
+      font-size:14px;
+      line-height:22px;
+      color: #666666;
+    }
+
+    /* mobile styles */
+    @media screen and (max-width:414px) {
+      .ht120 {
+        height: inherit !important;
+      }
+      .cattext {
+        width:100% !important;
+      }
+      .catbg {
+        background-size: 414px auto !important;
+        padding-bottom: 380px !important;
+      }
+      .desktopOnly {
+        font-size:0 !important;
+        line-height: 0 !important;
+        display: none !important;
+      }
+      .mobileOnly {
+        display: inherit !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+      }
+      .specialFooterLink {
+        display: block;
+        border-top: 1px solid #cccccc;
+        padding-top: 15px;
+      }
+      .specialFooterNav {
+        display: block; padding-bottom: 15px;
+      }
+    }
+  </style>
+  <style type="text/css">
+    /* target outlook Android/iOS */
+    [data-outlook-cycle] .cattext {
+      width: 100% !important;
+      width: calc(100%) !important;
+      color:#ff0000;
+    }
+    @media (min-resolution: 1dpi) {
+      body[data-outlook-cycle] .cattext {
+        display: block!important; 
+      width: calc(100%) !important;
+      color:#ff00ff !important;
+      }
+    }
+  </style>
+
+  <!--[if gte mso 9]>
+<style type="text/css">
+    body, h1, h2, h3, p {
+      font-family: Arial, sans-serif;
+    }
+
+    .catbg {
+      padding:15px !important;
+    }
+</style><![endif]-->
+
+  <!--[if gte mso 9]><xml>
+ <o:OfficeDocumentSettings>
+  <o:AllowPNG/>
+  <o:PixelsPerInch>96</o:PixelsPerInch>
+ </o:OfficeDocumentSettings>
+</xml><![endif]-->
+</head>
+
+  <body style="margin: 0; padding: 0;">
+<center>
+<!--[if gte mso 9]><table width="600" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td><![endif]-->
+<div style="min-width:320px; max-width:850px;border:1px solid #cccccc;">
+  <div style="width:90%;max-width:760px;">
+  <!-- gray background section -->
+	<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+      <td bgcolor="#eeeeee" style="padding:15px 15px 40px 15px;background:#eeeeee;">
+  <div class="graybg" >
+      <!-- ONE COLUMN SECTION -->
+    <h1 style="text-align:center;margin:23px 0 30px 0;">Headline 1</h1>
+    <table style="margin-bottom:40px;" class="wrapper" border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td class="catbg" width="100%" valign="top" 
+            style="padding:10px 10px 380px 10px;
+                  background-image: url('https://pngriver.com/wp-content/uploads/2017/11/cat-kitten-transparent-png-images-free-download-033.png');
+                  background-position: center bottom;
+                  background-size: contain;
+                  background-repeat: no-repeat;">
+      <!--[if gte mso 9]>
+      <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" 
+        style="height:530;width:600;">
+        <v:fill 
+					type="frame" 
+					src="https://pngriver.com/wp-content/uploads/2017/11/cat-kitten-transparent-png-images-free-download-033.png" 
+					color="#eeeeee"
+				/>
+        <v:textbox inset="0,0,0,0">
+      <![endif]-->
+      <div>
+          <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+              <td>
+                <table class="cattext" width="50%" border="0" cellspacing="0" cellpadding="0" style="width:calc(50%);">
+                  <tr>
+                    <td align="center" class="padding-copy">
+                      <h2 style="margin:0 0 10px 0;">Cats are great</h2>
+                    </td>
+                    </tr>
+                  <tr>
+                    <td align="center" class="padding-copy">
+                      <p style="display:block;width:95%;">Going to catch the red dot today going to catch the red dot today where is my slave?
+                      I'm getting hungry find box a little too small and curl up with fur.</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+      </div>
+      <!--[if gte mso 9]>
+        </v:textbox>
+      </v:rect>
+      <![endif]-->
+        </td>
+      </tr>
+    </table>
+          
+    <div style="font-size:0;">
+    <!-- TWO COLUMN SECTION -->
+    <!-- fab-four method -->
+    <!--[if gte mso 9]><table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td width="50%" valign="top"><![endif]-->
+      <div style="display:inline-block;
+      text-align:left;vertical-align:top;
+      width:50%;
+      min-width:240px;
+      max-width:100%;
+      width:-webkit-calc(230400px - 48000%);
+      min-width:-webkit-calc(50%);
+      width:calc(230400px - 48000%);
+      min-width:calc(50%);">
+        <!-- LEFT COLUMN -->
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="padding:0 40px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding:20px 0 15px 0;">
+                    <h3>Feature One</h3>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" class="para2 ht120" style="height:120px;padding:0 0 24px 0;" valign="top">
+                    <p>Sleep on keyboard then cats take over the world bit off human's toes lick human with sandpaper tongue ooh, are those your $250 dollar sandals? blep for tickle my belly.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center"  valign="middle">
+                    <img src="https://placekitten.com/265/460" height="460" width="265" style="width:100%;height:auto;" alt="" />
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <!--[if gte mso 9]></td><td valign="top"><![endif]-->
+      <!-- RIGHT COLUMN -->
+      <div style="display:inline-block;
+        text-align:left;vertical-align:top;
+        width:50%;
+        min-width:240px;
+        max-width:100%;
+        width:-webkit-calc(230400px - 48000%);
+        min-width:-webkit-calc(50%);
+        width:calc(230400px - 48000%);
+        min-width:calc(50%);">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td style="padding:0 40px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding:20px 0 15px 0; font-family: Arial, sans-serif; color: #333333; font-size: 20px;" >
+                    <h3>Feature Two</h3>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" class="para2 ht120" style="height:120px;padding:0 0 24px 0;" valign="top">
+                    <p>Lemme use that as my litter box yet floof tum, tickle bum, jellybean footies curly toes. Toy mouse squeak roll over.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center"  valign="middle">
+                    <img src="https://placekitten.com/265/460" height="460" width="265" style="width:100%;height:auto;" alt="" />
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <!--[if gte mso 9]></td></tr></table><![endif]-->
+    </div> <!-- font-size:0 -->
+  </div> <!-- END gray wrapper -->
+        
+      </td>
+    </tr>
+  </table>
+
+  <!-- 2x2 SECTION -->
+  <div class="twobytwo" style="padding:0 20px;">
+
+    <h1 style="text-align:center;margin:40px 0 40px 0;">Headline 2
+    <br />with more words</h1>
+
+
+    <div style="font-size:0;">
+    <!-- TWO COLUMN SECTION -->
+    <!-- fab-four method -->
+    <!--[if gte mso 9]><table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td valign="top"><![endif]-->
+      <div style="display:inline-block;
+      text-align:left;vertical-align:top;
+      width:50%;
+      min-width:240px;
+      max-width:100%;
+      width:-webkit-calc(230400px - 48000%);
+      min-width:-webkit-calc(50%);
+      width:calc(230400px - 48000%);
+      min-width:calc(50%);
+      height:150px;">
+        <!-- LEFT COLUMN -->
+        <div class="twobytwopad" style="padding:0 20px">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td width="24" colspan="2" valign="bottom">
+            <img align="absbottom" src="http://img.appular.com/smallpaw.png" height="24" width="24" alt="cat paw" style="margin-right:8px" />
+            </td>
+            <td style="font-size:20px;line-height:20px;vertical-align:bottom;">
+            Subhead 1
+            </td>
+          </tr>
+          <tr>
+            <td width="3">&nbnsp;</td>
+            <td class="para3" style="font-size:14px;line-height:24px;padding:12px 0px 0 0" colspan="2" >
+          I will pester for food when you're in the kitchen even if it's salad. Leave dead animals as gifts eat a plant.                                
+            </td>
+          </tr>
+        </table>
+        </div>
+      </div>
+      <!--[if gte mso 9]></td><td valign="top"><![endif]-->
+      <!-- RIGHT COLUMN -->
+      <div style="display:inline-block;
+        text-align:left;vertical-align:top;
+        width:50%;
+        min-width:240px;
+        max-width:100%;
+        width:-webkit-calc(230400px - 48000%);
+        min-width:-webkit-calc(50%);
+        width:calc(230400px - 48000%);
+        min-width:calc(50%);
+        height:150px;">
+        <div class="twobytwopad" style="padding:0 20px">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td width="24" colspan="2" valign="bottom">
+            <img align="absbottom" src="http://img.appular.com/smallpaw.png" height="24" width="24" alt="cat paw" style="margin-right:8px" />
+            </td>
+            <td style="font-size:20px;line-height:20px;vertical-align:bottom;">
+            Subhead 1
+            </td>
+          </tr>
+          <tr>
+            <td width="3">&nbnsp;</td>
+            <td class="para3" style="font-size:14px;line-height:24px;padding:12px 0px 0 0" colspan="2" >
+                Kill a hand yet purr but gate keepers of hell lie on your belly and purr when you are asleep.
+            </td>
+          </tr>
+        </table>
+      </div>
+      </div>
+      <!--[if gte mso 9]></td></tr><![endif]-->
+    <!--[if gte mso 9]><tr><td valign="top"><![endif]-->
+      <div style="display:inline-block;
+      text-align:left;vertical-align:top;
+      width:50%;
+      min-width:240px;
+      max-width:100%;
+      width:-webkit-calc(230400px - 48000%);
+      min-width:-webkit-calc(50%);
+      width:calc(230400px - 48000%);
+      min-width:calc(50%);
+      height:150px;">
+        <!-- LEFT COLUMN -->
+        <div class="twobytwopad" style="padding:0 20px">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td width="24" colspan="2" valign="bottom">
+            <img align="absbottom" src="http://img.appular.com/smallpaw.png" height="24" width="24" alt="cat paw" style="margin-right:8px" />
+            </td>
+            <td style="font-size:20px;line-height:20px;vertical-align:bottom;">
+            Subhead 1
+            </td>
+          </tr>
+          <tr>
+            <td width="3">&nbnsp;</td>
+            <td class="para3" style="font-size:14px;line-height:24px;padding:12px 0px 0 0;" colspan="2" >
+Or I show my fluffy belly but it's a trap! If you pet it I will tear up your hand. Sit and stare the fat cat sat on the mat.
+            </td>
+          </tr>
+        </table>
+        </div>
+      </div>
+      <!--[if gte mso 9]></td><td valign="top"><![endif]-->
+      <!-- RIGHT COLUMN -->
+      <div style="display:inline-block;
+        text-align:left;vertical-align:top;
+        width:50%;
+        min-width:240px;
+        max-width:100%;
+        width:-webkit-calc(230400px - 48000%);
+        min-width:-webkit-calc(50%);
+        width:calc(230400px - 48000%);
+        min-width:calc(50%);
+        height:150px;">
+        <div class="twobytwopad" style="padding:0 20px">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+          <tr>
+            <td width="24" colspan="2" valign="bottom">
+            <img align="absbottom" src="http://img.appular.com/smallpaw.png" height="24" width="24" alt="cat paw" style="margin-right:8px" />
+            </td>
+            <td style="font-size:20px;line-height:20px;vertical-align:bottom;">
+            Subhead 1
+            </td>
+          </tr>
+          <tr>
+            <td width="3">&nbnsp;</td>
+            <td class="para3" style="font-size:14px;line-height:24px;padding:12px 0px 0 0" colspan="2" >
+Bat away with paws. Destroy couch chase imaginary bugs, run around the house at 4 in the morning peer out window, chatter at birds, lure them to mouth for munch, munch.
+            </td>
+          </tr>
+        </table>
+        </div>
+      </div>
+      <!--[if gte mso 9]></td></tr></table><![endif]-->
+    </div> <!-- font-size:0 -->
+  </div> <!-- END 2x2 wrapper -->
+
+<hr style="margin:40px 0;" />
+
+<div style="margin:0 auto;font-size:16px;line-height;26px;text-align:center;">
+  <img src="http://placekitten.com/175/120" width="175" height="120" alt="kitten" />
+  <div>Check out a list of our must-have cat apps.</div>
+  <span class="appleBody">
+  <a class="desktopOnly" style="display:block;" href="http://cats.com">View the Cat collection&nbsp;&gt;</a>
+  <a class="mobileOnly" style="display:none;font-size:0;line-height:0;" href="http://cats.com/mobile">View the SPECIAL MOBILE ONLY Cat collection&nbsp;&gt;</a>
+  </span>
+</div>
+
+<hr style="margin:60px 0 60px 0;" />
+
+
+
+  <h1 style="text-align:center;margin:40px 0;">Headline 3</h1>
+  <!-- THREE COLUMN SECTION -->
+  <div class="threecol" style="margin:30px 0;">
+    <div style="font-size:0;">
+    <!-- fab-four method -->
+    <!--[if gte mso 9]><table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td width="33%" valign="top"><![endif]-->
+      <div style="display:inline-block;
+      text-align:left;vertical-align:top;
+      width:33%;
+      min-width:200px;
+      max-width:100%;
+      width:-webkit-calc(230400px - 48000%);
+      min-width:-webkit-calc(33%);
+      width:calc(230400px - 48000%);
+      min-width:calc(33%);">
+        <!-- LEFT COLUMN -->
+        <div class="para3" style="font-size:14px;line-height:24px;padding:12px 20px;text-align:center;">
+          <img src="http://img.appular.com/smallpaw.png" height="24" width="24" alt="cat paw" style="margin-right:8px" />
+          <div class="appleBody" style="padding-bottom:10px;"><h3>Title 1</h3></div>
+          <div class="appleBody" style="padding-bottom:10px;">Chomp, chomp but caticus cuteicus yet mice. Litter kitter kitty litty little kitten big roar roar feed me chirp at birds but show belly</div>
+          <div class="appleBody" style="margin:10px 0;"><a href="#">View the guide &nbsp;&gt;</a></div>
+          <div class="appleBody" style="margin:10px 0;"><a href="#">Dowload in iCat &nbsp;&gt;</a></div>
+        </div>
+      </div>
+      <!--[if gte mso 9]></td><td width="34%" valign="top"><![endif]-->
+      <!-- CENTER COLUMN -->
+      <div style="display:inline-block;
+        text-align:left;vertical-align:top;
+        width:33%;
+        min-width:200px;
+        max-width:100%;
+        width:-webkit-calc(230400px - 48000%);
+        min-width:-webkit-calc(33%);
+        width:calc(230400px - 48000%);
+        min-width:calc(33%);">
+        <div class="para3" style="font-size:14px;line-height:24px;padding:12px 20px;text-align:center;">
+          <img src="http://img.appular.com/smallpaw.png" height="24" width="24" alt="cat paw" style="margin-right:8px" />
+          <div class="appleBody" style="padding-bottom:10px;"><h3>Title 1</h3></div>
+          <div class="appleBody">Or I'm bored inside, let me out I'm lonely outside, let me in I can't make up my mind whether to go</div>
+          <div class="appleBody" style="margin:10px 0;"><a href="#">Find more info &nbsp;&gt;</a></div>
+        </div>
+      </div>
+
+      <!--[if gte mso 9]></td><td width="33%"><![endif]-->
+
+      <div style="display:inline-block;
+      text-align:left;vertical-align:top;
+      width:33%;
+      min-width:200px;
+      max-width:100%;
+      width:-webkit-calc(230400px - 48000%);
+      min-width:-webkit-calc(33%);
+      width:calc(230400px - 48000%);
+      min-width:calc(33%);">
+        <!-- RIGHT COLUMN -->
+        <div class="para3" style="font-size:14px;line-height:24px;padding:12px 20px;text-align:center;">
+          <img src="http://img.appular.com/smallpaw.png" height="24" width="24" alt="cat paw" style="margin-right:8px" />
+          <div class="appleBody" style="padding-bottom:10px;"><h3>Title 1</h3></div>
+          <div class="appleBody">You nudge me with your foot?!?! Leap into the air in greatest offense! Or follow us on Twitter <a href="#">@CatSupport</a></div>
+          <div class="appleBody" style="margin:10px 0;"><a href="#">Visit Cat Support &nbsp;&gt;</a></div>
+        </div>
+      </div>
+
+      <!--[if gte mso 9]></td></tr></table><![endif]-->
+    </div> <!-- font-size:0 -->
+  </div> <!-- END 3-column -->
+  </div> <!-- wrapper padding -->
+
+  <!-- FOOTER -->
+  <div style="background:#f2f2f2;color:#b6b6b6;font-size:12px;padding:20px 40px 90px 20px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td>
+          <div class="appleFooter" style="text-align:center;">
+            <span class="specialFooterNav">
+            <a href="#" style="color:#7d7d7d;">Link 1</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="#" style="color:#7d7d7d;">Link 2</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="#" style="color:#7d7d7d;">1-800-MY-CATSS</a>
+            </span>
+            <span class="desktopOnly">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+            <a href="#" class="specialFooterLink" style="color:#7d7d7d;">Link 3</a>
+          </div>
+          <div style="padding:20px 0 0 0"></div>        
+          <div class="appleFooter" style="color:#b6b6b6;border-top:1px solid #cccccc;padding-top:15px;">
+            Some features may not be available for all countries or all areas. 
+            <a href="#" style="color:#7d7d7d;">Click here</a> to see complete list.
+          </div>
+          <div class="appleFooter" style="padding:10px 0;">
+            <span style="display:inline-block;" >TM and &copy; 2016 Company Inc.</span>
+            <span style="display:inline-block;width:300px;">123 Main Street, San Francisco, CA 94109.</span>
+          </div>
+          <div class="appleFooter" style="padding:10px 0;">
+            <a href="#" style="color:#7d7d7d;">All Rights Reserved</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="#" style="color:#7d7d7d;">Privacy Policy</a> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a href="#" style="color:#7d7d7d;">My Cat ID</a>
+          </div>
+          <div class="appleFooter" style="color:#b6b6b6;">
+            If you prefer not to receive commercia email from us, or you've changed your email address, please click 
+            <a href="#" style="color:#7d7d7d;">here</a></div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div> <!-- borderwrapper -->
+<!--[if gte mso 9]></td></tr></table><![endif]-->
+</center>
+  </body>
+</html>
