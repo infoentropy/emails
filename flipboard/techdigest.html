@@ -1,0 +1,2281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office">
+  
+  <head>
+    <!-- email-basic -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Cache-control" content="no-cache" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title>Flipboard</title>
+    <!--[if gte mso 9]>
+      <xml>
+        <o:OfficeDocumentSettings>
+          <o:AllowPNG/>
+          <o:PixelsPerInch>96</o:PixelsPerInch>
+        </o:OfficeDocumentSettings>
+      </xml>
+    <![endif]-->
+    <style type="text/css">
+      /* ensure that clients don't add any padding or spaces around the email design and allow us to style emails for the entire width of the preview pane */
+      body,
+      #bodyTable {
+      height:100% !important;
+      width:100% !important;
+      margin:0;
+      padding:0;
+      }
+      
+      /* Ensures Webkit- and Windows-based clients don't automatically resize the email text. */
+      body,
+      table,
+      td,
+      p,
+      a,
+      li,
+      blockquote {
+      -ms-text-size-adjust:100%;
+      -webkit-text-size-adjust:100%;
+      }
+      
+      /* Forces Yahoo! to display emails at full width */
+      .thread-item.expanded .thread-body .body,
+      .msg-body {
+      width: 100% !important;
+      display: block !important;
+      }
+      
+      /* Forces Hotmail to display emails at full width */
+      .ReadMsgBody,
+      .ExternalClass {
+      width: 100%;
+      background-color: #000000;
+      }
+      
+      /* Forces Hotmail to display normal line spacing. */
+      .ExternalClass,
+      .ExternalClass p,
+      .ExternalClass span,
+      .ExternalClass font,
+      .ExternalClass td,
+      .ExternalClass div {
+      line-height:100%;
+      }
+      
+      /* Resolves webkit padding issue. */
+      table {
+      border-spacing:0;
+      }
+      
+      /* Resolves the Outlook 2007, 2010, and Gmail td padding issue, and removes spacing around tables that Outlook adds. */
+      table,
+      td {
+      border-collapse:collapse;
+      mso-table-lspace:0pt;
+      mso-table-rspace:0pt;
+      }
+      
+      /* Corrects the way Internet Explorer renders resized images in emails. */
+      img {
+      -ms-interpolation-mode: bicubic;
+      }
+      
+      /* Ensures images don't have borders or text-decorations applied to them by default. */
+      img,
+      a img {
+      border:0;
+      outline:none;
+      text-decoration:none;     
+      }
+      
+      /* Styles Yahoo's auto-sensing link color and border */
+      .yshortcuts a {
+      border-bottom: none !important;
+      }
+      
+      /* Styles the tel URL scheme */
+      a[href^=tel],
+      .mobile_link,
+      .mobile_link a {
+      color:#222222 !important;
+      text-decoration: underline !Important;
+      }
+      
+      /* Apple Mail doesn't support max-width, so we use media queries to constrain the email container width. */
+      @media only screen and (min-width: 651px) {
+      .email-container {
+        width: 650px !important;
+      }
+      }
+    </style>
+    <style type="text/css">
+      .appleLinksGrey { color: #a8a8a8 !important; }
+      .hover:hover {
+      color: #1199ce!important;
+      border-color: #1199ce!important;
+      }
+      span[class=preheader] { display:none !important; }
+      .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 25px; -webkit-border-radius: 25px; -moz-border-radius: 25px; border: 2px solid #949494;
+      }
+      .gmailfix {
+      display:none;
+      display:none!important;
+      }
+    </style>
+    <style type="text/css">
+      /* 4.0 CSS: Responsive Definitions id=47 */
+      a.fl-shortlink {text-decoration:none; color:#ffffff; border-bottom:2px solid #f52828;}
+      
+      @media screen { 
+      /* target gmail-only */
+      u + .body .gmailfix {
+      display:block !important;
+      }
+      
+      /* Tiempos */
+        @font-face {
+          font-family: "Tiempos";
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/TiemposText-Regular.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "Tiempos";
+          font-weight: normal;
+          font-style:italic;
+          src: url("https://s.flipboard.com/webapp/fonts/email/TiemposText-RegularItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "Tiempos";
+          font-weight: bold;
+          src: url("https://s.flipboard.com/webapp/fonts/email/TiemposText-Semibold.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "Tiempos";
+          font-weight: bold;
+          font-style:italic;
+          src: url("https://s.flipboard.com/webapp/fonts/email/TiemposText-SemiboldItalic.otf") format("opentype");
+        }
+      
+        /* "FaktCondensed" */
+        @font-face {
+          font-family: "FlipFaktCondensed";
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/FaktFlipboardCon-Normal.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktCondensed";
+          font-weight: bold;
+          src: url("https://s.flipboard.com/webapp/fonts/FaktFlipboardCon-Black.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktCondensed";
+          font-style: italic;
+          src: url("https://s.flipboard.com/webapp/fonts/FaktFlipboardCon-BlackItalic.otf") format("opentype");
+        }
+      
+        /* "Fakt" */
+        @font-face {
+          font-family: "FlipFakt";
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboard-Normal.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFakt";
+          font-weight: bold;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboard-Bold.otf") format("opentype");
+        }
+      
+      
+        @font-face {
+          font-family: "FlipFakt";
+          font-weight: 500;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboard-SemiBold.otf") format("opentype");
+        }
+      
+      
+        @font-face {
+          font-family: "FlipFakt";
+          font-style: italic;
+          font-weight:bold;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboard-BoldItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFakt";
+          font-style: italic;
+          font-weight:normal;
+          src: url("https://s.flipboard.com/webapp/fonts/FaktFlipboard-NormalItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFakt";
+          font-weight: 100;
+          /*src: url("https:///s.flipboard.com/webapp/fonts/FaktFlipboard-Light.otf") format("opentype");*/
+          src: url("https:///s.flipboard.com/webapp/fonts/FaktFlipboard-Thin.otf") format("opentype");
+      
+        }
+      
+        @font-face {
+          font-family: "FlipFakt";
+          font-style: italic;
+          font-weight: 100;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboard-LightItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktConLight";
+          font-style: normal;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboardCon-Light.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktConLight";
+          font-style: italic;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboard-LightItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktConThin";
+          font-style: normal;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboardCon-Thin.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktConThin";
+          font-style: italic;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboardCon-ThinItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktConMedium";
+          font-style: normal;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboardCon-Medium.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktConMedium";
+          font-style: italic;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboardCon-MediumItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktLight";
+          font-style: normal;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboard-Light.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FlipFaktLight";
+          font-style: italic;
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/email/FaktFlipboardCon-LightItalic.otf") format("opentype");
+        }
+      
+        @font-face {
+          font-family: "FaktFlipboardBlack";
+          font-weight: normal;
+          src: url("https://s.flipboard.com/webapp/fonts/FaktFlipboardCon-Black.otf") format("opentype");
+        }
+      
+      
+      .appleLinksWhite { color:#ffffff !important; }
+      .appleLinksGrey { color:#ffffff !important; }
+      }
+      
+      @media screen and (max-width: 649px) {
+        .imageScale {width: 100% !important; height: auto !important; clear: both;}
+      }
+      
+      @media screen and (min-width: 414px) {
+      .eraseForDesktop { display: none !important; }
+      .white_to_black a.fl-shortlink {text-decoration:none; color:#ffffff !important; border-bottom:2px solid #f52828;}
+      }
+      
+      @media screen and (max-width:414px) {
+      .eraseForDesktop { display: block !important; }
+      .eraseForMobile { display: none !important; }
+      .mobileOnlyBlock { display: block !important; }
+      .w10 {width:15px !important;}
+      .footer_padding { width:15px !important; }
+      .white_to_black a.fl-shortlink {text-decoration:none; color:#000000 !important; border-bottom:2px solid #f52828;}
+      
+      /* if responsive gmail, make sure to hide the spacer. */
+      u + .body .gmailfix {
+      display:none !important;
+      }
+      
+      }
+    </style>
+    <style type="text/css">
+      /* 4.0 CSS: Responsive Definitions id=47 */
+      .tw42 { width: 42px !important; }
+      .pad42 { Margin: 0 42px !important; }
+      .blurbtext, .digest_blurb b { font-weight:normal; color:#6E6D6D; }
+      .blurbtext, .digest_section_description { color:#999999 !important;  }
+      .excerpt {font-size:15px; line-height:21px;}
+      
+      .digesthead_section_name {font-weight:bold;}
+      .spc_section_name_description {height:12px !important;}
+      .spc_section_description { height:60px !important; }
+      .imageScale { width:100% !important; height:auto !important; }
+      
+      /* font stacks */
+      .title { font-family:Georgia, serif !important; text-align:left;}
+      .readlater, .book_author { font-family:Arial, sans-serif !important; vertical-align:top; }
+      .excerpt {font-family:Arial, sans-serif; color:#231F20;}
+      
+      
+      .theme_condensed { text-align:left; }
+      .theme_condensed h3 .title { font-size: 22px !important; line-height:24px !important; font-family:Georgia, Times, serif !important; }
+      .theme_bookhybrid .hybridleft img { border:1px solid #999999; }
+      
+      .headsquare { margin-right:10px; }
+      .titleUpScale1Line {height:38px !important; width:auto !important; display:block !important;}
+      
+      /* Desktop font sizes */
+      .book_author {font-size:17px !important; line-height:19px !important;}
+      .theme_highdensity {font-size:15px !important;}
+      .digesthead_section_name, .digesthead1, .digesthead2 { font-size: 20px !important; line-height:23px !important;  }
+      .digest_blurb, .blurbtext, .digest_section_description { font-size: 25px !important; line-height:28px !important;  }
+      
+      @media screen {
+      /* put webfont defs in media query to hide from outlook */
+      
+      .digest_h1 { font-family:'FlipFaktCondensed', Arial, sans-serif !important; }
+      .digesthead1 { font-family:Arial, Helvetica, sans-serif !important; }
+      .digest_blurb { font-family:'FlipFakt', Arial, sans-serif !important; }
+      .blurbtext, .digest_section_description { font-family:'FlipFakt', Arial, sans-serif !important; }
+      .theme_condensed h3 .title { font-family:'Tiempos', Georgia, Times, serif !important; }
+      .title { font-family:Tiempos, Georgia, serif !important; }
+      .theme_highdensity .component.image {margin-bottom:8px;}
+      .readlater { }
+      .plus { }
+      
+      .theme_highdensity .title { max-width:500px !important; }
+      .sourceline { font-family:'FlipFakt', sans-serif; }
+      }
+      
+      /* Desktop */
+      @media screen and (min-width:650px) {
+      
+      .digest_h1 { font-size: 32px !important; line-height:32px !important; }
+      .headsquare { height:50px !important; width:50px !important; }
+      .followbutton { font-size:16px !important; line-height:32px !important; width:80px !important; }
+      .title { font-size:23px !important; line-height:28px !important; display:block; text-align:left; }
+      .sourceline { font-size:17px !important; line-height:20px !important; }
+      .topic, .readlater { font-size:15px !important; line-height:15px !important; }
+      img.readlater { width:51px !important; height:11px !important;}
+      .excerpt { font-size:15px !important; line-height:21px !important; }
+      .blurbtext, .digest_section_description { padding-right:160px; }
+      .theme_condensed .c2 { width: 50px; }
+      .theme_condensed .readtime { font-size:17px !important; line-height:18px !important; }
+      .theme_condensed .readlater{ font-size:14px !important; line-height:14px !important; }
+      .theme_condensed .imageScale { max-width:unset !important; }
+      .theme_condensed .image { max-height:255px !important; overflow: hidden !important;}
+      .theme_bookhybrid .hybridleft { text-align:left; }
+      .theme_bookhybrid .hybridleft img { width:250px !important; height:auto !important; }
+      
+      }
+      
+      @media screen and (max-width:649px) {
+      .tw42 { width:10px !important; }
+      .pad42 { margin: 0 10px !important; }
+      .readtime { display:none !important; }
+      .full { width:100% !important; }
+      .theme_condensed .c1{  width:45% !important; }
+      .theme_condensed .c2 { width: 25px; }
+      .titleScale320w { width:300px !important; height:auto !important; }
+      .titleScale40h { width:auto !important; height:40px !important; }
+      .imageScale { width:100% !important; height:auto !important; }
+      .liveintent_img { width:100% !important; height:auto !important; }
+      }
+      
+      @media screen and (max-width:414px) {
+      .imgcurator { height:90px; width:90px; Margin-left:0 !important; Margin-right:0 !important; display:block;float:none;clear:both;}
+      .full, .body { background-color:#ffffff !important;  }
+      
+      .titleScale {height:26px !important; width:auto !important; display:block !important;  clear: both;}
+      .titleUpScale1Line, .titleScale220w {height:auto !important; width:300px !important; display:block !important;  clear: both;}
+      .titleScale265w {height:auto !important; width:265px !important; display:block !important;  clear: both;}
+      .titleScale300w {height:auto !important; width:280px !important; display:block !important;  clear: both;}
+      .titleScale95p {height:auto !important; width:95% !important; display:block !important;  clear: both;}
+      .titleScale1line {height:26px !important; width:auto !important; display:block !important;  clear: both;}
+      .titleScale2lines {height:50px !important; width:auto !important; display:block !important;  clear: both;}
+      .titleScale3lines {height:64px !important; width:auto !important; display:block !important;  clear: both;}
+      
+      .spc_section_name {height:35px !important;}
+      .spc_section_description { height:40px !important; }
+      .spc_section_name_description {height:5px !important;}
+      
+      .tw42 { width:12px !important; }
+      .theme_condensed .image {max-height:255px !important; max-width:164px !important; }
+      .theme_highdensity .title { max-width:86% !important; }
+      .theme_highdensity .component.image {margin-bottom:0px;}
+      .theme_bookhybrid .hybridleft { background-color:#f9f9f9; }
+      .theme_bookhybrid .hybridleft img { width:220px !important; height:auto !important; }
+      
+      /* header smaller than blurb*/
+      .digesthead1, .digesthead2, .digesthead_section_name { font-size: 15px !important; line-height:18px !important;  }
+      .digest_blurb, .blurbtext, .digest_section_description { font-size: 19px !important; line-height:23px !important;  }
+      
+      }
+      
+      @media screen and (max-width:374px) {
+      .theme_condensed .c3 { width:55%; }
+      .theme_condensed .imageScale { max-width:140px !important; }
+      .theme_bookhybrid .hybridleft img { width:200px !important; height:auto !important; }
+      }
+    </style>
+    <style type="text/css">
+      /* 4.0 CSS: Responsive Definitions id=47 */
+      
+      @media screen and (min-width:650px) {
+      .pad42 { Margin-left:42px !important; Margin-right:42px !important; }
+      .mb8   { Margin-bottom:8px !important; }
+      .mb10 { Margin-bottom:10px !important; }
+      .mb15 { Margin-bottom:15px !important; }
+      .mb18 { Margin-bottom:18px !important; }
+      .mb20 { Margin-bottom:20px !important; }
+      .mb25 { Margin-bottom:25px !important; }
+      .mb30 { Margin-bottom:30px !important; }
+      .mb35 { Margin-bottom:35px !important; }
+      .mb40 { Margin-bottom:40px !important; }
+      .mb45 { Margin-bottom:45px !important; }
+      .mb50 { Margin-bottom:50px !important; }
+      .mb55 { Margin-bottom:55px !important; }
+      .mb75 { Margin-bottom:75px !important; }
+      .mb100 { Margin-bottom:100px !important; }
+      
+      .spc8   { line-height:8px !important; }
+      .spc10 { line-height:10px !important; }
+      .spc12 { line-height:12px !important; }
+      .spc13 { line-height:13px !important; }
+      .spc14 { line-height:14px !important; }
+      .spc15 { line-height:15px !important; }
+      .spc18 { line-height:18px !important; }
+      .spc20 { line-height:20px !important; }
+      .spc25 { line-height:25px !important; }
+      .spc30 { line-height:30px !important; }
+      .spc35 { line-height:35px !important; }
+      .spc40 { line-height:40px !important; }
+      .spc45 { line-height:45px !important; }
+      .spc50 { line-height:50px !important; }
+      .spc55 { line-height:55px !important; }
+      .spc60 { line-height:60px !important; }
+      .spc75 { line-height:75px !important; }
+      .spc85 { line-height:85px !important; }
+      
+      /* hide on desktop */
+      .spc20x414 { line-height:0px !important; }
+      
+      /* Standard spacing. */
+      .h10 { height:10px !important; }
+      .h20 { height:20px !important; }
+      .h30 { height:30px !important; }
+      .h35 { height:35px !important; }
+      .h40 { height:40px !important; }
+      .h46 { height:46px !important; }
+      .h50 { height:50px !important; }
+      .h70 { height:70px !important; }
+      .h75 { height:75px !important; }
+      .h80 { height:80px !important; }
+      .h90 { height:90px !important; }
+      .h100 { height:100px !important; }
+      .h110 { height:110px !important; }
+      
+      /* table width padding */
+      .tw42 { width:42px !important; }
+      .tw50 { width:50px !important; }
+      .tw65 { width:65px !important; }
+      .tw80 { width:42px !important; }
+      .sq50 { width:50px !important; height:50px !important; }
+      }
+    </style>
+    <script type="application/ld+json">
+      {
+      "@context":"http://schema.org",
+      "@type":"EmailMessage",
+      "publisher":{
+      "@type":"Organization",
+      "name":"Flipboard",
+      "url":"http://flipboard.com",
+      "url/googlePlus":"https://plus.google.com/+Flipboard"
+      }
+      }
+    </script>
+    <script type="application/ld+json">
+      [{"logo": "http://cdn.flipboard.com/email/assets/logo2018-200x200.png", "@context": "http://schema.org/", "@type": "Organization", "name": "Flipboard"}, {"@context": "http://schema.org/", "image": "https://video-images.vice.com/articles/5cb9d9e22012390007161468/lede/1555689898129-shutterstock_1340840858.jpeg?resize=720:*", "@type": "PromotionCard"}]
+    </script>
+  </head>
+  
+  <body class="body" bgcolor="#000000" leftmargin="0" topmargin="0" marginwidth="0"
+  marginheight="0" dir="ltr" style="direction: ltr">
+<span class="preheader" style="display:none;font-size:0px;line-height:0px; color:#000000;"></span>
+
+    <!--
+    tracking pixels -->
+    <div style="background-color:transparent;height:2px;">
+      <img src="https://ue.flipboard.com/usage?data=%7B%22event_action%22%3A%22open%22%2C%22properties%22%3A%7B%22lang%22%3A%22en%22%2C%22uid%22%3A246175614%2C%22unique_id%22%3A246175614%2C%22time%22%3A1555706414000%7D%2C%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_data%22%3A%7B%22url%22%3A%22https%3A%2F%2Fcdn.flipboard.com%2Femail%2Fassets%2Fclear.gif%22%2C%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fcdn.flipboard.com%2Femail%2Fassets%2Fclear.gif%3Futm_campaign%3Ddigest-sections%26utm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%22%7D%7D"
+      align="right" style="font-size:1px;line-height:0px;color:inherit;" alt="" />
+    </div>
+    <!-- block: content -->
+    <!--[if gte mso 9]>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"
+      aria-hidden="true">
+        <tr>
+          <td align="center" width="650" style="width:650px;background-color:#000000" bgcolor="#000000">
+            <tr>
+              <td>
+              <![endif]-->
+              <!--[if gte mso 9]>
+                <table width="650" style="width:650px;" cellpadding="0" cellspacing="0" border="0"
+                role="presentation" aria-hidden="true">
+                  <tr>
+                    <td bgcolor="#ffffff">
+                    <![endif]-->
+                    <div class="wrap1" style="background-color:#000000;">
+                      <center bgcolor="#000000">
+                        <div class="full wrap2" style="text-align:center;max-width:650px;background-color:#ffffff">
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1388" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="10" class="h40"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="hr">
+                                    <td width="10" class="tw42"></td>
+                                    <td colspan="2" align="left">
+                                      <table class="full" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
+                                      aria-hidden="true">
+                                        <tr>
+                                          <td>
+                                            <div style="font-size:0px;line-height:0px;border-bottom:7px solid #000000;line-height:1px;font-size:1px">&nbsp;</div>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                    <td width="10" class="tw42"></td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4" height="10" class=""></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="image">
+                                    <td width="10" class="tw42"></td>
+                                    <td colspan="2" class="" align="left">
+                                      <img src="https://cdn.flipboard.com/dev_O/techweekly/techbriefing-2018-0424.png"
+                                      alt="YOUR TECH BRIEFING" height="40" width="401" class="titleUpScale1Line" style="letter-spacing:-1px;font-size:40px;line-height:40px;font-weight:bold;color:#f52828;"
+                                      />
+                                    </td>
+                                    <td width="10" class="tw42"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="25" class="spc33"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1393" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="text">
+                                    <td width="10" class="tw42"></td>
+                                    <td align="right" width="0" valign="top" class=""></td>
+                                    <td class="blurbtext" align="left" style="font-family:Arial, sans-serif;font-size:25px; line-height:28px;color:#9b9b9b;"
+                                    valign="top">This morning's top headlines, plus stories personalized for you and industry deep
+                                      dives.</td>
+                                    <td width="10" class="tw42"></td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4" height="30" class="h50"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1347" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="40" class="h20"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <div class="module_1392">
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="hr">
+                                <td width="10" class="tw42"></td>
+                                <td colspan="2" align="left">
+                                  <table class="full" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
+                                  aria-hidden="true">
+                                    <tr>
+                                      <td>
+                                        <div style="font-size:0px;line-height:0px;border-bottom:2px solid #f52828;font-size:0px;line-height:0px;">&nbsp;</div>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" height="10" class="spc12"></td>
+                              </tr>
+                            </table>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component image">
+                                <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22top%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fmotherboard.vice.com%2Fen_us%2Farticle%2F43jdbj%2Fchristchurch-attack-videos-still-on-facebook-instagram%22%2C%22method%22%3A%22externalweb%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fmotherboard.vice.com%2Fen_us%2Farticle%2F43jdbj%2Fchristchurch-attack-videos-still-on-facebook-instagram%3Futm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%26utm_content%3D%26utm_campaign%3Ddigest-sections%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910284920%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                style="border:none;">
+                                  <img src="https://video-images.vice.com/articles/5cb9d9e22012390007161468/lede/1555689898129-shutterstock_1340840858.jpeg?resize=720:*"
+                                  alt="" height="404.061111111" width="566.0" class="imageScale" style="font-size:20px;"
+                                  />
+                                </a>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc12">&nbsp;</div>
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fmotherboard.vice.com%25252Fen_us%25252Farticle%25252F43jdbj%25252Fchristchurch-attack-videos-still-on-facebook-instagram%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fmotherboard.vice.com%2Fen_us%2Farticle%2F43jdbj%2Fchristchurch-attack-videos-still-on-facebook-instagram&amp;utm_medium=techboard.mon.3li.20190419&amp;v=0803175d67315a5e&amp;position=0&amp;part=top&amp;china_variant=False">36 Days After Christchurch, Terrorist Attack Videos Are Still on Facebook</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">VICE <span class="readtime">&bull;</span>  <span class="readtime">3 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22top%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fmotherboard.vice.com%252Fen_us%252Farticle%252F43jdbj%252Fchristchurch-attack-videos-still-on-facebook-instagram%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fmotherboard.vice.com%252Fen_us%252Farticle%252F43jdbj%252Fchristchurch-attack-videos-still-on-facebook-instagram%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285417%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252F9to5mac.com%25252F2019%25252F04%25252F19%25252Fsiri-shortcuts-screen-time-mac%25252F%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2F9to5mac.com%2F2019%2F04%2F19%2Fsiri-shortcuts-screen-time-mac%2F&amp;utm_medium=techboard.mon.3li.20190419&amp;v=333f2223a920f379&amp;position=1&amp;part=top&amp;china_variant=False">Siri Shortcuts, Screen Time, and other iOS features coming to the Mac with 10.15</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">9to5Mac <span class="readtime">&bull;</span>  <span class="readtime">2 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22top%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252F9to5mac.com%252F2019%252F04%252F19%252Fsiri-shortcuts-screen-time-mac%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252F9to5mac.com%252F2019%252F04%252F19%252Fsiri-shortcuts-screen-time-mac%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285416%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.theverge.com%25252F2019%25252F4%25252F19%25252F18507869%25252Fweather-channel-ransomware-attack-tv-program-cable-off-the-air%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.theverge.com%2F2019%2F4%2F19%2F18507869%2Fweather-channel-ransomware-attack-tv-program-cable-off-the-air&amp;utm_medium=techboard.mon.3li.20190419&amp;v=0016b0c5b86b7265&amp;position=2&amp;part=top&amp;china_variant=False">A ransomware attack took The Weather Channel off the air</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">The Verge <span class="readtime">&bull;</span>  <span class="readtime">1 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22top%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.theverge.com%252F2019%252F4%252F19%252F18507869%252Fweather-channel-ransomware-attack-tv-program-cable-off-the-air%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.theverge.com%252F2019%252F4%252F19%252F18507869%252Fweather-channel-ransomware-attack-tv-program-cable-off-the-air%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285512%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.cnet.com%25252Fnews%25252Fnetflixs-random-play-button-is-what-weve-all-been-waiting-for%25252F%25253Fftag%25253DCOS-05-10aaa0b%252526linkId%25253D66322708%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.cnet.com%2Fnews%2Fnetflixs-random-play-button-is-what-weve-all-been-waiting-for%2F%3FlinkId%3D66322708%26ftag%3DCOS-05-10aaa0b&amp;utm_medium=techboard.mon.3li.20190419&amp;v=5e014d69672d4d6c&amp;position=3&amp;part=top&amp;china_variant=False">Netflix&#39;s random play button is what we&#39;ve all been waiting for</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">CNET <span class="readtime">&bull;</span>  <span class="readtime">1 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22top%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.cnet.com%252Fnews%252Fnetflixs-random-play-button-is-what-weve-all-been-waiting-for%252F%253Fftag%253DCOS-05-10aaa0b%2526linkId%253D66322708%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.cnet.com%252Fnews%252Fnetflixs-random-play-button-is-what-weve-all-been-waiting-for%252F%253Fftag%253DCOS-05-10aaa0b%2526linkId%253D66322708%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285458%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.theverge.com%25252F2019%25252F4%25252F19%25252F18507839%25252Felon-musk-boring-company-dc-baltimore-hyperloop-report%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.theverge.com%2F2019%2F4%2F19%2F18507839%2Felon-musk-boring-company-dc-baltimore-hyperloop-report&amp;utm_medium=techboard.mon.3li.20190419&amp;v=9e88a3517e542cf4&amp;position=4&amp;part=top&amp;china_variant=False">Elon Musk’s Boring Company scales down its East Coast ambitions</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">The Verge <span class="readtime">&bull;</span>  <span class="readtime">3 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22top%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.theverge.com%252F2019%252F4%252F19%252F18507839%252Felon-musk-boring-company-dc-baltimore-hyperloop-report%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.theverge.com%252F2019%252F4%252F19%252F18507839%252Felon-musk-boring-company-dc-baltimore-hyperloop-report%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285506%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                          </div>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1721" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="hr">
+                                    <td width="42" class="w10"></td>
+                                    <td colspan="2" align="left">
+                                      <table class="full" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
+                                      aria-hidden="true">
+                                        <tr>
+                                          <td>
+                                            <div style="font-size:0px;line-height:0px;border-bottom:1px solid #d8d8d8;line-height:1px;font-size:0px;">&nbsp;</div>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                    <td width="42" class="w10"></td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4" height="25" class="h25"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="text">
+                                    <td width="42" class="w10"></td>
+                                    <td align="right" width="0" valign="top" class=""></td>
+                                    <td class="" align="left" style="color:#000000;font-size:20px;line-height:26px;font-family:Arial, sans-serif;"
+                                    valign="top">
+                                      <table border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                          <td colspan="2">
+                                            <a href="http://d.liadm.com/click2/ae590ce0/8vjVQ5B7J6FUgcmGvq73tsKrhKMRWLapPebfTH8e2gYRaxqAEVFNmRyQDqhrn-HEw2kHjeW_uWpPXGYi6Yr9tDNVGosVCximZLpdDq7KrU8pKO-pKUPWFiH4AkLVJj7sq5ehmnGV1tEP1YLKPT3yLOn9_-9c2xLQ7vHhsjfbS2EoSlb1-6nvSC_OxLNVr7fosAetN-yhAUGsu8CJX0kJbV_zGBAO85IAP01E9LAO_PsD2y1r6s3JnGEa760BtL0f5JFZiUW5stV_VCcUdiAAThubyu0A0iCJG5timfXcqcoDGCFAZhhB6tUS_mIMonfKNWyIiYCPLCsNEi8hoGZEOdRMkqIOhQq_vpzVbVzFlah9a2aOTb4eTtYuX57DCLXjyYBHP37xLvsOlJfQINxxpyd36rvEL--f03c2mVCTnzeQS-IAn6Rc9J14n4qVX__JhLFVPii3ovRcJ9ZaofdxohN7IKCmoTj4oMgz0aM41fi31tioj604Lup2UL5JWhb7nLMJi58iSMOCNxI4Qt-i1kgG4FNmnSQzQAXosAweTFyDU5RYoCPj0Y6Zgy8VT9V-6q4619UkPqHeMt8BBSPKYgVUL45hrKLZjMwSSpBn7Cc86jPgmJf9GXSOnHtjp25631MXPRUPcf2QX7NYsn7nyCpCQgKre4hZpbAwbk0D7pnrpdKzJ_MnFlCDTHXbvJcbOAc_UHySN9mzh5wnFQVePq7E3jhKwk6vlRrGwMeaq9MKQRFm9kRlQx-t-ErzjRF4seaYCmY4pG0pwPbfEqhdOqgQO4P9KMWmJ-Kqs-3Z_0wGlLhljGs373vzDGXfP9IkYsjYkzgBNqj637A3a-qpnOBKToOHwJgjTwkSxnBoAMZi-DHu_z9EKbHtZWXrUIqJBL-7kT7BwyTmwZL9Mk8yZ6sC_ynmcTqGt6ymE4b_NH2OLR7cDUW31I6NbBwHl_7f_9dM-P20EHF1S9FRFMVyG5_ONSx3TpMVE6b6Y5XTqFNlQiaLtG-3XAnjK-58c6GE-jP-AhOOnzwxWUZt_1zBcMlvU4xuHC7BeP_KV60q1YtHG6MyhQSLaGEeJWYvYuudm2ZGwpLGV3owAGl75OME1t6XW2axohFq2DlyssdsgSbByf8FA6BFGQDdhb1LalIl4u2J6lxhlw//"
+                                            rel="nofollow">
+                                              <img class="liveintent_img" src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=672725&m=0de0fc8e99007fe686e171efae324527&li="
+                                              border="0" width="566" height="" style="max-width:566px;" />
+                                            </a>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td align="left">
+                                            <a style="display:block; max-width:116px; max-height:15px;" href="https://liveintent.com/powered-by/?utm_medium=product&amp;utm_source=liveintent+platform&amp;utm_campaign=poweredby"
+                                            rel="nofollow">
+                                              <img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=672726&m=0de0fc8e99007fe686e171efae324527&li="
+                                              border="0" />
+                                            </a>
+                                          </td>
+                                          <td align="right">
+                                            <a style="display:block; max-width:19px; max-height:15px;" href="https://liveintent.com/ad-choices/?utm_medium=product&amp;utm_source=liveintent+platform&amp;utm_campaign=adchoices&amp;c=${CRITEO_OPTOUT_URL}"
+                                            rel="nofollow">
+                                              <img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=672728&m=0de0fc8e99007fe686e171efae324527&li="
+                                              border="0" />
+                                            </a>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                    <td width="42" class="w10"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="30" class="h50"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1347" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="40" class="h20"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <div class="module_1628">
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="hr">
+                                <td width="10" class="tw42"></td>
+                                <td colspan="2" align="left">
+                                  <table class="full" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
+                                  aria-hidden="true">
+                                    <tr>
+                                      <td>
+                                        <div style="font-size:0px;line-height:0px;border-bottom:2px solid #f52828;font-size:0px;line-height:0px;">&nbsp;</div>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" height="10" class="spc12"></td>
+                              </tr>
+                            </table>
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="text">
+                                <td width="10" class="tw42"></td>
+                                <td align="right" width="0" valign="top" class=""></td>
+                                <td class="digesthead_section_name" align="left" style="font-family:Arial, sans-serif;font-size:15px;line-height:15px"
+                                valign="top">
+                                  <div class="digesthead1">FOR YOU IN TECHNOLOGY</div>
+                                </td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" height="35" class="spc_section_name"></td>
+                              </tr>
+                            </table>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component image">
+                                <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22foryou%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fwww.nytimes.com%2F2019%2F04%2F17%2Fopinion%2Fdata-privacy.html%22%2C%22method%22%3A%22externalweb%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fwww.nytimes.com%2F2019%2F04%2F17%2Fopinion%2Fdata-privacy.html%3Futm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%26utm_content%3D%26utm_campaign%3Ddigest-sections%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285047%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                style="border:none;">
+                                  <img src="https://static01.nyt.com/images/2019/04/17/opinion/sunday/17hartzog-privacy/e4e8035f545b4c5a89dd9d788560870b-articleLarge.jpg"
+                                  alt="" height="566.0" width="566.0" class="imageScale" style="font-size:20px;"
+                                  />
+                                </a>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc12">&nbsp;</div>
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:15px;line-height:18px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.nytimes.com%25252F2019%25252F04%25252F17%25252Fopinion%25252Fdata-privacy.html%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.nytimes.com%2F2019%2F04%2F17%2Fopinion%2Fdata-privacy.html&amp;utm_medium=techboard.mon.3li.20190419&amp;v=70f8fc82b3191626&amp;position=0&amp;part=foryou&amp;china_variant=False">Why You Can No Longer Get Lost in the Crowd</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">The New York Times <span class="readtime">&bull;</span>  <span class="readtime">5 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22foryou%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.nytimes.com%252F2019%252F04%252F17%252Fopinion%252Fdata-privacy.html%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.nytimes.com%252F2019%252F04%252F17%252Fopinion%252Fdata-privacy.html%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285486%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:15px;line-height:18px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.nytimes.com%25252Finteractive%25252F2019%25252F04%25252F16%25252Fopinion%25252Ffacial-recognition-new-york-city.html%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.nytimes.com%2Finteractive%2F2019%2F04%2F16%2Fopinion%2Ffacial-recognition-new-york-city.html&amp;utm_medium=techboard.mon.3li.20190419&amp;v=aa41dc031dc88c97&amp;position=1&amp;part=foryou&amp;china_variant=False">We Built a (Legal) Facial Recognition Machine for $60</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">The New York Times <span class="readtime">&bull;</span>  <span class="readtime">1 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22foryou%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.nytimes.com%252Finteractive%252F2019%252F04%252F16%252Fopinion%252Ffacial-recognition-new-york-city.html%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.nytimes.com%252Finteractive%252F2019%252F04%252F16%252Fopinion%252Ffacial-recognition-new-york-city.html%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285489%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:15px;line-height:18px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.nytimes.com%25252F2019%25252F04%25252F13%25252Fopinion%25252Fchina-internet-privacy.html%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.nytimes.com%2F2019%2F04%2F13%2Fopinion%2Fchina-internet-privacy.html&amp;utm_medium=techboard.mon.3li.20190419&amp;v=b1e1a8d564368edd&amp;position=2&amp;part=foryou&amp;china_variant=False">The Only Answer Is Less Internet</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">The New York Times <span class="readtime">&bull;</span>  <span class="readtime">4 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22foryou%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.nytimes.com%252F2019%252F04%252F13%252Fopinion%252Fchina-internet-privacy.html%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.nytimes.com%252F2019%252F04%252F13%252Fopinion%252Fchina-internet-privacy.html%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285468%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                          </div>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1347" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="40" class="h20"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <div class="module_1395">
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="hr">
+                                <td width="10" class="tw42"></td>
+                                <td colspan="2" align="left">
+                                  <table class="full" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
+                                  aria-hidden="true">
+                                    <tr>
+                                      <td>
+                                        <div style="font-size:0px;line-height:0px;border-bottom:2px solid #f52828;font-size:0px;line-height:0px;">&nbsp;</div>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" height="10" class="spc12"></td>
+                              </tr>
+                            </table>
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="text">
+                                <td width="10" class="tw42"></td>
+                                <td align="right" width="0" valign="top" class=""></td>
+                                <td class="" align="left" style="color:#000000;font-size:20px;line-height:26px;font-family:Arial, sans-serif;"
+                                valign="top">THE FULL STORY</td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                            </table>
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="text">
+                                <td width="10" class="tw42"></td>
+                                <td align="right" width="0" valign="top" class=""></td>
+                                <td class="digest_section_description" align="left" style="font-family:Arial, sans-serif;font-size:18px;line-height:21px;color:#9b9b9b"
+                                valign="top">Highlights from the 2019 TED conference.</td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" height="35" class="spc_section_description"></td>
+                              </tr>
+                            </table>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component image">
+                                <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22full%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fwww.fastcompany.com%2F90335514%2Fcarole-cadwalladr-condemns-facebook-google-twitter-execs-technology-crime-scene-ted-talk%22%2C%22method%22%3A%22externalweb%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fwww.fastcompany.com%2F90335514%2Fcarole-cadwalladr-condemns-facebook-google-twitter-execs-technology-crime-scene-ted-talk%3Futm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%26utm_content%3D%26utm_campaign%3Ddigest-sections%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285043%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                style="border:none;">
+                                  <img src="https://images.fastcompany.net/image/upload/w_562,ar_16:9,c_fill,g_auto,f_auto,q_auto,fl_lossy/wp-cms/uploads/2019/04/p-1-carole-cadwalladr-condemns-facebook-google-twitter-execs-technology-crime-scene-ted-talk.gif"
+                                  alt="" height="318.24911032" width="566.0" class="imageScale" style="font-size:20px;"
+                                  />
+                                </a>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc12">&nbsp;</div>
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.fastcompany.com%25252F90335514%25252Fcarole-cadwalladr-condemns-facebook-google-twitter-execs-technology-crime-scene-ted-talk%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.fastcompany.com%2F90335514%2Fcarole-cadwalladr-condemns-facebook-google-twitter-execs-technology-crime-scene-ted-talk&amp;utm_medium=techboard.mon.3li.20190419&amp;v=9cb4021a7f829e70&amp;position=0&amp;part=full&amp;china_variant=False">Carole Cadwalladr blasts tech titans at TED: Your technology is “a crime scene”</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">Fast Company <span class="readtime">&bull;</span>  <span class="readtime">3 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22full%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.fastcompany.com%252F90335514%252Fcarole-cadwalladr-condemns-facebook-google-twitter-execs-technology-crime-scene-ted-talk%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.fastcompany.com%252F90335514%252Fcarole-cadwalladr-condemns-facebook-google-twitter-execs-technology-crime-scene-ted-talk%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285470%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.wired.com%25252Fstory%25252Fted-2019-jack-dorsey-captain-twittanic%25252F%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.wired.com%2Fstory%2Fted-2019-jack-dorsey-captain-twittanic%2F&amp;utm_medium=techboard.mon.3li.20190419&amp;v=7299002206fd1d2e&amp;position=1&amp;part=full&amp;china_variant=False">Jack Dorsey Is Captain of the Twittanic at TED 2019</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">WIRED <span class="readtime">&bull;</span>  <span class="readtime">6 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22full%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.wired.com%252Fstory%252Fted-2019-jack-dorsey-captain-twittanic%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.wired.com%252Fstory%252Fted-2019-jack-dorsey-captain-twittanic%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285529%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.businessinsider.com%25252Fwhat-its-like-inside-black-hole-holodome-2019-4%252523a-ring-of-light-quickly-begins-to-form-representing-heated-gas-particles-that-orbit-the-event-horizon-or-point-of-no-return-4%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.businessinsider.com%2Fwhat-its-like-inside-black-hole-holodome-2019-4%23a-ring-of-light-quickly-begins-to-form-representing-heated-gas-particles-that-orbit-the-event-horizon-or-point-of-no-return-4&amp;utm_medium=techboard.mon.3li.20190419&amp;v=9d2ff4140d7dfa2e&amp;position=2&amp;part=full&amp;china_variant=False">We went inside a virtual simulation of a black hole, and it was a mind-bending
+                                    experience</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">Business Insider <span class="readtime">&bull;</span>  <span class="readtime">2 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22full%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.businessinsider.com%252Fwhat-its-like-inside-black-hole-holodome-2019-4%2523a-ring-of-light-quickly-begins-to-form-representing-heated-gas-particles-that-orbit-the-event-horizon-or-point-of-no-return-4%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.businessinsider.com%252Fwhat-its-like-inside-black-hole-holodome-2019-4%2523a-ring-of-light-quickly-begins-to-form-representing-heated-gas-particles-that-orbit-the-event-horizon-or-point-of-no-return-4%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285443%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                          </div>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1722" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="hr">
+                                    <td width="42" class="w10"></td>
+                                    <td colspan="2" align="left">
+                                      <table class="full" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
+                                      aria-hidden="true">
+                                        <tr>
+                                          <td>
+                                            <div style="font-size:0px;line-height:0px;border-bottom:1px solid #d8d8d8;line-height:1px;font-size:0px;">&nbsp;</div>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                    <td width="42" class="w10"></td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4" height="25" class="h25"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="text">
+                                    <td width="42" class="w10"></td>
+                                    <td align="right" width="0" valign="top" class=""></td>
+                                    <td class="" align="left" style="color:#000000;font-size:20px;line-height:26px;font-family:Arial, sans-serif;"
+                                    valign="top">
+                                      <table border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                          <td colspan="2">
+                                            <a href="http://d.liadm.com/click2/ae590ce0/Th2uktuOzWjlHq81lrFPlusSj6tnzj-G5JnCRhwlzyBsxwv0whU6h1EFHsCLcAsSe1BC-vwhwQiTSIHgfb0Fc1OKl1VVz1Y5KSRZpfgCYjFKlcrCsSXSbHbNkfwo9HgRM9xECMjFFhP5iOIn459ujwQPLVDHpUKMlGYwf8GCa9cyRZSb9BQUN0la3UYC2rEvsHWQOKrSASWZv3DKqJ9chG-VsUZp6GvU_8rqNSJ0ulsGb-GxEnFwZO4j5SJVfpqAE9zd5iSv_jHRpAeKhww4zI686UoKK7lw6-My24ephLwzHsHE0TmArmvUHStXXfJp1ouSIS3kJswYR-VgpTw4hiaqullL0-h8W_eSvdWajLLhfSzN2kyhqNMe5ygL2IhKHDzxM4FRS-tRccIwztY0D4UhRJEd2PgBH-hc-0S5tanhlUnGbneSUBrYi6snm9H1A_C76wbm6mgVJQgEhaXwxMa-qcOGvtPdfFRybuRC4475t_Qh56-1GXoudqMxD7vBx5QHLOdMCHlwqIkBG7igM1G2qXN8YZMOHmpYk-wV_F9DjflY4solVS0YCJwUBfsB2YNkruq5BGs6zb66uSueU2OJeyKX0liyCMr3JT6X47U-duSmaQZPO9YT3t-qnHp4Ha8JGBDapUTdETHE-YKYNUX1gco2yIorefhp9eJCSQaOzaYnNWJgpEsQIIZQstP2TFsU2PPaTbViwZhcoTrsHX3lLMYVzbFGSYZHZFYJXjlzot7ioKUL-5PljQYscW3bmR9dl3_tQ5VWmYWinZF1_uXYMta995Pm9rZbDzrYGeblNTUhvQbv1hgun_DM7Wir418WKNIG-hxoh9PHK47TdQpRL6gST1eCjnwUFsatZ5R-O0pSXDsZJaHLp6kRX4Fbas8s37HAwISOjY8DCDuHJrhmaxE-oKrQOjM5bKWSZHV5VgpmKFkArlqvg6NixaczqfVsVQ8h_AHj0HBeANKVXXoWlQCzIs7FEwdY31pvJTTeVSPluWSkopXrdf3JmhG7V3tuVsE9W5rd-3nEkAf-6ySqrW6lJ3OO6Ujm9Xwd5hmz2TM2KGxaCy1KaUFD7r7j8J97e0pwUDA3pcGogh6ehbB-fjgCe_iAKUA9BJoq37_YXFI5MAgYNZ7BVit20gJgMzxiu723-Q//"
+                                            rel="nofollow">
+                                              <img class="liveintent_img" src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=672729&m=0de0fc8e99007fe686e171efae324527&li="
+                                              border="0" width="566" height="" style="max-width:566px;" />
+                                            </a>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td align="left">
+                                            <a style="display:block; max-width:116px; max-height:15px;" href="https://liveintent.com/powered-by/?utm_medium=product&amp;utm_source=liveintent+platform&amp;utm_campaign=poweredby"
+                                            rel="nofollow">
+                                              <img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=672730&m=0de0fc8e99007fe686e171efae324527&li="
+                                              border="0" />
+                                            </a>
+                                          </td>
+                                          <td align="right">
+                                            <a style="display:block; max-width:19px; max-height:15px;" href="https://liveintent.com/ad-choices/?utm_medium=product&amp;utm_source=liveintent+platform&amp;utm_campaign=adchoices&amp;c=${CRITEO_OPTOUT_URL}"
+                                            rel="nofollow">
+                                              <img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=672732&m=0de0fc8e99007fe686e171efae324527&li="
+                                              border="0" />
+                                            </a>
+                                          </td>
+                                        </tr>
+                                      </table>
+                                    </td>
+                                    <td width="42" class="w10"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="30" class="h50"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1347" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="40" class="h20"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                          <div class="module_1394">
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="hr">
+                                <td width="10" class="tw42"></td>
+                                <td colspan="2" align="left">
+                                  <table class="full" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation"
+                                  aria-hidden="true">
+                                    <tr>
+                                      <td>
+                                        <div style="font-size:0px;line-height:0px;border-bottom:2px solid #f52828;font-size:0px;line-height:0px;">&nbsp;</div>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" height="10" class="spc12"></td>
+                              </tr>
+                            </table>
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="text">
+                                <td width="10" class="tw42"></td>
+                                <td align="right" width="0" valign="top" class=""></td>
+                                <td class="digesthead1" align="left" style="font-family:Arial, sans-serif;font-weight:bold;font-size:18px;line-height:21px"
+                                valign="top">FOLLOW THE MONEY</td>
+                                <td width="10" class="tw42"></td>
+                              </tr>
+                            </table>
+                            <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                            role="presentation" aria-hidden="true">
+                              <tr class="text">
+                                <td width="10" class="tw42"></td>
+                                <td align="right" width="0" valign="top" class=""></td>
+                                <td class="digest_section_description" align="left" style="font-family:Arial, sans-serif;font-size:18px;line-height:21px;color:#9b9b9b"
+                                valign="top">The funding and investments made in Silicon Valley and beyond.</td>
+                                <td width="10"
+                                class="tw42"></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" height="35" class="spc_section_description"></td>
+                              </tr>
+                            </table>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component image">
+                                <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22mon%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fnews.crunchbase.com%2Fnews%2Ffirst-look-at-the-fastly-ipo-filing%2F%22%2C%22method%22%3A%22externalweb%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fnews.crunchbase.com%2Fnews%2Ffirst-look-at-the-fastly-ipo-filing%2F%3Futm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%26utm_content%3D%26utm_campaign%3Ddigest-sections%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285208%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                style="border:none;">
+                                  <img src="https://news.crunchbase.com/wp-content/uploads/2019/03/moneyheap4.png"
+                                  alt="" height="318.217777778" width="566.0" class="imageScale" style="font-size:20px;"
+                                  />
+                                </a>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc12">&nbsp;</div>
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fnews.crunchbase.com%25252Fnews%25252Ffirst-look-at-the-fastly-ipo-filing%25252F%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fnews.crunchbase.com%2Fnews%2Ffirst-look-at-the-fastly-ipo-filing%2F&amp;utm_medium=techboard.mon.3li.20190419&amp;v=da67529d0e218581&amp;position=0&amp;part=mon&amp;china_variant=False">First Look At The Fastly IPO...</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">
+                                          <a style="color:inherit;text-decoration:none;" href="#!">crunchbase.com</a> <span class="readtime">&bull;</span>  <span class="readtime">4 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22mon%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fnews.crunchbase.com%252Fnews%252Ffirst-look-at-the-fastly-ipo-filing%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fnews.crunchbase.com%252Fnews%252Ffirst-look-at-the-fastly-ipo-filing%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285433%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fwww.reuters.com%25252Farticle%25252Fus-life360-ipo-australia%25252Fu-s-family-tracking-app-life360-launches-104-million-australian-ipo-idUSKCN1RU0AF%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fwww.reuters.com%2Farticle%2Fus-life360-ipo-australia%2Fu-s-family-tracking-app-life360-launches-104-million-australian-ipo-idUSKCN1RU0AF&amp;utm_medium=techboard.mon.3li.20190419&amp;v=1e818ab59bda68e1&amp;position=1&amp;part=mon&amp;china_variant=False">U.S. family tracking app Life360 launches $104 million Australian IPO</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">Reuters <span class="readtime">&bull;</span>  <span class="readtime">1 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22mon%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.reuters.com%252Farticle%252Fus-life360-ipo-australia%252Fu-s-family-tracking-app-life360-launches-104-million-australian-ipo-idUSKCN1RU0AF%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fwww.reuters.com%252Farticle%252Fus-life360-ipo-australia%252Fu-s-family-tracking-app-life360-launches-104-million-australian-ipo-idUSKCN1RU0AF%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285503%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div class="component hr" style="font-size:1px;line-height:1px;border-bottom:1px solid #d8d8d8;line-height:0px;font-size:0px;">&nbsp;</div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                            <div class="theme_highdensity pad42" style="margin:0 10px;">
+                              <div class="component text">
+                                <div class="title" style="text-align:left;font-weight:bold;font-size:17px;line-height:21px;font-family:Times, serif;;">
+                                  <a style="text-decoration:none;color:#000000" href="https://flemail.flipboard.com/redirect/ws?lang=en&amp;utm_campaign=digest-sections&amp;uid=246175614&amp;sub_part=article&amp;section_url=flipboard%3A%2F%2FshowSection%2Fresolve%252Fflipboard%252Furl%25252Fhttps%25253A%25252F%25252Fnews.crunchbase.com%25252Fnews%25252Fzoom-and-pinterest-storm-out-the-gate-as-newly-public-companies%25252F%3Fback%3Dauth%252Fflipboard%252Fcoverstories&amp;utm_source=email&amp;web_url=https%3A%2F%2Fnews.crunchbase.com%2Fnews%2Fzoom-and-pinterest-storm-out-the-gate-as-newly-public-companies%2F&amp;utm_medium=techboard.mon.3li.20190419&amp;v=478339c19ad33da5&amp;position=2&amp;part=mon&amp;china_variant=False">Zoom And Pinterest Storm Out The Gate As Newly Public Companies</a>
+                                </div>
+                              </div>
+                              <div style="font-size:0px;line-height:7px;" class="spc12">&nbsp;</div>
+                              <div class="component nest">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td class="c1" width="" valign="top" align="left">
+                                      <div class="component text">
+                                        <div class="sourceline" style="text-align:left;font-size:11px;line-height:13px;color:#999999;font-family:Arial, sans-serif;;">
+                                          <a style="color:inherit;text-decoration:none;" href="#!">crunchbase.com</a> <span class="readtime">&bull;</span>  <span class="readtime">2 min read</span>
+                                        </div>
+                                      </div>
+                                      <div style="font-size:0px;line-height:10px;" class="spc12">&nbsp;</div>
+                                    </td>
+                                    <td class="c2" width="" valign="" align=""></td>
+                                    <td class="c3" width="130" valign="top" align="right">
+                                      <div class="component image">
+                                        <a href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22mon%2Fart%22%2C%22url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fnews.crunchbase.com%252Fnews%252Fzoom-and-pinterest-storm-out-the-gate-as-newly-public-companies%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fshare.flipboard.com%2Fbookmarklet%2Fpopout%3Futm_campaign%3Ddigest-sections%26url%3Dhttps%253A%252F%252Fnews.crunchbase.com%252Fnews%252Fzoom-and-pinterest-storm-out-the-gate-as-newly-public-companies%252F%26utm_source%3Demail%26utm_medium%3Dtechboard.mon.3li.20190419%26t%3D1555706414000%26v%3D2%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285441%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                        style="border:none;">
+                                          <img src="https://cdn.flipboard.com/dev_O/welcome/flip.png" alt="read later" height="9"
+                                          width="41" class="readlater" style="font-size:14px;color:#f52828;font-family:Arial, sans-serif;"
+                                          />
+                                        </a>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </div>
+                              <div style="font-size:0px;line-height:20px;" class="spc30">&nbsp;</div>
+                            </div>
+                          </div>
+                          <table border="0" bgcolor="#ffffff" cellpadding="0" cellspacing="0" width="100%"
+                          class="full module_1389" role="presentation" aria-hidden="true">
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr>
+                                    <td colspan="4" height="30" class="spc75"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="text">
+                                    <td width="44" class="w10"></td>
+                                    <td align="right" width="0" valign="top" class=""></td>
+                                    <td class="cta" align="center" style="font-family:Arial, sans-serif;font-size:22px;line-height:28px;color:#000000;font-weight:bold;"
+                                    valign="top">Share stories with your team.</td>
+                                    <td width="44" class="w10"></td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="4" height="30" class="spc40"></td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="100%">
+                                <table class="component" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                role="presentation" aria-hidden="true">
+                                  <tr class="cta">
+                                    <td colspan="4" align="center">
+                                      <div class="ctatable">
+                                        <!--[if mso]>
+                                          <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+                                          href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22cta%2F0%22%2C%22url%22%3A%22https%3A%2F%2Fflipboard.com%2Ftopic%2Ftechnology%3Faction%3DshowCreateGroupMagazine%26utm_campaign%3Ddigest-sections%26utm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fflipboard.com%2Ftopic%2Ftechnology%3Faction%3DshowCreateGroupMagazine%26utm_campaign%3Ddigest-sections%26utm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910284855%2C%22ab_tests%22%3A%22%22%7D%7D"
+                                          style="height:52.2px;v-text-anchor:middle;width:196px;" arcsize="13%" stroke="f"
+                                          fillcolor="#f52828><w:anchorlock/><center>
+<![endif]-->
+<a class=" ctabutton " href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22cta%2F0%22%2C%22url%22%3A%22https%3A%2F%2Fflipboard.com%2Ftopic%2Ftechnology%3Faction%3DshowCreateGroupMagazine%26utm_campaign%3Ddigest-sections%26utm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fflipboard.com%2Ftopic%2Ftechnology%3Faction%3DshowCreateGroupMagazine%26utm_campaign%3Ddigest-sections%26utm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910284855%2C%22ab_tests%22%3A%22%22%7D%7D "
+style="background-color:#f52828;border-radius:4px;color:#ffffff;display:inline-block;font-family:Arial,sans-serif;font-size:18px;line-height:49.5px;text-align:center;text-decoration:none;width:206px;letter-spacing:0.5px;-webkit-text-size-adjust:none;border:1px
+                                          solid #ffffff; ">Create magazine</a>
+<!--[if mso]></center></v:roundrect><![endif]-->
+</div>
+
+</td>
+</tr>
+
+
+<tr>
+<td colspan="4 " height="70 " class="h70_40 "></td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+</table>
+
+  
+
+  
+  
+  
+
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+
+
+
+
+
+
+
+
+
+<table border="0 " bgcolor="#ffffff " cellpadding="0 " cellspacing="0
+                                          " width="100% " class="full module_2050 " role="presentation " aria-hidden="true ">
+
+
+
+
+
+
+
+
+
+
+<tr>
+<td width="100% ">
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table class="component " cellpadding="0 " cellspacing="0 " border="0
+                                          " width="100% " role="presentation " aria-hidden="true ">
+
+<tr class="hr ">
+<td width="42 " class="w10 "></td>
+<td colspan="2 " align="left ">
+<table class="full " cellpadding="0 " cellspacing="0 " border="0 " width="100%
+                                          " role="presentation " aria-hidden="true ">
+<tr>
+<td><div style="font-size:0px;line-height:0px;border-bottom:1px solid #d8d8d8;line-height:1px;font-size:0px; ">&nbsp;</div></td>
+</tr>
+</table>
+</td>
+<td width="42 " class="w10 "></td>
+</tr>
+
+
+<tr>
+<td colspan="4 " height="25 " class="h25 "></td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+
+
+<tr>
+<td width="100% ">
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table class="component " cellpadding="0 " cellspacing="0 " border="0
+                                          " width="100% " role="presentation " aria-hidden="true ">
+
+<tr class="text ">
+<td width="42 " class="w10 "></td>
+<td align="right " width="0 " valign="top "
+class=" "
+>
+
+</td>
+<td class=" " align="left " style="color:#000000;font-size:20px;line-height:26px;font-family:Arial,
+                                          sans-serif; " valign="top ">
+<table border="0 " cellpadding="0 " cellspacing="0 " >
+<tr>
+<td colspan="2 ">
+<a href="http://d.liadm.com/click2/ae590ce0/soth_ymuXWM4oDPa-fXFoJY_i3ApPi--AP4wm0w0y8vodkuFFuwGxDIKBXkmUeMEUlURb7sU_m0uCyX3ivve1E96RNpKf4vPYc2IfWpWSxqAk1nDDwAUoGuoq-oxFgv3MOJcAt65ztzekhpEASRiKOm1aJZnveu0FCWqCmAldvHakFnRLhVzU-y1iRuhakevo09KOp9mwxjUSIajoF9k5ZYoHWyr5jF7ZpumMSdUtVeG3_hgvSf8Bzv8vH4qK-k-3jd4NgXG3HLfNIHahm3F3a_s-fjDFt9oFmX41CxUASXKXdHM3JbdVB9mujSvlKXPktvt7ZBqfIuuKA_9zJuSTCDcRK0s-OxqPXaed7g6s3IfncH4JaSoL_lE_3lJYBQbr5w3_yxPwqSA-vGI0RSLOIGp_WMtPaTUW6F6Gruo_oiBerPdZwf_nWgPD9JDCB32OmdP-0NAw5p-VUU1aBAlnfrsdH4hu1EavdWWkFyDQz-LfODavcfvIQeG7_aQUQGgkl9r4-JjqlCKMnLoN807PBkML374QxZtSwNqqy4Z9ICg7kpW4ne4WejChEnz5eH22DlyQ0d9w_k0Aownkyk_TBfw5ug2WX11Cc57veOFuWNE9-ZEiXuT-DQXLbwAyTAVesIXDUCx3cr42QL_11wyiZA8aGHtehCBjHy5fHtk-sF2Nhf31lOoyJNAq6xR3Bhg_vWUq9ge5cwpc9ukrw2rvu6DM82yOEniKiaHnea9euCexPDvfIgYgIrbOPKI7EwpM6iojzvneMypNiO4djW38ENRIbm3xGNtic9dlY7v0SnhEie2-2cBiGU8l2w-72qxZ8-JuQltFrZxu4O98Z1CNaC0HiJVWW0a4FnGoO5xvYFdCwqhdoWrjYJxQqC8ybn_eT0x0y6NldoUs5c4DMFVmLZ1JDGup12CHFqjhejPMIRUbRt-Cbv0usWwaadpxFlQxSfEzfjECBKzXvM0kdBMlb3Tj6mSJ4aTc_EXfdkeP_FCgBN4XGu_6cRQH7Nk7VWaWqzJ1YYWnQwmMLSN3aAH_O0lhE8GJjudxBzjHBUGJiFWUBUzDo2xWRcdoTr3oKxZkpcmY8pU4KItdrScOAkysygdq5oylU1KRRl2Ositk331QBICyVtSep8nhU6f_usK8g//
+                                          " rel="nofollow ">
+<img class="liveintent_img " src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=700291&m=0de0fc8e99007fe686e171efae324527&li=" border="
+                                          0 " width="566 " height=" " style="max-width:566px; "/>
+</a>
+</td>
+</tr>
+<tr>
+<td align="left ">
+<a style="display:block; max-width:116px; max-height:15px; " href="https://liveintent.com/powered-by/?utm_medium=product&amp;utm_source=liveintent+platform&amp;utm_campaign=poweredby
+                                          " rel="nofollow ">
+<img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=700292&m=0de0fc8e99007fe686e171efae324527&li=" border="
+                                          0 "/>
+</a>
+</td>
+<td align="right ">
+<a style="display:block; max-width:19px; max-height:15px; " href="https://liveintent.com/ad-choices/?utm_medium=product&amp;utm_source=liveintent+platform&amp;utm_campaign=adchoices&amp;c=${CRITEO_OPTOUT_URL}
+                                          " rel="nofollow ">
+<img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=700294&m=0de0fc8e99007fe686e171efae324527&li=" border="
+                                          0 "/>
+</a>
+</td>
+</tr>
+</table>
+</td>
+<td width="42 " class="w10 "></td>
+</tr>
+
+
+</table>
+
+</td>
+</tr>
+
+
+
+<tr>
+<td width="100% ">
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table class="component " cellpadding="0 " cellspacing="0 " border="0
+                                          " width="100% " role="presentation " aria-hidden="true ">
+
+
+<tr>
+<td colspan="4 " height="30 " class="h50 "></td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+</table>
+
+  
+
+  
+  
+  
+
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+
+
+
+
+
+
+
+
+
+<table border="0 " bgcolor="#ffffff " cellpadding="0 " cellspacing="0
+                                          " width="100% " class="full module_1723 " role="presentation " aria-hidden="true ">
+
+
+
+
+
+
+
+
+
+
+<tr>
+<td width="100% ">
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table class="component " cellpadding="0 " cellspacing="0 " border="0
+                                          " width="100% " role="presentation " aria-hidden="true ">
+
+<tr>
+<td colspan="4 ">
+<table cellpadding="0 " cellspacing="0 " border="0 " width="40 " height="6
+                                          "><tbody><tr><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484000&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484001&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484002&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484003&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484004&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484005&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484006&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484007&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484008&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484009&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484010&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484011&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484012&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484013&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484014&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484015&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484016&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484017&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484018&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td><td><img src="http://li.flipboard.com/imp?p=techboard.mon.3li.20190419&s=125484019&m=e2246b47d446e0032365ad64718f0e18&li=" width="
+                                          2 " height="6 " border="0 " /></td></tr></tbody></table>
+</td>
+</tr>
+
+
+</table>
+
+</td>
+</tr>
+
+</table>
+
+  
+
+
+</div>
+</center>
+</div>
+<!--[if gte mso 9]></td></tr></table><![endif]-->
+<!--[if gte mso 9]></td></tr></table><![endif]-->
+
+
+
+<!-- block: footer -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- START Width-constraint -->
+
+
+
+
+
+<!--[if gte mso 9]><table width="100% " cellpadding="0 " cellspacing="0
+                                          " border="0 " role="presentation " aria-hidden="true "><tr><td align="center " width="650
+                                          " style="width:650px;background-color:#000000 " bgcolor="#000000 ">
+<tr><td><![endif]-->
+<!--[if gte mso 9]><table width="650 " style="width:650px; " cellpadding="0
+                                          " cellspacing="0 " border="0 " role="presentation " aria-hidden="true "><tr><td bgcolor="#ffffff "><![endif]-->
+<div class="wrap1 " style="background-color:#000000; ">
+<center bgcolor="#000000 ">
+<div class="full wrap2 " style="text-align:center;max-width:650px;background-color:#ffffff ">
+
+
+<table cellpadding="0 " cellspacing="0 " border="0 " width="650 " bgcolor="#ffffff
+                                          " class="footer full ">
+<tbody><tr>
+<td align="center ">
+<!-- START footer:center -->
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center
+                                          " class="full ">
+<tbody>
+<tr>
+<td class="footer_padding " bgcolor="#000000 "></td>
+<td valign="top " bgcolor="#000000 ">
+<!-- START footer:content -->
+
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center ">
+<tr>
+<td height="30 "></td>
+</tr>
+</table>
+
+
+
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center ">
+<tr>
+<td class="disclaimer_row " width="100% " style="font-size: 12px; color: #ffffff;
+                                          text-align: center; font-weight: normal; font-family:Arial,sans-serif; line-height:18px;
+                                          ">
+
+You have received this email because you signed up for an account on Flipboard with the email address: <a style="text-decoration: none; color: #ffffff; " class="hover " href="mailto:flipemailqa+conf1@gmail.com ">flipemailqa+conf1@gmail.com</a>.
+
+</td>
+</tr>
+</table>
+
+
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center ">
+<tr>
+<td height="20 ">
+</td>
+</tr>
+</table>
+
+
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center
+                                          " style="text-align: center; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; ">
+<tr>
+<td class="unsubscribe_row " width="100% " style="font-size: 16px; color: #ffffff;
+                                          font-weight: normal; font-family:Arial, sans-serif; line-height:20px; vertical-align:middle;
+                                          text-transform:uppercase; ">
+<a
+href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22unsubscribe%2F1%22%2C%22url%22%3A%22https%3A%2F%2Fflemail.flipboard.com%2Faccount%2FemailSettings%3Flang%3Den%26utm_campaign%3Ddigest-sections%26code%3DMjQ2MTc1NjE0JWZsaXBlbWFpbHFhK2NvbmYxQGdtYWlsLmNvbSVlbiUxNTU1NzA2NDE0MDAw%26preselect%3D2%26utm_source%3Demail%26s%3DkoTuo4FY126w7VXr4KrjoHHoY5jimPb%252FUtFpdsnoR1g%253D%26utm_medium%3Dtechboard.mon.3li.20190419%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fflemail.flipboard.com%2Faccount%2FemailSettings%3Flang%3Den%26utm_campaign%3Ddigest-sections%26code%3DMjQ2MTc1NjE0JWZsaXBlbWFpbHFhK2NvbmYxQGdtYWlsLmNvbSVlbiUxNTU1NzA2NDE0MDAw%26preselect%3D2%26utm_source%3Demail%26s%3DkoTuo4FY126w7VXr4KrjoHHoY5jimPb%252FUtFpdsnoR1g%253D%26utm_medium%3Dtechboard.mon.3li.20190419%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285383%2C%22ab_tests%22%3A%22%22%7D%7D "
+class="hover " style="text-decoration: none; color: #ffffff; ">Unsubscribe</a>
+<span>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span>
+<a
+href="http://ue.flipboard.com/usage?data=%7B%22prod_type%22%3A%22notification%22%2C%22event_category%22%3A%22email%22%2C%22event_action%22%3A%22click%22%2C%22event_data%22%3A%7B%22type%22%3A%22techboard.mon.3li.20190419%22%2C%22target_id%22%3A%22privacy%2F1%22%2C%22url%22%3A%22https%3A%2F%2Fflipboard.com%2Fprivacy%3Futm_campaign%3Ddigest-sections%26utm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%22%2C%22method%22%3A%22web%22%2C%22redirect_url%22%3A%22https%3A%2F%2Fflipboard.com%2Fprivacy%3Futm_campaign%3Ddigest-sections%26utm_medium%3Dtechboard.mon.3li.20190419%26utm_source%3Demail%22%7D%2C%22properties%22%3A%7B%22uid%22%3A%22246175614%22%2C%22unique_id%22%3A%22246175614%22%2C%22time%22%3A1556910285402%2C%22ab_tests%22%3A%22%22%7D%7D "
+class="hover " style="text-decoration: none; color: #ffffff; ">Privacy Policy</a>
+</td>
+</tr>
+</table>
+
+
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center ">
+<tr>
+<td height="20 ">
+</td>
+</tr>
+</table>
+
+
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center ">
+<tr>
+<td class="copyright_row " width="100% " style="font-size: 12px; color: #ffffff;
+                                          text-align: center; font-weight: normal; font-family:Arial, sans-serif; line-height:
+                                          27px; text-decoration:none; ">
+&copy;2019
+<a href="https://about.flipboard.com/about-us/ " class="appleLinksWhite
+                                          " style="color: #ffffff;text-decoration:none;
+                                          ">Flipboard, Inc. Made with love at <span class="appleLinksGrey " style="color:#ffffff; ">735 Emerson Street, Palo Alto, CA 94301</span></a>
+</td>
+</tr>
+</table>
+
+
+<table width="100% " border="0 " cellpadding="0 " cellspacing="0 " align="center ">
+<tr>
+<td height="30 ">
+</td>
+</tr>
+</table>
+
+<!-- END footer:content -->
+</td>
+<td class="footer_padding " bgcolor="#000000 "></td>
+</tr>
+</tbody></table>
+<!-- END footer:center -->
+</td>
+</tr>
+</tbody></table>
+
+
+</div>
+</center>
+</div>
+<!--[if gte mso 9]></td></tr></table><![endif]-->
+<!--[if gte mso 9]></td></tr></table><![endif]-->
+
+<!-- END Width-constraint -->
+
+
+
+
+<!-- end block: footer -->
+
+
+
+
+
+
+
+<img src="http://www.google-analytics.com/collect?v=1&tid=UA-100694527-1&cid=f840972a-11e8-4927-a851-6cc312fd47f0&t=pageview&cm=email&cs=techboard.mon.3li.20190419&cn=digest-sections&dp=/email/techboard.mon.3li.20190419
+                                          " alt=" " />
+<!-- server: flamingo21-ui.private.flipboard.com -->
+
+
+<img src="http://email.flipboard.com/wf/open?upn=smQgLT46XgcS6fMZFBQL4y4HevEsnc38MDOEpQYV3JEailnzZwdF0Em9EirzdPemzRxquS3webdwqJYl-2F8Ydsbpd6T6chu1at8XN660FkMKtpkRrmHizmZmrqxHzYPtzFbvTaYFvDZcxJJxGA6vUlfQt04b3-2FI4HWwYGqNYTAHwQKd-2FE4rhYgvW2uIbFN4KVb2-2BLflrL0TfMOkFb0XWCJWS3E8CVfDMB2xyq5EzEjVl7ibu2p8QxExuxFv-2FYZhFhM8RLU0gtqC8BIt6-2FNmUm1yR21eaVbLJPqhluCZeL3xlreKm5EC-2BB9uAxvfLBvZQu0vJzSSA7zAAf1kc9NcCaLJjid1VHTHbv-2FfCUqAZtbgKKWZ0qjy0u-2FUR3nvdBIsiSrfZCjrzLJPXfrzq0jtIBryZqBeOvaftNEkXcdS4A8v2RIYmnHg6igsdhqbm15QWZj9iLgQhxVaK9Fvjpm-2BkfLQ-3D-3D
+                                          " alt=" " width="1 " height="1 " border="0 " style="height:1px !important;width:1px !important;border-width:0
+                                          !important;margin-top:0 !important;margin-bottom:0 !important;margin-right:0 !important;margin-left:0
+                                          !important;padding-top:0 !important;padding-bottom:0 !important;padding-right:0
+                                          !important;padding-left:0 !important; "/>
+</body>
+</html>
