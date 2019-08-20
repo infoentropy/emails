@@ -1,5 +1,14 @@
+import yaml
+import mistune
+import json
+from jinja2 import (
+Template as JinjaTemplate,
+)
+
+
 from django.db import models
-from jinja2 import (Template as JinjaTemplate)
+
+MARKDOWN = mistune.Markdown()
 
 """
 Template
@@ -64,6 +73,20 @@ class ComponentSchema(MetadataMixin):
 class Component(MetadataMixin):
     # it's a HEADER/BODY/FOOTER element
     category = models.ForeignKey('ComponentCategory', on_delete=models.CASCADE)
+    schema = models.TextField(blank=True, null=True)
+    markup = models.TextField(blank=True, null=True)
+
+    def _pretty_json(self):
+        try:
+            return json.dumps(self.json, indent=2)
+        except Exception as e:
+            return (e)
+
+    def _to_json(self):
+        return yaml.safe_load(self.schema)
+
+    json = property(_to_json)
+    pretty_json = property(_pretty_json)
 
 class Module(MetadataMixin):
     # Narrator Header
@@ -74,9 +97,26 @@ class ModuleComponent(models.Model):
     component = models.ForeignKey(Component, on_delete=models.CASCADE)
 
 class Content(MetadataMixin):
-    # HEADER with data inside
-    component = models.ForeignKey('Component', on_delete=models.CASCADE)
+    # Ex: HEADER component filled with data inside
+    component = models.ForeignKey('Component', on_delete=models.CASCADE, blank=True, null=True)
     # content can extend other content
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
-    # json data?
-    html = models.TextField()
+    data = models.TextField(blank=True, null=True)
+
+    def _render_data(self):
+        # not a component? it's freeform
+        if not self.component:
+            print("MARKDOWN", self)
+            try:
+                return MARKDOWN(self.data)
+            except Exception as e:
+                return ""
+        try:
+            schema = yaml.safe_load(self.component.schema)
+            schema.update(yaml.safe_load(self.data))
+            tmpl = JinjaTemplate(self.component.markup)
+            return tmpl.render(schema)
+        except Exception as e:
+            return self.data
+
+    preview = property(_render_data)

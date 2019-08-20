@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import (BaseTemplate,
 Template,
 TemplateCategory,
@@ -10,6 +11,7 @@ Component,
 ComponentCategory,
 Content,
 )
+from .forms import (YamlContentAdminForm, MarkdownContentAdminForm, ComponentAdminForm)
 
 
 # Template > Modules > Components > content?
@@ -28,9 +30,24 @@ class TemplateAdmin(admin.ModelAdmin):
     model = Template
     inlines = (TemplateRegionInline, )
 
+
 class ComponentAdmin(admin.ModelAdmin):
     model = Component
+    form = ComponentAdminForm
+    readonly_fields = ('pretty_json', )
     # filter_horizontal = ('authors',)
+
+class ContentAdmin(admin.ModelAdmin):
+    model = Content
+    readonly_fields = ('preview', )
+    # form = ContentAdminForm
+    # filter_horizontal = ('authors',)
+    def get_form(self, request, obj=None, **kwargs):
+        if obj and obj.component:
+            kwargs['form'] = YamlContentAdminForm
+        else:
+            kwargs['form'] = MarkdownContentAdminForm
+        return super().get_form(request, obj, **kwargs)
 
 class ModuleAdmin(admin.ModelAdmin):
     model = Module
@@ -45,5 +62,5 @@ admin.site.register(Region)
 admin.site.register(Module, ModuleAdmin)
 admin.site.register(ComponentCategory)
 admin.site.register(Component, ComponentAdmin)
-admin.site.register(Content)
+admin.site.register(Content, ContentAdmin)
 # admin.site.register(Category)
