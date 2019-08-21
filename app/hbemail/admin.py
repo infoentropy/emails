@@ -30,10 +30,10 @@ class TemplateAdmin(admin.ModelAdmin):
     model = Template
     inlines = (TemplateRegionInline, )
 
-
 class ComponentAdmin(admin.ModelAdmin):
     model = Component
     form = ComponentAdminForm
+    list_display = ('name', 'category',)
     readonly_fields = ('pretty_json', )
     # filter_horizontal = ('authors',)
 
@@ -43,9 +43,9 @@ class ContentAdmin(admin.ModelAdmin):
     # form = ContentAdminForm
     # filter_horizontal = ('authors',)
     def get_form(self, request, obj=None, **kwargs):
-        if obj and obj.component:
+        if obj and obj.data_type == 'yaml':
             kwargs['form'] = YamlContentAdminForm
-        else:
+        elif obj and obj.data_type == 'markdown':
             kwargs['form'] = MarkdownContentAdminForm
         return super().get_form(request, obj, **kwargs)
 

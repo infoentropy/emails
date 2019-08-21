@@ -38,15 +38,27 @@ class Template(MetadataMixin):
     html = models.TextField()
 
     def load_template(self):
-        def temp(x = None):
-            return True
-        return (self.html, self.name, temp)
+        def outdated(x = None):
+            return False
+        return (self.html, self.name, outdated)
 
-    def render(self, environment):
+    def get_template(self, environment):
         if self.parent:
             self.parent.load_template()
-        tmpl = environment.get_template(self.name)
-        return tmpl.render(tmpl = self)
+        return environment.get_template(self.name)
+
+    def render(self, environment, **kwargs):
+        tmpl = self.get_template(environment)
+        regiondata = {}
+        for r in self.templateregion_set.all().order_by('region_id', 'order'):
+            region = r.region.name
+            temp = regiondata.setdefault(region, '')
+            regiondata[region] = temp + ((r.content and r.content._render_data()) or r.html)
+
+        kwargs.update(regiondata)
+        return tmpl.render(
+            tmpl = self,
+            **kwargs)
 
 class Region(MetadataMixin):
     pass
@@ -55,6 +67,7 @@ class TemplateRegion(models.Model):
     order = models.PositiveSmallIntegerField(default=0)
     template = models.ForeignKey(Template, on_delete=models.CASCADE)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, null=True, blank=True)
     html = models.TextField(blank=True)
 
 class TemplateCategory(MetadataMixin):
@@ -92,16 +105,28 @@ class Module(MetadataMixin):
     # Narrator Header
     components = models.ManyToManyField(Component, through='ModuleComponent')
 
+
 class ModuleComponent(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     component = models.ForeignKey(Component, on_delete=models.CASCADE)
 
 class Content(MetadataMixin):
+    MARKDOWN = 'markdown'
+    YAML = 'yaml'
+    HTML = 'html'
+
+    CONTENT_CHOICES = [
+        (MARKDOWN, 'Markdown'),
+        (YAML, 'YAML'),
+        (HTML, 'HTML')
+    ]
+
     # Ex: HEADER component filled with data inside
     component = models.ForeignKey('Component', on_delete=models.CASCADE, blank=True, null=True)
     # content can extend other content
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     data = models.TextField(blank=True, null=True)
+    data_type = models.CharField(max_length=64, choices=CONTENT_CHOICES, default=MARKDOWN)
 
     def _render_data(self):
         # not a component? it's freeform
