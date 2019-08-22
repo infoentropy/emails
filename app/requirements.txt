@@ -4,3 +4,4 @@ Jinja2
 jinja2-cli
 mistune==0.8.4
 pyyaml==5.1.2
+django-mjml

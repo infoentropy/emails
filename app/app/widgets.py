@@ -1,4 +1,24 @@
+
+from mjml.apps import mjml_render
 from django import forms
+from jinja2 import nodes
+from jinja2.ext import Extension
+
+
+class MjmlExtension(Extension):
+    tags = {'mjml'}
+
+    def __init__(self, environment):
+        super(MjmlExtension, self).__init__(environment)
+        # environment.extend(mjml = '')
+
+    def parse(self, parser):
+        lineno = next(parser.stream).lineno
+        body = parser.parse_statements(['name:endmjml'], drop_needle=True)
+        return nodes.CallBlock(self.call_method('_mjml'), [], [], body).set_lineno(lineno)
+
+    def _mjml(self, caller):
+        return mjml_render(caller())
 
 class CodeEditor(forms.Textarea):
     def __init__(self, *args, **kwargs):
@@ -8,15 +28,17 @@ class CodeEditor(forms.Textarea):
     class Media:
         css = {
             'all': (
-                'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.9.0/codemirror.css',
+                'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/codemirror.css',
             )
         }
         js = (
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.9.0/codemirror.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.9.0/mode/xml/xml.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.9.0/mode/htmlmixed/htmlmixed.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.9.0/mode/yaml/yaml.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.9.0/mode/markdown/markdown.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/codemirror.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/xml/xml.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/jinja2/jinja2.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/htmlmixed/htmlmixed.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/django/django.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/yaml/yaml.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/markdown/markdown.js',
             '/static/codemirror.js'
         )
 

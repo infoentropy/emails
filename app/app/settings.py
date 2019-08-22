@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mjml',
     'hbemail'
 ]
 
@@ -116,7 +117,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -126,3 +127,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
+MJML_BACKEND_MODE = 'cmd'
+MJML_EXEC_CMD = '/Users/jlee/work/lifecycle-email/mjml/node_modules/mjml/bin/mjml'

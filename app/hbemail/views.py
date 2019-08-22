@@ -1,3 +1,5 @@
+import mjml
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from jinja2 import (
@@ -8,11 +10,12 @@ Template as Jinja,
 select_autoescape,
 )
 
+from app.widgets import MjmlExtension
+
 from .models import (BaseTemplate,
 Template,
 TemplateCategory,
-TemplateRegion,
-Region,
+TemplateContent,
 Module,
 ModuleComponent,
 Component,
@@ -21,6 +24,7 @@ Content,
 )
 
 jinjaenv = Environment(
+    extensions=[MjmlExtension],
     loader=FunctionLoader(
         lambda tmpl_name: Template.objects.get(name=tmpl_name).load_template()
         ),

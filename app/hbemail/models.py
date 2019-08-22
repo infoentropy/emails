@@ -1,3 +1,4 @@
+from datetime import datetime,timedelta
 import yaml
 import mistune
 import json
@@ -36,10 +37,12 @@ class Template(MetadataMixin):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     category = models.ForeignKey('TemplateCategory', on_delete=models.CASCADE, null=True, blank=True)
     html = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def load_template(self):
         def outdated(x = None):
-            return False
+            return self.updated > (datetime.now()-timedelta(seconds=30))
         return (self.html, self.name, outdated)
 
     def get_template(self, environment):
@@ -50,25 +53,27 @@ class Template(MetadataMixin):
     def render(self, environment, **kwargs):
         tmpl = self.get_template(environment)
         regiondata = {}
-        for r in self.templateregion_set.all().order_by('region_id', 'order'):
-            region = r.region.name
+        for r in self.templatecontent_set.all().order_by('var_name', 'order'):
+            region = r.var_name
             temp = regiondata.setdefault(region, '')
-            regiondata[region] = temp + ((r.content and r.content._render_data()) or r.html)
+            regiondata[region] = temp + ((r.content and r.content._render_data()) or r.data)
 
         kwargs.update(regiondata)
         return tmpl.render(
             tmpl = self,
             **kwargs)
 
-class Region(MetadataMixin):
-    pass
+# class Region(MetadataMixin):
+#     pass
 
-class TemplateRegion(models.Model):
+class TemplateContent(models.Model):
     order = models.PositiveSmallIntegerField(default=0)
     template = models.ForeignKey(Template, on_delete=models.CASCADE)
-    region = models.ForeignKey(Region, on_delete=models.CASCADE)
     content = models.ForeignKey('Content', on_delete=models.CASCADE, null=True, blank=True)
-    html = models.TextField(blank=True)
+    data = models.TextField(blank=True)
+    # the var in which to inject the content
+    var_name = models.CharField(max_length=255)
+    # region = models.ForeignKey(Region, on_delete=models.CASCADE)
 
 class TemplateCategory(MetadataMixin):
     class Meta:
@@ -113,17 +118,20 @@ class ModuleComponent(models.Model):
 class Content(MetadataMixin):
     MARKDOWN = 'markdown'
     YAML = 'yaml'
-    HTML = 'html'
+    HTML = 'htmlmixed'
+    DJANGO = 'django'
+    MJML = 'mjml'
 
     CONTENT_CHOICES = [
         (MARKDOWN, 'Markdown'),
         (YAML, 'YAML'),
+        (MJML, 'MJML'),
         (HTML, 'HTML')
     ]
 
     # Ex: HEADER component filled with data inside
     component = models.ForeignKey('Component', on_delete=models.CASCADE, blank=True, null=True)
-    # content can extend other content
+    # content can extend other content?
     parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     data = models.TextField(blank=True, null=True)
     data_type = models.CharField(max_length=64, choices=CONTENT_CHOICES, default=MARKDOWN)
@@ -131,11 +139,12 @@ class Content(MetadataMixin):
     def _render_data(self):
         # not a component? it's freeform
         if not self.component:
-            print("MARKDOWN", self)
-            try:
-                return MARKDOWN(self.data)
-            except Exception as e:
-                return ""
+            if self.data_type == MARKDOWN:
+                try:
+                    return MARKDOWN(self.data)
+                except Exception as e:
+                    pass
+            return self.data
         try:
             schema = yaml.safe_load(self.component.schema)
             schema.update(yaml.safe_load(self.data))
