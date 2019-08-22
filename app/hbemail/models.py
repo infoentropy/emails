@@ -42,7 +42,7 @@ class Template(MetadataMixin):
 
     def load_template(self):
         def outdated(x = None):
-            return self.updated > (datetime.now()-timedelta(seconds=30))
+            return self.updated > (datetime.now()-timedelta(seconds=1))
         return (self.html, self.name, outdated)
 
     def get_template(self, environment):
@@ -56,7 +56,7 @@ class Template(MetadataMixin):
         for r in self.templatecontent_set.all().order_by('var_name', 'order'):
             region = r.var_name
             temp = regiondata.setdefault(region, '')
-            regiondata[region] = temp + ((r.content and r.content._render_data()) or r.data)
+            regiondata[region] = temp + ((r.content and r.content._render_data(child_data=r.data)) or r.data)
 
         kwargs.update(regiondata)
         return tmpl.render(
@@ -136,7 +136,7 @@ class Content(MetadataMixin):
     data = models.TextField(blank=True, null=True)
     data_type = models.CharField(max_length=64, choices=CONTENT_CHOICES, default=MARKDOWN)
 
-    def _render_data(self):
+    def _render_data(self, child_data=None):
         # not a component? it's freeform
         if not self.component:
             if self.data_type == MARKDOWN:
@@ -147,7 +147,16 @@ class Content(MetadataMixin):
             return self.data
         try:
             schema = yaml.safe_load(self.component.schema)
+
+            # override tmpl data with Content data
             schema.update(yaml.safe_load(self.data))
+            print(schema)
+            # override tmpl data again with TemplateContent data
+            if child_data:
+                child_data = yaml.safe_load(child_data)
+                schema.update(child_data)
+                print(schema)
+
             tmpl = JinjaTemplate(self.component.markup)
             return tmpl.render(schema)
         except Exception as e:
