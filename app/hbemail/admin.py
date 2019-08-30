@@ -14,7 +14,7 @@ Content,
 )
 from .forms import (
 TemplateForm,
-YamlContentAdminForm,
+ContentAdminForm,
 ComponentAdminForm,
 TemplateContentForm,
 )
@@ -37,11 +37,24 @@ class TemplateAdmin(admin.ModelAdmin):
     model = Template
     form = TemplateForm
     inlines = (TemplateContentInline, )
-    readonly_fields = ('openPreview', )
+    list_display = ('name', 'category', )
+    readonly_fields = ('openPreview', 'publishToIterable', )
+    def publishToIterable(self, obj):
+        if obj and obj.id:
+            url = reverse('publishTemplate', args=(obj.id, ))
+            return format_html('<a href="{}">Publish</a>', url)
+        else:
+            return "Save first"
+    publishToIterable.allow_tags = True
+
     def openPreview(self, obj):
-        url = reverse('template', args=(obj.id, ))
-        return format_html('<a href="{}">Preview</a>', url)
+        if obj and obj.id:
+            url = reverse('viewTemplate', args=(obj.id, ))
+            return format_html('<a href="{}">Preview</a>', url)
+        else:
+            return "Save first"
     openPreview.allow_tags = True
+
 
 
 class ComponentAdmin(admin.ModelAdmin):
@@ -52,18 +65,12 @@ class ComponentAdmin(admin.ModelAdmin):
 
 class ContentAdmin(admin.ModelAdmin):
     model = Content
-    readonly_fields = ('preview', 'sync_to_iterable', )
-    # form = YamlContentAdminForm
-    # filter_horizontal = ('authors',)
+    list_display = ('name', 'component',)
+    readonly_fields = ('preview', )
     def get_form(self, request, obj=None, **kwargs):
-        kwargs['form'] = YamlContentAdminForm
+        kwargs['form'] = ContentAdminForm
         return super().get_form(request, obj, **kwargs)
 
-
-    def sync_to_iterable(self, obj):
-        return format_html('<a href="{}">{}</a>', 'something', 'something')
-
-    sync_to_iterable.allow_tags = True
 
 
 class ModuleAdmin(admin.ModelAdmin):

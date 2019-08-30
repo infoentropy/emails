@@ -1,4 +1,5 @@
 import mjml
+from app import settings
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -39,6 +40,14 @@ def templates(request):
     template = Jinja('{% for a in templates %}<div>{{a.name}}</div>{% endfor %}')
     return HttpResponse(template.render(dict(templates=templates)))
 
-def template(request, id):
+def viewTemplate(request, id):
     tmpl = Template.objects.get(pk=id)
     return HttpResponse(tmpl.render(jinjaenv))
+
+
+def publish(request, id):
+    if not settings.ITERABLE_API_KEY:
+        return HttpResponse("forgot to set iterable api key on environment")
+    tmpl = Template.objects.get(pk=id)
+    response = tmpl.publish(jinjaenv)
+    return HttpResponse(response.status_code)

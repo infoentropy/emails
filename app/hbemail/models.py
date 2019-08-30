@@ -1,15 +1,15 @@
-from datetime import datetime,timedelta
 import yaml
 import mistune
 import json
+
 from jinja2 import (
 Template as JinjaTemplate,
 )
-
-
+from datetime import datetime,timedelta
 from django.db import models
+from .utils import send_to_iterable
 
-MARKDOWN = mistune.Markdown()
+RENDER_MARKDOWN = mistune.Markdown()
 
 """
 Template
@@ -39,6 +39,8 @@ class Template(MetadataMixin):
     html = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    subject = models.CharField(max_length=256)
+    preheaderText = models.CharField(max_length=256)
 
     def load_template(self):
         def outdated(x = None):
@@ -50,12 +52,18 @@ class Template(MetadataMixin):
             self.parent.load_template()
         return environment.get_template(self.name)
 
+    def publish(self, environment, **kwargs):
+        # publish to iterable.
+        payload = self.render(environment)
+        return send_to_iterable(payload)
+
     def render(self, environment, **kwargs):
         tmpl = self.get_template(environment)
         regiondata = {}
         for r in self.templatecontent_set.all().order_by('var_name', 'order'):
             region = r.var_name
             temp = regiondata.setdefault(region, '')
+            # print(r.data)
             regiondata[region] = temp + ((r.content and r.content._render_data(child_data=r.data)) or r.data)
 
         kwargs.update(regiondata)
@@ -115,6 +123,9 @@ class ModuleComponent(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     component = models.ForeignKey(Component, on_delete=models.CASCADE)
 
+class Campaign(MetadataMixin):
+    pass
+
 class Content(MetadataMixin):
     MARKDOWN = 'markdown'
     YAML = 'yaml'
@@ -138,28 +149,26 @@ class Content(MetadataMixin):
 
     def _render_data(self, child_data=None):
         # not a component? it's freeform
-        if not self.component:
-            if self.data_type == MARKDOWN:
-                try:
-                    return MARKDOWN(self.data)
-                except Exception as e:
-                    pass
+        if self.data_type == self.MARKDOWN:
+            try:
+                return RENDER_MARKDOWN(child_data or self.data)
+            except Exception as e:
+                return "Markdown error: %s" % e
             return self.data
-        try:
-            schema = yaml.safe_load(self.component.schema)
-
-            # override tmpl data with Content data
-            schema.update(yaml.safe_load(self.data))
-            print(schema)
-            # override tmpl data again with TemplateContent data
-            if child_data:
-                child_data = yaml.safe_load(child_data)
-                schema.update(child_data)
-                print(schema)
-
-            tmpl = JinjaTemplate(self.component.markup)
-            return tmpl.render(schema)
-        except Exception as e:
+        elif self.component:
+            try:
+                schema = yaml.safe_load(self.component.schema)
+                # override tmpl data with Content data
+                schema.update(yaml.safe_load(self.data))
+                # override tmpl data again with TemplateContent data
+                if child_data:
+                    child_data = yaml.safe_load(child_data)
+                    schema.update(child_data)
+                tmpl = JinjaTemplate(self.component.markup)
+                return tmpl.render(schema)
+            except Exception as e:
+                return self.data
+        else:
             return self.data
 
     preview = property(_render_data)

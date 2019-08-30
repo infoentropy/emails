@@ -18,7 +18,12 @@ class MjmlExtension(Extension):
         return nodes.CallBlock(self.call_method('_mjml'), [], [], body).set_lineno(lineno)
 
     def _mjml(self, caller):
-        return mjml_render(caller())
+        try:
+            foo = mjml_render(caller())
+            return foo
+        except Exception as e:
+            raise e
+
 
 class CodeEditor(forms.Textarea):
     def __init__(self, *args, **kwargs):

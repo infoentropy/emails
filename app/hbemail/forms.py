@@ -33,7 +33,7 @@ class TemplateForm(ModelForm):
         }
 
 
-class YamlContentForm(ModelForm):
+class ContentForm(ModelForm):
     class Meta:
         fields = '__all__'
         widgets = {
@@ -53,8 +53,7 @@ class YamlContentForm(ModelForm):
             self.initial['data'] = self.instance.data or self.instance.component.schema
 
 TemplateContentAdminForm = modelform_factory(TemplateContent, form=TemplateContentForm)
-YamlContentAdminForm = modelform_factory(Content, form=YamlContentForm)
-# MarkdownContentAdminForm = modelform_factory(Content, form=MarkdownContentForm)
+ContentAdminForm = modelform_factory(Content, form=ContentForm)
 
 # https://mrcoffee.io/blog/code-editor-django-admin
 class ComponentAdminForm(ModelForm):

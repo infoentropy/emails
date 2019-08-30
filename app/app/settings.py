@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os
+import os,sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -130,3 +130,4 @@ STATICFILES_DIRS = [
 
 MJML_BACKEND_MODE = 'cmd'
 MJML_EXEC_CMD = '/Users/jlee/work/lifecycle-email/mjml/node_modules/mjml/bin/mjml'
+ITERABLE_API_KEY = os.environ.get('ITERABLE_API_KEY', None)
