@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <url>http://localhost:8000/campaigns/1/</url>
+    <name>Sample Campaign</name>
+    <subject>This is the subject</subject>
+    <preheaderText>This is something else.</preheaderText>
+    <iterablecampaignsnippet_set>
+        <list-item>
+            <data>
+                <bg_color>#000000</bg_color>
+                <bg_image>https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/b215951a136f423a9cbb19359fcccb0a/new%20template%20-%20bg%20images/19-06-30_beach-sunset2.jpg</bg_image>
+                <icon_image></icon_image>
+                <icon_link></icon_link>
+                <preheader>Something really great</preheader>
+                <padding>10px 20px 10px 20px</padding>
+                <bg_position>bottom center</bg_position>
+                <coupon_code>CODE</coupon_code>
+                <cta_text>Get it Now</cta_text>
+                <expires_text>EXPIRES TOMORROW</expires_text>
+                <body>&lt;p&gt;THIS IS THE BEST I CAN DO&lt;/p&gt;
+&lt;p&gt;wow it is great&lt;/p&gt;</body>
+            </data>
+            <snippet>
+                <name>component - discount header</name>
+            </snippet>
+        </list-item>
+        <list-item>
+            <data>
+                <bg_image>https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/b215951a136f423a9cbb19359fcccb0a/Content-Headers/Sleep-Stories/Content/bg.jpg</bg_image>
+                <bg_color>##446740</bg_color>
+                <avatar_image>https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/b215951a136f423a9cbb19359fcccb0a/Content-Headers/Sleep-Stories/Content/sleep-feature.png</avatar_image>
+                <avatar_link>https://www.calm.com/sleep</avatar_link>
+                <icon_image></icon_image>
+                <icon_link></icon_link>
+                <icon_image_visible>True</icon_image_visible>
+                <preheader>THIS IS THE PREHEADER</preheader>
+                <bg_position>bottom center</bg_position>
+                <feature_type>sleep</feature_type>
+            </data>
+            <snippet>
+                <name>component - content feature header</name>
+            </snippet>
+        </list-item>
+        <list-item>
+            <data>
+                <height>50</height>
+            </data>
+            <snippet>
+                <name>component - spacer</name>
+            </snippet>
+        </list-item>
+        <list-item>
+            <data>
+                <color>calm-blue</color>
+                <text>YOUR TEXT</text>
+                <link>https://www.calm.com/meditate</link>
+                <width>220</width>
+            </data>
+            <snippet>
+                <name>component - button</name>
+            </snippet>
+        </list-item>
+        <list-item>
+            <data>
+                <color>blue</color>
+            </data>
+            <snippet>
+                <name>component - large divider</name>
+            </snippet>
+        </list-item>
+        <list-item>
+            <data>
+                <color>blue</color>
+                <text>Do This Now</text>
+                <link>https://www.calm.com/meditate</link>
+                <width>220</width>
+            </data>
+            <snippet>
+                <name>component - button</name>
+            </snippet>
+        </list-item>
+    </iterablecampaignsnippet_set>
+</root>
