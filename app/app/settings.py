@@ -25,11 +25,19 @@ SECRET_KEY = 'qk*awy^mk&cn07_ed$o+pn#d6)6yd#1@*60sr@81cdm^3z5!uw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['273109a6.ngrok.io', 'localhost']
+ALLOWED_HOSTS = ['a6a5727b.ngrok.io', 'localhost']
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework_xml.parsers.XMLParser',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework_xml.renderers.XMLRenderer',
+    ),
 }
 
 # Application definition
@@ -44,6 +52,7 @@ INSTALLED_APPS = [
     'mjml',
     'hbemail',
     'iterablegen',
+    'rest_framework_xml',
     'rest_framework',
 ]
 
