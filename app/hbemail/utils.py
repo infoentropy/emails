@@ -1,6 +1,7 @@
-from app import settings
 import requests
 
+from app import settings
+from app.widgets import MjmlExtension
 from jinja2 import (
 BaseLoader,
 Environment,

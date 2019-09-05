@@ -4,12 +4,30 @@ import json
 
 from jinja2 import (
 Template as JinjaTemplate,
+Environment as JinjaEnvironment,
+FunctionLoader,
 )
 from datetime import datetime,timedelta
 from django.db import models
-from .utils import send_to_iterable
+from .utils import (
+    send_to_iterable,
+)
+
+iterableEnviron = JinjaEnvironment(
+    variable_start_string="[[",
+    variable_end_string="]]",
+    loader=FunctionLoader(
+        lambda tmpl_name: Component.objects.get(name=tmpl_name).load_template()
+        ),
+)
 
 RENDER_MARKDOWN = mistune.Markdown()
+MARKDOWN = 'markdown'
+YAML = 'yaml'
+HTML = 'htmlmixed'
+DJANGO = 'django'
+MJML = 'mjml'
+ITERABLE = 'iterable' #iterable snippet
 
 """
 Template
@@ -97,10 +115,19 @@ class ComponentSchema(MetadataMixin):
     pass
 
 class Component(MetadataMixin):
-    # it's a HEADER/BODY/FOOTER element
+    MARKUP_CHOICES = [
+        (MARKDOWN, 'Markdown'),
+        (MJML, 'MJML'),
+        (HTML, 'HTML'),
+        (ITERABLE, 'Iterable')
+    ]
+
     category = models.ForeignKey('ComponentCategory', on_delete=models.CASCADE)
     schema = models.TextField(blank=True, null=True)
     markup = models.TextField(blank=True, null=True)
+    markup_type = models.CharField(max_length=64, choices=MARKUP_CHOICES, default=MARKDOWN)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def _pretty_json(self):
         try:
@@ -111,6 +138,32 @@ class Component(MetadataMixin):
     def _to_json(self):
         return yaml.safe_load(self.schema)
 
+    # for jinja
+    def load_template(self):
+        def outdated(x = None):
+            return self.updated > (datetime.now()-timedelta(seconds=1))
+        return (self.markup, self.name, outdated)
+
+
+    def render(self):
+        data = self._to_json()
+        if self.markup_type == MARKDOWN:
+            try:
+                return RENDER_MARKDOWN(data)
+            except Exception as e:
+                return "Markdown error: %s" % e
+            return self.data
+        if self.markup_type == ITERABLE:
+            try:
+                tmpl = iterableEnviron.get_template(self.name)
+                return tmpl.render(data)
+            except Exception as e:
+                return "Iterable render error %s" % e
+        else:
+            # raw jinja no special config or env
+            tmpl = JinjaTemplate(self.markup)
+            return tmpl.render(data)
+
     json = property(_to_json)
     pretty_json = property(_pretty_json)
 
@@ -118,57 +171,63 @@ class Module(MetadataMixin):
     # Narrator Header
     components = models.ManyToManyField(Component, through='ModuleComponent')
 
-
 class ModuleComponent(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE)
     component = models.ForeignKey(Component, on_delete=models.CASCADE)
 
-class Campaign(MetadataMixin):
-    pass
-
 class Content(MetadataMixin):
-    MARKDOWN = 'markdown'
-    YAML = 'yaml'
-    HTML = 'htmlmixed'
-    DJANGO = 'django'
-    MJML = 'mjml'
-
     CONTENT_CHOICES = [
         (MARKDOWN, 'Markdown'),
         (YAML, 'YAML'),
         (MJML, 'MJML'),
-        (HTML, 'HTML')
+        (HTML, 'HTML'),
+        (ITERABLE, 'Iterable'),
+        ('inherit', 'Inherit')
     ]
 
-    # Ex: HEADER component filled with data inside
     component = models.ForeignKey('Component', on_delete=models.CASCADE, blank=True, null=True)
-    # content can extend other content?
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     data = models.TextField(blank=True, null=True)
-    data_type = models.CharField(max_length=64, choices=CONTENT_CHOICES, default=MARKDOWN)
+    data_type = models.CharField(max_length=64, choices=CONTENT_CHOICES, default='inherit')
+
+    def _load_yaml(self, child_data=None):
+        try:
+            schema = yaml.safe_load(self.component.schema)
+            # override tmpl data with Content data
+            schema.update(yaml.safe_load(self.data))
+            # override tmpl data again with TemplateContent data
+            if child_data:
+                child_data = yaml.safe_load(child_data)
+                schema.update(child_data)
+            return schema
+        except Exception as e:
+            return self.data
 
     def _render_data(self, child_data=None):
         # not a component? it's freeform
-        if self.data_type == self.MARKDOWN:
+        if self.data_type == MARKDOWN:
             try:
                 return RENDER_MARKDOWN(child_data or self.data)
             except Exception as e:
                 return "Markdown error: %s" % e
             return self.data
         elif self.component:
-            try:
-                schema = yaml.safe_load(self.component.schema)
-                # override tmpl data with Content data
-                schema.update(yaml.safe_load(self.data))
-                # override tmpl data again with TemplateContent data
-                if child_data:
-                    child_data = yaml.safe_load(child_data)
-                    schema.update(child_data)
+            data = self._load_yaml(child_data=None)
+            if self.data_type == ITERABLE:
+                tmpl = iterableEnviron.get_template(self.component.name)
+                return tmpl.render(data)
+            else:
                 tmpl = JinjaTemplate(self.component.markup)
-                return tmpl.render(schema)
-            except Exception as e:
-                return self.data
+                return tmpl.render(data)
         else:
             return self.data
 
     preview = property(_render_data)
+
+class CampaignContent(models.Model):
+    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE)
+    content = models.ForeignKey('Content', on_delete=models.CASCADE, null=True, blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    data = models.TextField(blank=True)
+
+class Campaign(MetadataMixin):
+    campaign_id = models.CharField(max_length=64)
