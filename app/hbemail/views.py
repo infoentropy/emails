@@ -24,6 +24,7 @@ ComponentCategory,
 Content,
 )
 
+
 jinjaenv = Environment(
     extensions=[MjmlExtension],
     loader=FunctionLoader(

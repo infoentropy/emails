@@ -61,7 +61,7 @@ class ComponentAdmin(admin.ModelAdmin):
     model = Component
     form = ComponentAdminForm
     list_display = ('name', 'category',)
-    readonly_fields = ('pretty_json', )
+    readonly_fields = ('pretty_json', 'render')
 
 class ContentAdmin(admin.ModelAdmin):
     model = Content

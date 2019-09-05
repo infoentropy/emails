@@ -37,13 +37,15 @@ class CodeEditor(forms.Textarea):
             )
         }
         js = (
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/codemirror.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/xml/xml.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/jinja2/jinja2.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/htmlmixed/htmlmixed.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/django/django.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/yaml/yaml.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0/mode/markdown/markdown.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/codemirror.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/xml/xml.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/jinja2/jinja2.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/htmlmixed/htmlmixed.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/django/django.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/yaml/yaml.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/markdown/markdown.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/addon/mode/simple.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/handlebars/handlebars.js',
             '/static/codemirror.js'
         )
 
