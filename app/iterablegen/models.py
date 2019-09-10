@@ -37,14 +37,39 @@ class IterableCampaignSnippet(models.Model):
     order = models.PositiveSmallIntegerField(default=0)
     data = models.TextField(blank=True, null=True)
 
+    def load_data(self):
+        return yaml.safe_load(self.data) or {}
+
+    def load_schema(self):
+        if self.snippet.schema:
+            return yaml.safe_load(self.snippet.schema)
+        return {}
+
+    @property
+    def snippet_args(self):
+        schema = self.load_schema()
+        if schema:
+            data = self.load_data()
+            schema.update(data)
+            snippety = ["%s=\"%s\"" % (key, val or '') for key,val in schema.items()]
+            return "\n".join(snippety)
+        return ''
 
 class IterableSnippet(MetadataMixin):
     schema = models.TextField(blank=True, null=True)
     markup = models.TextField(blank=True, null=True)
+    needsWrap = models.BooleanField(default=False)
 
 class IterableCampaign(MetadataMixin):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('published', 'Published')
+    ]
     subject = models.CharField(max_length=256)
     preheaderText = models.CharField(max_length=256)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=128, default='draft')
+    category = models.ForeignKey('IterableCampaignCategory', on_delete=None, blank=True, null=True)
+    campaignId = models.CharField(max_length=32, null=True, blank=True)
 
     def openPreview(self, obj):
         if obj and obj.id:
@@ -53,3 +78,11 @@ class IterableCampaign(MetadataMixin):
         else:
             return "Save first"
     openPreview.allow_tags = True
+
+    @property
+    def sorted_snippet_set(self):
+        return self.iterablecampaignsnippet_set.order_by('order')
+
+class IterableCampaignCategory(MetadataMixin):
+    class Meta:
+        verbose_name_plural = "IterableCampaignCategories"

@@ -1,0 +1,20 @@
+{% load rest_framework %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{{var}}</title>
+</head>
+<body>
+<pre>
+{% templatetag openvariable %}{ snippet "wrapper - open" button_color="calm-blue green blue red" }{% templatetag closevariable %}
+{% for f in campaign.sorted_snippet_set %}{% if f.snippet.needsWrap %}{% templatetag openvariable %}#assign "body"{% templatetag closevariable %}
+{% templatetag openvariable %}{ snippet '{{f.snippet.name}}' {{f.snippet_args}} }{% templatetag closevariable %}
+{% templatetag openvariable %}/assign{% templatetag closevariable %}
+{% templatetag openvariable %}{ snippet 'wrapper - table center' body=body}{% templatetag closevariable %}
+{% else %}
+{% templatetag openvariable %}{ snippet '{{f.snippet.name}}' {{f.snippet_args}} }{% templatetag closevariable %}{% endif %}
+{% endfor %}
+{% templatetag openvariable %}{ snippet "wrapper - close" }{% templatetag closevariable %}
+</pre>
+</body>
+</html>
