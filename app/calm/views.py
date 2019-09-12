@@ -91,15 +91,27 @@ class GuideEmailCampaignViewSet(viewsets.ModelViewSet):
         fudge = []
         fudge.append("""{{{ snippet "wrapper - open" button_color="calm-blue green blue red" }}}""")
         for b in data['iterablecampaignsnippet_set']:
+            # set up snippet args
+            bdata = b['data']
+            body = bdata.get('body')
+            description = bdata.get('description')
+            if body:
+                fudge.append("""{{#assign "body"}}%s{{/assign}}""" % body.strip())
+            if description:
+                fudge.append("""{{#assign "description"}}%s{{/assign}}""" % description.strip())
             snippety = []
-            for key,val in b['data'].items():
+            for key,val in bdata.items():
                 if isinstance(val, str):
                     val = val.replace('\n', '')
                 if key in ["body", "description"]:
-                    snippety.append("%s='%s'" % (key, val or ''))
+                    snippety.append("%s=%s" % (key, key))
                 else:
                     snippety.append("%s=\"%s\"" % (key, val or ''))
-
-            fudge.append("""{{{ snippet "%s" %s }}}""" % (b['snippet']['name'], "\n".join(snippety)))
+            foo = """{{{ snippet "%s" %s }}}""" % (b['snippet']['name'], "\n".join(snippety))
+            if b['snippet']['needsWrap']:
+                fudge.append("""{{#assign "wrappee"}}%s{{/assign}}""" % foo)
+                fudge.append("""{{{ snippet "wrapper - table center" body=wrappee}}}""")
+            else:
+                fudge.append(foo)
         fudge.append("""{{{ snippet "wrapper - close" }}}""")
         return Response({"text":"\n".join(fudge)})

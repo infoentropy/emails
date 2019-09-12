@@ -26,7 +26,7 @@ SECRET_KEY = 'qk*awy^mk&cn07_ed$o+pn#d6)6yd#1@*60sr@81cdm^3z5!uw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['7c3db2bd.ngrok.io', 'localhost']
+ALLOWED_HOSTS = ['cd14761b.ngrok.io', 'localhost']
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

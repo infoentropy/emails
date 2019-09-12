@@ -103,7 +103,9 @@ class GuideEmailCampaignAdmin(admin.ModelAdmin):
             path('<int:id>/publicpreview',
             self.preview,
             name='preview'),
-
+            path('<int:id>/snippet',
+            self.admin_site.admin_view(self.snippet),
+            name='snippet'),
         ]
         return my_urls + urls
 
@@ -138,10 +140,12 @@ class GuideEmailCampaignAdmin(admin.ModelAdmin):
             program=program,
             nextguide=nextguide))
 
-    def snippet(self, request, guide_id):
-        guide = Guide.objects.get(guide_id=guide_id)
+    def snippet(self, request, id):
+        # guide = Guide.objects.get(guide_id=guide_id)
         # calm.models.GuideEmailCampaign.objects.filter(guide__id=g.id).first()
-        obj = self.model.objects.filter(guide__id=guide.id).first()
+        # obj = self.model.objects.filter(guide__id=guide.id).first()
+        obj = self.model.objects.filter(pk=id)
+        guide = obj.guide
         program = guide.program
         overrides = yaml.safe_load(obj.data)
         obj.iterablegen_campaign
