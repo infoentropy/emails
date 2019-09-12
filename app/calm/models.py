@@ -2,7 +2,10 @@ from django.db import models
 import logging
 logger = logging.getLogger(__name__)
 
+
 from .utils import CalmAPI
+from iterablegen.models import IterableCampaign
+
 CALM_API_CLIENT = CalmAPI()
 
 LANGUAGE = [
@@ -83,6 +86,7 @@ class Guide(CalmModel):
     short_title = models.CharField(max_length=256)
     title = models.CharField(max_length=256)
     type = models.CharField(default="audio", max_length=32)
+    data = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return "%s: %s (%s)" % (self.program.title, self.title, self.position)
@@ -118,12 +122,15 @@ class GuideEmailCampaign(models.Model):
         ('markdown', 'markdown'),
     )
 
+    def __str__(self):
+        return "%s: %s (%s)" % (self.guide.program.title, self.guide.title, self.guide.position)
+
     guide = models.ForeignKey('Guide', on_delete=models.CASCADE)
-    format = models.CharField(default='markdown', max_length=32, choices=FORMAT_CHOICES, blank=True, null=True)
+    format = models.CharField(default='yaml', max_length=32, choices=FORMAT_CHOICES, blank=True, null=True)
     data = models.TextField(blank=True, null=True)
     test = models.TextField(blank=True, null=True)
-
-
+    iterable_campaign_id = models.CharField(max_length=32, null=True, blank=True)
+    iterablegen_campaign = models.ForeignKey(IterableCampaign, null=True, blank=True, on_delete=None)
     @property
     def render(self):
         pass

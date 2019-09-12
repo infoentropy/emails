@@ -1,13 +1,20 @@
 import json
+import yaml
 import logging
+
 logger = logging.getLogger(__name__)
+
+from jinja2 import Template
 
 from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse, path
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-
 from app.widgets import CodeEditor
+from iterablegen.serializers import IterableCampaignSerializer
+from rest_framework.renderers import JSONRenderer
+
+
 from .models import (
     Program,
     Guide,
@@ -18,7 +25,8 @@ from .serializers import (
     GuideSerializer,
     GuideEmailCampaignSerializer)
 from .forms import (
-    GuideEmailCampaignForm
+    GuideEmailCampaignForm,
+    GuideForm
 )
 from .utils import CalmAPI
 
@@ -78,11 +86,66 @@ class ProgramAdmin(admin.ModelAdmin):
 class GuideAdmin(admin.ModelAdmin):
     model = Guide
     list_display = ['title', 'deeplink', 'parent_title']
-
     inlines = [GuideEmailCampaignInlineAdmin]
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs['form'] = GuideForm
+        return super().get_form(request, obj, **kwargs)
 
 class GuideEmailCampaignAdmin(admin.ModelAdmin):
     model = GuideEmailCampaign
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            path('<int:id>/preview',
+            self.admin_site.admin_view(self.preview),
+            name='preview'),
+            path('<int:id>/publicpreview',
+            self.preview,
+            name='preview'),
+
+        ]
+        return my_urls + urls
+
+    # this will hack the format into something that Iterable
+    # can consume. A bit cludgy.
+    def preview(self, request, id):
+        obj = self.model.objects.get(pk=id)
+        guide = obj.guide
+        program = guide.program
+        overrides = yaml.safe_load(obj.data)
+        tmp = IterableCampaignSerializer(obj.iterablegen_campaign, context={'request':request})
+        usabledata = json.loads(JSONRenderer().render(tmp.data))
+        for idx, snippet in enumerate(usabledata['iterablecampaignsnippet_set']):
+            orig = snippet['data']
+            orig.update(overrides[idx])
+            snippet['data'] = orig
+            usabledata['iterablecampaignsnippet_set'][idx] = snippet
+        temp = usabledata['iterablecampaignsnippet_set']
+        usabledata['iterablecampaignsnippet_set']= {'list-item':temp}
+        root = {"root":usabledata}
+        t = Template(json.dumps(root))
+        nextguide = None
+        if program.meditation_type == 'sequential':
+            currentPosition = int(guide.position)
+            nextPosition = currentPosition+1
+            try:
+                nextguide = program.guide_set.get(position=nextPosition)
+            except:
+                logger.info("position %s not here" % nextPosition)
+        return HttpResponse(t.render(
+            guide=guide,
+            program=program,
+            nextguide=nextguide))
+
+    def snippet(self, request, guide_id):
+        guide = Guide.objects.get(guide_id=guide_id)
+        # calm.models.GuideEmailCampaign.objects.filter(guide__id=g.id).first()
+        obj = self.model.objects.filter(guide__id=guide.id).first()
+        program = guide.program
+        overrides = yaml.safe_load(obj.data)
+        obj.iterablegen_campaign
+        return HttpResponse(obj.iterablegen_campaign)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'program':

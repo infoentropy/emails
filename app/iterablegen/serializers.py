@@ -11,7 +11,7 @@ from .models import (
 class IterableSnippetSerializer(serializers.ModelSerializer):
     class Meta:
         model = IterableSnippet
-        fields = ['name']
+        fields = ['name', 'needsWrap']
 
 
 class IterableCampaignSnippetSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class IterableCampaignSnippetSerializer(serializers.ModelSerializer):
         except Exception as e:
             raise e
 
-class IterableCampaignSerializer(serializers.HyperlinkedModelSerializer):
+class IterableCampaignSerializer(serializers.ModelSerializer):
     iterablecampaignsnippet_set = serializers.SerializerMethodField()
 
     class Meta:
