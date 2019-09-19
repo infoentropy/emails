@@ -27,10 +27,14 @@ class CalmModel(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.title
+        return self.title or ''
 
     def fetch(self):
         raise Exception("You need to define a fetch() for your class")
+
+    def translate_api_for_serializer(id, data):
+        # You need to define this for your model.
+        raise Exception("You need to define translate_api_for_serializer() for your class")
 
     def sync(self, serializer, data=None):
         """
@@ -104,10 +108,6 @@ class Guide(CalmModel):
     def deeplink(self):
         return "https://www.calm.com/player/%s" % self.guide_id
 
-    @property
-    def parent_title(self):
-        return self.program.title
-
     def fetch(self):
         data = CALM_API_CLIENT.get('/programs/guides/%s' % self.guide_id)
         for g in data['guides']:
@@ -131,6 +131,7 @@ class GuideEmailCampaign(models.Model):
     test = models.TextField(blank=True, null=True)
     iterable_campaign_id = models.CharField(max_length=32, null=True, blank=True)
     iterablegen_campaign = models.ForeignKey(IterableCampaign, null=True, blank=True, on_delete=None)
+
     @property
     def render(self):
         pass

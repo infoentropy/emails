@@ -1,3 +1,4 @@
+import yaml
 import logging
 logger = logging.getLogger(__name__)
 
@@ -40,12 +41,14 @@ class GuideSerializer(serializers.ModelSerializer):
         model = Guide
         fields = '__all__'
 
-
     def create(self, validated_data):
         g = Guide(**validated_data)
         g.save()
         logger.info("serializer: create guide")
         return g
+
+    def yaml_data(self):
+        return yaml.dump_all(self.data)
 
     def update(self, instance, validated_data):
         instance.duration = validated_data.get('duration', instance.guide_id)
@@ -56,6 +59,7 @@ class GuideSerializer(serializers.ModelSerializer):
         instance.short_title = validated_data.get('short_title', instance.short_title)
         instance.title = validated_data.get('title', instance.title)
         instance.type = validated_data.get('type', instance.type)
+        # instance.data = self.yaml_data()
         instance.save()
         logging.info("serializer: update guide")
         return instance

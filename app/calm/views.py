@@ -64,13 +64,14 @@ class GuideEmailCampaignViewSet(viewsets.ModelViewSet):
         obj = self.get_object()
         guide = obj.guide
         program = guide.program
-        overrides = yaml.safe_load(obj.data)
+        overrides = yaml.safe_load(obj.data or "")
         tmp = IterableCampaignSerializer(obj.iterablegen_campaign, context={'request':request})
         usabledata = json.loads(JSONRenderer().render(tmp.data))
         logger.debug(json.dumps(usabledata, indent=2))
         for idx, snippet in enumerate(usabledata['iterablecampaignsnippet_set']):
             orig = snippet['data']
-            orig.update(overrides[idx])
+            if overrides:
+                orig.update(overrides[idx])
             snippet['data'] = orig
             usabledata['iterablecampaignsnippet_set'][idx] = snippet
         nextguide = None

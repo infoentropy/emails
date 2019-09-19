@@ -44,7 +44,7 @@ class GuideEmailCampaignInlineAdmin(admin.StackedInline):
 class ProgramAdmin(admin.ModelAdmin):
     model = Program
     inlines = [GuideInlineAdmin]
-    # readonly_fields = ['import_program_link', ]
+    readonly_fields = ['import_program_link', ]
 
     def get_urls(self):
         urls = super().get_urls()
@@ -55,6 +55,13 @@ class ProgramAdmin(admin.ModelAdmin):
         ]
         return my_urls + urls
 
+    def import_program_link(self, obj):
+        if obj and obj.id:
+            # url = reverse('admin_import', args=(obj.id, ))
+            return format_html('<a href="{}">Import</a>', '../import')
+        else:
+            return "Save first"
+    import_program_link.allow_tags = True
 
     def import_program_view(self, request, id):
         context = dict(self.admin_site.each_context(request))
@@ -85,14 +92,50 @@ class ProgramAdmin(admin.ModelAdmin):
 
 class GuideAdmin(admin.ModelAdmin):
     model = Guide
-    list_display = ['title', 'deeplink', 'parent_title']
-    inlines = [GuideEmailCampaignInlineAdmin]
+    list_display = ['title', 'program_title', 'program_id', 'a_deeplink']
+    fields = ['title', 'program', 'guide_id', 'a_deeplink', 'position', 'yaml_data', 'data', ]
+    readonly_fields = ['title', 'a_deeplink', 'guide_id', 'yaml_data', 'program', 'position']
+    inlines = []
+
+
     def get_form(self, request, obj=None, **kwargs):
         kwargs['form'] = GuideForm
         return super().get_form(request, obj, **kwargs)
 
+    def program_title(self, obj):
+        return format_html('<a href="{}">{}</a>', reverse('admin:calm_program_change', args=(obj.program.id,)), obj.program.title)
+    program_title.allow_tags = True
+    program_title.short_description = "Program"
+
+    def program_id(self, obj):
+        return format_html('<a target="api" href="https://api.app.aws-prod.useast1.calm.com/programs/{}">{}</a>', obj.program.program_id, obj.program.program_id)
+    program_id.allow_tags = True
+    program_id.short_description = "API Link"
+
+    def a_deeplink(self, obj):
+        return format_html('<a href="{}">{}</a>', obj.deeplink, obj.deeplink)
+    a_deeplink.allow_tags = True
+    a_deeplink.short_description = "Player Link"
+
+    def yaml_data(self, obj):
+        from .serializers import (GuideSerializer)
+        g = dict(GuideSerializer(obj).data)
+        g['link'] = obj.deeplink
+        g['content_type'] = obj.program.meditation_type
+        g['description'] = obj.program.description
+        g['image'] = obj.program.titled_background_image
+        g['bg_image'] = obj.program.background_image
+        for k in ['id', 'duration', 'data', 'guide_id', 'language', 'position', 'program', 'short_title', 'type']:
+            g.pop(k)
+        return format_html('<pre style="background-color:#efefef;">{}</pre>', yaml.dump(g))
+    yaml_data.allow_tags = True
+    yaml_data.short_description = "Common YAML"
+
+
 class GuideEmailCampaignAdmin(admin.ModelAdmin):
     model = GuideEmailCampaign
+    readonly_fields = ['mylink', ]
+    extra = 0
 
     def get_urls(self):
         urls = super().get_urls()
@@ -109,6 +152,15 @@ class GuideEmailCampaignAdmin(admin.ModelAdmin):
         ]
         return my_urls + urls
 
+    def mylink(self, obj):
+        if obj and obj.id:
+            return format_html('<a href="{}" target="render">Show snippets</a>',
+                        reverse('email-render', args=[obj.id]))
+        else:
+            return "Save first"
+    mylink.allow_tags = True
+
+
     # this will hack the format into something that Iterable
     # can consume. A bit cludgy.
     def preview(self, request, id):
@@ -120,7 +172,8 @@ class GuideEmailCampaignAdmin(admin.ModelAdmin):
         usabledata = json.loads(JSONRenderer().render(tmp.data))
         for idx, snippet in enumerate(usabledata['iterablecampaignsnippet_set']):
             orig = snippet['data']
-            orig.update(overrides[idx])
+            if overrides:
+                orig.update(overrides[idx])
             snippet['data'] = orig
             usabledata['iterablecampaignsnippet_set'][idx] = snippet
         temp = usabledata['iterablecampaignsnippet_set']

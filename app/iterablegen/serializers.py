@@ -1,4 +1,6 @@
 import yaml
+import logging
+logger = logging.getLogger(__name__)
 
 from rest_framework import serializers
 
@@ -24,8 +26,11 @@ class IterableCampaignSnippetSerializer(serializers.ModelSerializer):
 
     def get_data(self, instance):
         try:
-            foo = yaml.safe_load(instance.data)
-            return foo or {}
+            logging.debug(instance.snippet.name)
+            schema = yaml.safe_load(instance.snippet.schema) or {}
+            foo = yaml.safe_load(instance.data) or {}
+            schema.update(foo)
+            return schema or {}
         except Exception as e:
             raise e
 
