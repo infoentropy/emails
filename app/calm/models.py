@@ -93,7 +93,7 @@ class Guide(CalmModel):
     data = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return "%s: %s (%s)" % (self.program.title, self.title, self.position)
+        return "%s / %s (%s) / %s" % (self.title, self.program.title, self.position, self.guide_id)
 
     """
     need to map the CALM id into a field otherwise collision with Django ID
@@ -103,6 +103,10 @@ class Guide(CalmModel):
         data['guide_id'] = data['id']
         data['id'] = id
         return data
+
+    @property
+    def image(self):
+        return self.program.titled_background_image
 
     @property
     def deeplink(self):

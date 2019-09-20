@@ -32,10 +32,17 @@ class MetadataMixin(models.Model):
 
 # Create your models here.
 class IterableCampaignSnippet(models.Model):
+    class Meta:
+        ordering = ['campaign', 'order', ]
+
     campaign = models.ForeignKey('IterableCampaign', on_delete=models.CASCADE)
-    snippet = models.ForeignKey('IterableSnippet', on_delete=models.CASCADE)
+    snippet = models.ForeignKey('IterableSnippet', on_delete=models.CASCADE, related_name='snippets')
+    guide = models.ForeignKey('calm.Guide', blank=True, null=True, on_delete=models.CASCADE)
     order = models.PositiveSmallIntegerField(default=0)
     data = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return "{} {} {}".format(self.campaign.name, self.snippet.name, self.order)
 
     def load_data(self):
         return yaml.safe_load(self.data) or {}
@@ -55,6 +62,13 @@ class IterableCampaignSnippet(models.Model):
             return "\n".join(snippety)
         return ''
 
+
+class OrderedIterableCampaignSnippet(IterableCampaignSnippet):
+    # https://docs.djangoproject.com/en/dev/topics/db/models/#proxy-models
+    class Meta:
+        proxy = True
+        ordering = ['order', ]
+
 class IterableSnippet(MetadataMixin):
     schema = models.TextField(blank=True, null=True)
     markup = models.TextField(blank=True, null=True)
@@ -70,18 +84,11 @@ class IterableCampaign(MetadataMixin):
     status = models.CharField(choices=STATUS_CHOICES, max_length=128, default='draft')
     category = models.ForeignKey('IterableCampaignCategory', on_delete=None, blank=True, null=True)
     campaignId = models.CharField(max_length=32, null=True, blank=True)
+    snippets = models.ManyToManyField('IterableSnippet', through='IterableCampaignSnippet')
 
-    def openPreview(self, obj):
-        if obj and obj.id:
-            url = reverse('preview', args=(obj.id, ))
-            return format_html('<a href="{}">Preview</a>', url)
-        else:
-            return "Save first"
-    openPreview.allow_tags = True
+    def get_snippets(self):
+        return self.snippets.order_by('snipets__order')
 
-    @property
-    def sorted_snippet_set(self):
-        return self.iterablecampaignsnippet_set.order_by('order')
 
 class IterableCampaignCategory(MetadataMixin):
     class Meta:

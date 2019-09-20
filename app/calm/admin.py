@@ -1,12 +1,11 @@
 import json
 import yaml
 import logging
-
 logger = logging.getLogger(__name__)
 
 from jinja2 import Template
 
-from django.contrib import admin
+from django.contrib import (admin,messages)
 from django.utils.html import format_html
 from django.urls import reverse, path
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -36,6 +35,13 @@ CALM_API_CLIENT = CalmAPI()
 class GuideInlineAdmin(admin.TabularInline):
     model = Guide
     extra = 0
+    readonly_fields = ['link', 'position', 'guide_id', 'language', ]
+    fields = ['link', 'guide_id', 'position', 'language',]
+
+    def link(self, obj):
+        return format_html('<a href="{}">{}</a>', reverse('admin:calm_guide_change', args=(obj.id,)), obj.short_title)
+    link.allow_tags = True
+
 
 class GuideEmailCampaignInlineAdmin(admin.StackedInline):
     model = GuideEmailCampaign
@@ -44,8 +50,12 @@ class GuideEmailCampaignInlineAdmin(admin.StackedInline):
 class ProgramAdmin(admin.ModelAdmin):
     model = Program
     inlines = [GuideInlineAdmin]
-    readonly_fields = ['import_program_link', ]
-
+    readonly_fields = ['program_id', 'import_program_link', 'author', 'description', 'language', 'meditation_type', 'narrator', 'title']
+    fields = ['program_id', 'title',
+        'background_image', 'image',
+        'narrator_image', 'titled_background_image',
+        'language', 'description',
+        'meditation_type', 'import_program_link']
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
@@ -70,12 +80,14 @@ class ProgramAdmin(admin.ModelAdmin):
         updated = program.sync(ProgramSerializer, data=data)
 
         # check and update child guides.
+        update_count = 0
         if updated.is_valid():
             for g in data['guides']:
                 guide_data = Guide.translate_api_for_serializer(None, g)
                 try:
                     guide = Guide.objects.get(guide_id=g['guide_id'])
                     guide.sync(GuideSerializer, data=guide_data)
+                    update_count += 1
                 except:
                     del g['id']
                     g['program'] = id
@@ -85,14 +97,16 @@ class ProgramAdmin(admin.ModelAdmin):
                         logger.debug("saved guide", g)
                     else:
                         raise
-        return HttpResponse(updated.errors or updated)
-
-
+        # return HttpResponse(updated.errors or updated)
+        messages.add_message(request, messages.INFO, "Updated %s guides" % update_count)
+        return HttpResponseRedirect(reverse('admin:calm_program_change', args=(id, )))
 
 
 class GuideAdmin(admin.ModelAdmin):
     model = Guide
-    list_display = ['title', 'program_title', 'program_id', 'a_deeplink']
+    search_fields = ['title', 'guide_id', 'program__title']
+    ordering = ('title', )
+    list_display = ['title', 'program_title', 'meditation_type', 'a_deeplink']
     fields = ['title', 'program', 'guide_id', 'a_deeplink', 'position', 'yaml_data', 'data', ]
     readonly_fields = ['title', 'a_deeplink', 'guide_id', 'yaml_data', 'program', 'position']
     inlines = []
@@ -106,6 +120,9 @@ class GuideAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">{}</a>', reverse('admin:calm_program_change', args=(obj.program.id,)), obj.program.title)
     program_title.allow_tags = True
     program_title.short_description = "Program"
+
+    def meditation_type(self, obj):
+        return obj.program.meditation_type
 
     def program_id(self, obj):
         return format_html('<a target="api" href="https://api.app.aws-prod.useast1.calm.com/programs/{}">{}</a>', obj.program.program_id, obj.program.program_id)
@@ -153,6 +170,7 @@ class GuideEmailCampaignAdmin(admin.ModelAdmin):
         return my_urls + urls
 
     def mylink(self, obj):
+        return 'foo'
         if obj and obj.id:
             return format_html('<a href="{}" target="render">Show snippets</a>',
                         reverse('email-render', args=[obj.id]))

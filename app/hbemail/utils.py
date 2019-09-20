@@ -10,14 +10,12 @@ Template as Jinja,
 select_autoescape,
 )
 
-def send_to_iterable(payload):
+def send_to_iterable(templateId, payload):
     ITERABLE_URL = "https://api.iterable.com"
     UPDATE_TEMPLATE_ENDPOINT = "/api/templates/email/update"
     UPDATE_TEMPLATE_PARAMS = {
-        "templateId":1062313,
-        # "apiKey":settings.ITERABLE_API_KEY,
+        "templateId":templateId,
         "html": payload,
-        "plainText": "hello this is an excellent email.",
     }
     url = ITERABLE_URL + UPDATE_TEMPLATE_ENDPOINT
     response = requests.post(url,

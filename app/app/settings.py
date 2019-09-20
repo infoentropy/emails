@@ -53,8 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mjml',
     'hbemail',
-    'iterablegen',
     'calm',
+    'iterablegen',
     'rest_framework_xml',
     'rest_framework',
 ]

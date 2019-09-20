@@ -53,12 +53,16 @@ class ProgramViewSet(viewsets.ModelViewSet):
 class GuideViewSet(viewsets.ModelViewSet):
     queryset = Guide.objects.all()
     serializer_class = GuideSerializer
+    parser_classes = (JSONParser, )
+    renderer_classes = (JSONRenderer, )
 
 
 class GuideEmailCampaignViewSet(viewsets.ModelViewSet):
     queryset = GuideEmailCampaign.objects.all()
     serializer_class = GuideEmailCampaignSerializer
     template_name = "guide_email_campaign.html"
+    parser_classes = (JSONParser, )
+    renderer_classes = (JSONRenderer, )
 
     def apply_overrides(self, request):
         obj = self.get_object()
