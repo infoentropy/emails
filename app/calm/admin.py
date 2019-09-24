@@ -50,7 +50,7 @@ class GuideEmailCampaignInlineAdmin(admin.StackedInline):
 class ProgramAdmin(admin.ModelAdmin):
     model = Program
     inlines = [GuideInlineAdmin]
-    readonly_fields = ['program_id', 'import_program_link', 'author', 'description', 'language', 'meditation_type', 'narrator', 'title']
+    readonly_fields = ['import_program_link', 'author', 'description', 'language', 'meditation_type', 'narrator', 'title']
     fields = ['program_id', 'title',
         'background_image', 'image',
         'narrator_image', 'titled_background_image',

@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from jinja2 import Template
+from jinja2 import Template, select_autoescape
 from django.utils.html import escape
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -48,7 +48,7 @@ def render_snippet(snippet, guide=None, data=None):
             schema = yaml.safe_load(schema) or {}
             if data:
                 schema.update(data)
-            tmpl = Template(json.dumps(schema))
+            tmpl = Template(json.dumps(schema), autoescape=select_autoescape(['html']))
             rendered = tmpl.render(guide=guide)
             schema = json.loads(rendered)
             schema_string = []
