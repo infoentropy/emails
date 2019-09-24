@@ -75,7 +75,10 @@ class Template(MetadataMixin):
     def publish(self, environment, **kwargs):
         # publish to iterable.
         payload = self.render(environment)
-        return send_to_iterable(payload)
+        return send_to_iterable({
+            'subject':self.subject,
+            'preheaderText':self.preheaderText,
+            'html':payload})
 
     def render(self, environment, **kwargs):
         tmpl = self.get_template(environment)

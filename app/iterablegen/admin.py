@@ -63,7 +63,11 @@ class IterableCampaignAdmin(admin.ModelAdmin):
         campaign = self.model.objects.get(pk=id)
         payload = render_campaign(campaign)
         logger.debug(payload)
-        response = send_to_iterable(int(campaign.campaignId), payload)
+        response = send_to_iterable(
+            templateId=int(campaign.campaignId),
+            html=payload,
+            subject=campaign.subject,
+            preheaderText=campaign.preheaderText)
         logger.debug(response.content)
         if response.status_code == 200:
             messages.add_message(request, messages.INFO, "Exported to Iterable")

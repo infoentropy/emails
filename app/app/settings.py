@@ -170,3 +170,7 @@ LOGGING = {
         },
     },
 }
+
+if DEBUG:
+    import app.devsettings
+    ITERABLE_API_KEY = app.devsettings.ITERABLE_API_KEY
