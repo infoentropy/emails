@@ -28,7 +28,7 @@ IterableCampaignSerializer,
 )
 
 SNIPPET_OUTPUT = "{{{ snippet '%s' %s }}}"
-TEMPLATE_BEGIN = '{{{ snippet "wrapper - open" button_color="calm-blue blue green red orange" }}}'
+TEMPLATE_BEGIN = '{{{ snippet "wrapper - open" button_color="calm-blue blue green pink red orange" }}}'
 TEMPLATE_END = '{{{ snippet "wrapper - close" }}}'
 def center():
     return "\n{{{ snippet 'wrapper - table center' body=output }}}"
@@ -48,6 +48,7 @@ def render_snippet(snippet, guide=None, data=None):
             schema = yaml.safe_load(schema) or {}
             if data:
                 schema.update(data)
+            logger.debug(schema)
             tmpl = Template(json.dumps(schema), autoescape=select_autoescape(['html']))
             rendered = tmpl.render(guide=guide)
             schema = json.loads(rendered)

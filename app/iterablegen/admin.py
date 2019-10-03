@@ -45,7 +45,7 @@ class IterableCampaignAdmin(admin.ModelAdmin):
     model = IterableCampaign
     inlines = [CampaignSnippetInline]
     list_display = ['subject', 'name', 'status', 'updated']
-    readonly_fields = ['somelink', 'exportlink']
+    readonly_fields = ['somelink', 'exportlink', 'datapreviewlink']
 
 
     def get_urls(self):
@@ -90,6 +90,10 @@ class IterableCampaignAdmin(admin.ModelAdmin):
         else:
             return "Save first"
     exportlink.allow_tags = True
+
+    def datapreviewlink(self, obj):
+        return format_html('<a href="{}" target="iter">Iterable Preview</a>',
+            'https://app.iterable.com/templates/showHtml?templateId=%s' % (obj.campaignId))
 
     def render(self, obj):
         return render_campaign(obj)

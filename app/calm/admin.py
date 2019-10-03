@@ -105,12 +105,11 @@ class ProgramAdmin(admin.ModelAdmin):
 class GuideAdmin(admin.ModelAdmin):
     model = Guide
     search_fields = ['title', 'guide_id', 'program__title']
-    ordering = ('title', )
-    list_display = ['title', 'program_title', 'meditation_type', 'a_deeplink']
+    ordering = ('program__title', 'position', 'title' , )
+    list_display = ['program_title', 'position', 'title', 'meditation_type', 'a_deeplink']
     fields = ['title', 'program', 'guide_id', 'a_deeplink', 'position', 'yaml_data', 'data', ]
     readonly_fields = ['title', 'a_deeplink', 'guide_id', 'yaml_data', 'program', 'position']
     inlines = []
-
 
     def get_form(self, request, obj=None, **kwargs):
         kwargs['form'] = GuideForm
@@ -151,6 +150,8 @@ class GuideAdmin(admin.ModelAdmin):
 
 class GuideEmailCampaignAdmin(admin.ModelAdmin):
     model = GuideEmailCampaign
+    ordering = ('guide__program__title', 'guide__position', 'guide__title' , )
+    # list_display = ['guide__program_title', 'guide__position', 'guide__title', ]
     readonly_fields = ['mylink', ]
     extra = 0
 

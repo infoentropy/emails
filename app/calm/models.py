@@ -91,9 +91,9 @@ class Guide(CalmModel):
     title = models.CharField(max_length=256)
     type = models.CharField(default="audio", max_length=32)
     data = models.TextField(blank=True, null=True)
-
+    iterablegen_campaign = models.ManyToManyField('iterablegen.IterableCampaign', through='GuideEmailCampaign')
     def __str__(self):
-        return "%s / %s (%s) / %s" % (self.title, self.program.title, self.position, self.guide_id)
+        return "%s / %s / %s / %s" % (self.program.title, self.position , self.title, self.guide_id)
 
     """
     need to map the CALM id into a field otherwise collision with Django ID
@@ -127,7 +127,7 @@ class GuideEmailCampaign(models.Model):
     )
 
     def __str__(self):
-        return "%s: %s (%s)" % (self.guide.program.title, self.guide.title, self.guide.position)
+        return "%s / %s / %s" % (self.guide.program.title, self.guide.position, self.guide.title)
 
     guide = models.ForeignKey('Guide', on_delete=models.CASCADE)
     format = models.CharField(default='yaml', max_length=32, choices=FORMAT_CHOICES, blank=True, null=True)
