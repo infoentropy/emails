@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import requests
 
 from app import settings
@@ -19,6 +22,7 @@ def send_to_iterable(**kwargs):
         "preheaderText": kwargs.get('preheaderText',''),
         "subject": kwargs.get('subject',''),
     }
+    logger.debug(UPDATE_TEMPLATE_PARAMS)
     url = ITERABLE_URL + UPDATE_TEMPLATE_ENDPOINT
     response = requests.post(url,
         params={"apiKey":settings.ITERABLE_API_KEY},
