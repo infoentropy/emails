@@ -32,6 +32,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         instance.program_id = validated_data.get('program_id', instance.program_id)
         instance.title = validated_data.get('title', instance.title)
         instance.titled_background_image = validated_data.get('titled_background_image', instance.titled_background_image)
+        # instance.key = validated_data.get('key', instance.key)
         instance.save()
         logging.info("serializer: update program")
         return instance

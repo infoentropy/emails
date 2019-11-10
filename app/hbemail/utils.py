@@ -12,10 +12,30 @@ FunctionLoader,
 Template as Jinja,
 select_autoescape,
 )
+UPDATE_TEMPLATE_ENDPOINT = "/templates/email/update"
+
+def iterable(path, data=None, **kwargs):
+    ITERABLE_URL = "https://api.iterable.com/api"
+    url = ITERABLE_URL + path
+    http_method = requests.post
+
+    if kwargs.get('method', '') == 'patch':
+        http_method = requests.patch
+    elif kwargs.get('method', '') == 'put':
+        http_method = requests.put
+
+    print(url, http_method)
+    response = http_method(url,
+        params={"apiKey":settings.ITERABLE_API_KEY},
+        json=data
+        )
+    return response
+
 
 def send_to_iterable(**kwargs):
-    ITERABLE_URL = "https://api.iterable.com"
-    UPDATE_TEMPLATE_ENDPOINT = "/api/templates/email/update"
+    """
+    Update a HTML template
+    """
     UPDATE_TEMPLATE_PARAMS = {
         "templateId":kwargs.get('templateId',''),
         "html": kwargs.get('html',''),
@@ -23,9 +43,18 @@ def send_to_iterable(**kwargs):
         "subject": kwargs.get('subject',''),
     }
     logger.debug(UPDATE_TEMPLATE_PARAMS)
-    url = ITERABLE_URL + UPDATE_TEMPLATE_ENDPOINT
-    response = requests.post(url,
-        params={"apiKey":settings.ITERABLE_API_KEY},
-        json=UPDATE_TEMPLATE_PARAMS
-        )
+    response = iterable(UPDATE_TEMPLATE_ENDPOINT, data=UPDATE_TEMPLATE_PARAMS)
     return response
+
+def update_catalog_item(catalog, itemId, data, **kwargs):
+    data = {
+        "value":data
+    }
+    return iterable('/catalogs/%s/items/%s' % (catalog, itemId), data=data, method='put')
+
+
+def bulk_update_catalog(catalog, documents, **kwargs):
+    data = {
+        "documents":documents
+    }
+    return iterable('/catalogs/%s/items' % catalog, data=data, method='post')

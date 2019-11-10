@@ -2,6 +2,7 @@ from django.db import models
 import logging
 logger = logging.getLogger(__name__)
 
+from rest_framework.renderers import JSONRenderer
 
 from .utils import CalmAPI
 from iterablegen.models import IterableCampaign
@@ -17,6 +18,7 @@ MEDITATION_CHOICES = (
     ('sleep', 'Sleep'),
     ('sequential', 'Sequential'),
     ('masterclass', 'Masterclass'),
+    ('freeform', 'Freeform'),
 )
 
 class CalmModel(models.Model):
@@ -61,6 +63,7 @@ class Program(CalmModel):
     narrator = models.CharField(max_length=256, blank=True, null=True)
     narrator_image = models.CharField(max_length=2048, blank=True, null=True)
     program_id = models.CharField(max_length=64)
+    # key = models.CharField(max_length=64)
     title = models.CharField(max_length=2048, blank=True, null=True)
     titled_background_image = models.CharField(max_length=2048, blank=True, null=True)
 
@@ -79,6 +82,12 @@ class Program(CalmModel):
     def fetch(self):
         data = CALM_API_CLIENT.get('/programs/%s' % self.program_id)
         return Program.translate_api_for_serializer(self.id, data)
+
+    def save_catalog(self):
+        from .serializers import ProgramSerializer
+        ser = ProgramSerializer(self)
+        logger.info(JSONRenderer().render(ser.data))
+        return ser
 
 # Guide, ripped from API
 class Guide(CalmModel):
