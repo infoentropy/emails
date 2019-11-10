@@ -8,3 +8,4 @@ django-mjml
 requests
 pybars3
 djangorestframework
+djangorestframework-xml

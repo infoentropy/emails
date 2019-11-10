@@ -38,7 +38,7 @@ def index(request):
 
 def templates(request):
     templates = Template.objects.all()
-    template = Jinja('{% for a in templates %}<div>{{a.name}}</div>{% endfor %}')
+    template = Jinja('{% for a in templates %}<div><a href="{{a.id}}">{{a.name}}</a></div>{% endfor %}')
     return HttpResponse(template.render(dict(templates=templates)))
 
 def viewTemplate(request, id):

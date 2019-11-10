@@ -1,6 +1,10 @@
 import yaml
+import logging
+logger = logging.getLogger(__name__)
 
 from rest_framework import serializers
+from calm.serializers import (GuideSerializer)
+
 from .models import (
     IterableCampaignSnippet,
     IterableSnippet,
@@ -8,34 +12,30 @@ from .models import (
 )
 
 class IterableSnippetSerializer(serializers.ModelSerializer):
+    guide = GuideSerializer(read_only=True)
     class Meta:
         model = IterableSnippet
-        fields = ['name']
+        fields = '__all__'
 
 
 class IterableCampaignSnippetSerializer(serializers.ModelSerializer):
-    snippet = IterableSnippetSerializer(read_only=True)
-    data = serializers.SerializerMethodField()
+    campaign = serializers.PrimaryKeyRelatedField(read_only=True)
+    snippet = serializers.PrimaryKeyRelatedField(read_only=True)
+    guide = serializers.PrimaryKeyRelatedField(read_only=True)
+    schema = serializers.SerializerMethodField()
 
     class Meta:
         model = IterableCampaignSnippet
-        fields = ['data', 'snippet']
+        fields = '__all__'
+        # fields = ['snippet', 'guide', 'data']
 
-    def get_data(self, instance):
-        try:
-            foo = yaml.safe_load(instance.data)
-            return foo or {}
-        except Exception as e:
-            raise e
+    def get_schema(self, instance):
+        logging.debug(instance.schema)
+        schema = yaml.safe_load(instance.schema) or {}
+        return schema
 
-class IterableCampaignSerializer(serializers.HyperlinkedModelSerializer):
-    iterablecampaignsnippet_set = serializers.SerializerMethodField()
+class IterableCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = IterableCampaign
-        # fields = '__all__'
-        fields =['url', 'name', 'subject', 'preheaderText', 'iterablecampaignsnippet_set']
-
-    def get_iterablecampaignsnippet_set(self, instance):
-        snippets = instance.iterablecampaignsnippet_set.all().order_by('order', 'id')
-        return  IterableCampaignSnippetSerializer(snippets, many=True).data
+        fields = '__all__'

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os,sys
+import logging
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,11 +26,20 @@ SECRET_KEY = 'qk*awy^mk&cn07_ed$o+pn#d6)6yd#1@*60sr@81cdm^3z5!uw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['273109a6.ngrok.io', 'localhost']
+ALLOWED_HOSTS = ['81ecfb22.ngrok.io', 'localhost']
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework_xml.parsers.XMLParser',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.TemplateHTMLRenderer',
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework_xml.renderers.XMLRenderer',
+    ),
 }
 
 # Application definition
@@ -43,7 +53,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mjml',
     'hbemail',
+    'calm',
     'iterablegen',
+    'rest_framework_xml',
     'rest_framework',
 ]
 
@@ -137,3 +149,28 @@ STATICFILES_DIRS = [
 MJML_BACKEND_MODE = 'cmd'
 MJML_EXEC_CMD = '/Users/jlee/work/lifecycle-email/mjml/node_modules/mjml/bin/mjml'
 ITERABLE_API_KEY = os.environ.get('ITERABLE_API_KEY', None)
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+    },
+}
+
+if DEBUG:
+    import app.devsettings
+    ITERABLE_API_KEY = app.devsettings.ITERABLE_API_KEY

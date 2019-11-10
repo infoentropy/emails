@@ -46,6 +46,7 @@ class CodeEditor(forms.Textarea):
             'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/markdown/markdown.js',
             'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/addon/mode/simple.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/handlebars/handlebars.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4/mode/javascript/javascript.js',
             '/static/codemirror.js'
         )
 

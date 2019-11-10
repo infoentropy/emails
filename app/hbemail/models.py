@@ -1,6 +1,8 @@
 import yaml
 import mistune
 import json
+import logging
+logger = logging.getLogger(__name__)
 
 from jinja2 import (
 Template as JinjaTemplate,
@@ -73,7 +75,10 @@ class Template(MetadataMixin):
     def publish(self, environment, **kwargs):
         # publish to iterable.
         payload = self.render(environment)
-        return send_to_iterable(payload)
+        return send_to_iterable({
+            'subject':self.subject,
+            'preheaderText':self.preheaderText,
+            'html':payload})
 
     def render(self, environment, **kwargs):
         tmpl = self.get_template(environment)
@@ -81,7 +86,6 @@ class Template(MetadataMixin):
         for r in self.templatecontent_set.all().order_by('var_name', 'order'):
             region = r.var_name
             temp = regiondata.setdefault(region, '')
-            # print(r.data)
             regiondata[region] = temp + ((r.content and r.content._render_data(child_data=r.data)) or r.data)
 
         kwargs.update(regiondata)
@@ -202,22 +206,28 @@ class Content(MetadataMixin):
         except Exception as e:
             return self.data
 
+    def render_markdown(self, child_data=None):
+        try:
+            return RENDER_MARKDOWN(child_data or self.data)
+        except Exception as e:
+            return "Markdown error: %s" % e
+        return self.data
+
+    def render_component(self, child_data=None):
+        data = self._load_yaml(child_data=child_data)
+        if self.data_type == ITERABLE:
+            tmpl = iterableEnviron.get_template(self.component.name)
+            return tmpl.render(data)
+        else:
+            tmpl = JinjaTemplate(self.component.markup)
+            return tmpl.render(data)
+
     def _render_data(self, child_data=None):
         # not a component? it's freeform
         if self.data_type == MARKDOWN:
-            try:
-                return RENDER_MARKDOWN(child_data or self.data)
-            except Exception as e:
-                return "Markdown error: %s" % e
-            return self.data
+            return self.render_markdown(child_data=child_data)
         elif self.component:
-            data = self._load_yaml(child_data=None)
-            if self.data_type == ITERABLE:
-                tmpl = iterableEnviron.get_template(self.component.name)
-                return tmpl.render(data)
-            else:
-                tmpl = JinjaTemplate(self.component.markup)
-                return tmpl.render(data)
+            return self.render_component(child_data=child_data)
         else:
             return self.data
 
