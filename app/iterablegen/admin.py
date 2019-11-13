@@ -45,15 +45,18 @@ class IterableCampaignAdmin(admin.ModelAdmin):
     model = IterableCampaign
     inlines = [CampaignSnippetInline]
     list_display = ['subject', 'name', 'status', 'updated']
-    readonly_fields = ['somelink', 'exportlink', 'datapreviewlink']
+    readonly_fields = ['somelink', 'exportlink', 'datapreviewlink', 'clonelink']
 
 
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
             path('<int:id>/export',
-            self.admin_site.admin_view(self.export),
-            name='export'),
+                    self.admin_site.admin_view(self.export),
+                    name='export'),
+            path('<int:id>/clone',
+                    self.admin_site.admin_view(self.clone),
+                    name='clone'),
         ]
         return my_urls + urls
 
@@ -75,6 +78,28 @@ class IterableCampaignAdmin(admin.ModelAdmin):
             messages.add_message(request, messages.ERROR, "FAILeD")
         return HttpResponseRedirect(reverse('admin:iterablegen_iterablecampaign_change', args=(id, )))
 
+    def clone(self, request, id):
+        original = self.model.objects.get(pk=id)
+
+        clone = self.model.objects.get(pk=id)
+        clone.pk = None
+        clone.name = "[clone of id=%s] %s" % (original.id, original.name)
+        clone.save()
+
+        orig_snippets = list(original.iterablecampaignsnippet_set.all())
+        new_snippets  = [
+            IterableCampaignSnippet(
+                campaign=clone,
+                snippet=sn.snippet,
+                guide=sn.guide,
+                order=sn.order,
+                data=sn.data) for sn in orig_snippets
+            ]
+        IterableCampaignSnippet.objects.bulk_create(new_snippets)
+        messages.add_message(request, messages.INFO, "Cloned campaign %s" % original)
+        return HttpResponseRedirect(reverse('admin:iterablegen_iterablecampaign_change', args=(clone.pk, )))
+
+
     def somelink(self, obj):
         if obj and obj.id:
             return format_html('<a href="{}?format=html" target="render">Show campaign</a>',
@@ -90,6 +115,15 @@ class IterableCampaignAdmin(admin.ModelAdmin):
         else:
             return "Save first"
     exportlink.allow_tags = True
+
+    def clonelink(self, obj):
+        if obj and obj.id:
+            return format_html('<a href="{}">Clone This</a>',
+                        reverse('admin:clone', args=(obj.id,)))
+        else:
+            return "Save first"
+    exportlink.allow_tags = True
+
 
     def datapreviewlink(self, obj):
         return format_html('<a href="{}" target="iter">Iterable Preview</a>',

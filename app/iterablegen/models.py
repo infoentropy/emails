@@ -87,8 +87,7 @@ class IterableCampaign(MetadataMixin):
     snippets = models.ManyToManyField('IterableSnippet', through='IterableCampaignSnippet')
 
     def get_snippets(self):
-        return self.snippets.order_by('snipets__order')
-
+        return self.snippets.order_by('snippets__order')
 
 class IterableCampaignCategory(MetadataMixin):
     class Meta:
