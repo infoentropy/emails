@@ -14,7 +14,9 @@ LAYOUT_TEMPLATE = """
 {{#assign "styles"}}
 <style type="text/css">
 h1,div,p { Margin:0; padding:0; }
-.section { color:#ffffff; font-family: 'Avenir Next', Arial, sans-serif; Margin:5px auto; max-width:500px;}
+h1 { font-weight:400; }
+.copy { font-size:18px;Margin:15px 0;color:#6D7278 }
+.section { color:#ffffff; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; Margin:5px auto 15px auto; max-width:500px;}
 .yir { padding:30px 32px 10px 32px; }
 .section h1.title { font-size:30px; Margin-bottom:30px;}
 .section1 { background-color:#60B4E7;}
@@ -25,13 +27,13 @@ h1,div,p { Margin:0; padding:0; }
 
 .metric { Margin-bottom:60px; }
 
-.metric.minimargin { Margin-bottom:10px; }
+.metric.minimargin { Margin-bottom:5px; }
 .metric.nomargin { Margin-bottom:0px; }
 
 .metric .title { text-transform:uppercase; font-size:12px; letter-spacing:1px; Margin-bottom:10px;}
 .metric .value { font-size:26px; line-height:30px;}
-.calendar.metric .title { display:inline-block;  width:46px; Margin-bottom:0;}
-.calendar.metric .value { display:inline-block; font-size:12px; line-height:14px; }
+.calendar.metric .title { width:46px; Margin-bottom:0;}
+.calendar.metric .value { font-size:12px;line-height:12px; }
 .bigimage.metric td.image { width:90px;}
 .metric a { text-decoration:none; color:#ffffff;}
 </style>
@@ -50,8 +52,81 @@ h1,div,p { Margin:0; padding:0; }
 {{#assign "imagestyle"}}{{/assign}}
 {{{ snippet 'component - image with optional text' image=image title=title body=body description=description link=link imagestyle=imagestyle }}}
 
+{{#assign "text"}}
+<div style="max-width:380px;Margin:40px auto;">
+<h1 style="color:#333333;Margin:10px 0 0 0;">What a year!</h1>
+<p style="Margin:35px 0;font-size:18px;color:#6D7278">Through it all, you made time to invite more peace and relaxation into your life.</p>
+<p style="Margin:35px 0;font-size:18px;color:#6D7278">Scroll through to reflect on 2019 and inspire new ways to care for your mind in 2020.</p>
+</div>
+{{/assign}}
+{{#assign "body"}}
+{{{ snippet "component - basic text" body=text }}}
+{{/assign}}
+{{{ snippet "wrapper - table center" body=body }}}
+
 {% block content %}{% endblock %}
 
+{{#assign "body"}}
+<tr>
+<td>
+<div class="section">
+    <div style="Margin:40px 0 10px 0; color:#000000;text-align:center;">
+        <h1 style="line-height:40px;">Together we're making <br /> the world a little calmer</h1>
+        <p style="Margin-top:20px;font-size:18px;color:#6D7278">See Calm's 🌎 Year in Review</p>
+    </div>
+</div>
+</td>
+</tr>
+{{{ snippet "component - button" color="calm-blue" text="Let's Reflect" link="https://www.calm.com/blog" width="220" }}}
+{{{ snippet "component - spacer" height=20 }}}
+{{/assign}}
+{{{ snippet "wrapper - table center" body=body }}}
+
+{{!-- https://calmdotcom.atlassian.net/browse/LIFE-225 --}}
+{{#assign "coupon"}}uTESt8tS{{/assign}}
+{{#assign "title"}}Invite friends to join you for a Calm 2020{{/assign}}
+{{#assign "text"}}
+<p class="copy">Share this personalized link to give them our most generous offer of the season.</p>
+{{/assign}}
+{{#assign "cta"}}Share the Calm{{/assign}}
+
+{% for offer in SPECIAL_OFFERS %}
+{{#eq yir2019segment "_{{offer.audience}}_" }}
+{{#assign "coupon"}}_{{offer.coupon}}_{{/assign}}
+{{#assign "title"}}_{{offer.title}}_{{/assign}}
+{{#assign "cta"}}_{{offer.cta}}_{{/assign}}
+{{#assign "text"}}
+{% for line in offer.text %}
+<p class="copy">_{{line}}_</p>
+{% endfor %}
+{{/assign}}
+{{/eq}}
+{% endfor %}
+{{#assign "coupon_path"}}new-member-offer{{/assign}}
+{{#assign "plan"}}yearly{{/assign}}
+{{#assign "couponLink"}}https://www.calm.com{{coupon_path}}?plan={{defaultIfEmpty plan "lifetime"}}&coupon={{coupon_code}}&lifetime_coupon={{coupon_code}}&email={{#urlEncode}}{{email}}{{/urlEncode}}{{/assign}}
+{{#assign "escapedCouponLink"}}
+https://www.calm.com/nodeeplink?redirect_to={{#urlEncode}}{{{couponLink}}}{{/urlEncode}}
+{{/assign}}
+
+{{#assign "body"}}
+<div class="section" style="Margin:0 10px">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="Margin:30px 0 30px 0;">
+    <tr>
+    <td>
+    <div style="max-width:350px;Margin:0 auto;">
+    <h1 style="color:#333333;font-size:24px;line-height:32px;">{{{title}}}</h1>
+    {{{text}}}
+    <div><a href="{{escapedCouponLink}}">{{cta}}</a></div>
+    </div>
+    </td>
+    </tr>
+    </table>
+</div>
+{{/assign}}
+<div style="Margin:0 20px">
+{{{ snippet "component - gradient border block" body=body }}}
+</div>
 
 {{{ snippet "wrapper - close" }}}
 """
@@ -71,7 +146,8 @@ INDEX_TEMPLATE = """
 {{#eq time_of_day_most_freq "_{{key}}_"}}{{#assign "time_of_day_most_freq_icon"}}_{{icon}}_{{/assign}}{{/eq}}{% endfor %}
 
 {{#catalog "Localization" "yearinreview" as |translations| }}
-{{#lookup translations active_language as |text| }}
+{{#assign "user_lang"}}{{defaultIfEmpty active_language "en"}}{{/assign}}
+{{#lookup translations user_lang as |text| }}
 
 {% for section in data_layout %}
 {{!-- START SECTION ("_{{section.title.default}}_") --}}
@@ -88,24 +164,32 @@ INDEX_TEMPLATE = """
 
 {% for metric in section.get('data', []) %}
 {{!-- _{{ metric.variable }}_ --}}
-
-{{#lookup text {% if metric.title.lookup %}_{{ metric.title.lookup }}_{%else%}"_{{metric.title.keyname}}_" {%endif%} as |_metricTitle|}}
+{{#if _{{metric.variable}}_ }}
+{% if metric.title.lookup %}
+{{#lookup text _{{ metric.title.lookup }}_ as |_metricTitle|}}
 {{#assign "metricTitle"}}{{{ defaultIfEmpty _metricTitle  "_{{metric.title.default}}_" }}}{{/assign}}
+{{/lookup}}
+{% else %}
+{{#lookup text "_{{metric.title.keyname}}_" as |_metricTitle|}}
+{{#assign "metricTitle"}}{{{ defaultIfEmpty _metricTitle  "_{{metric.title.default}}_" }}}{{/assign}}
+{{/lookup}}
+{% endif %}
 {% if 'NNN' in metric.title.default %}
 {{#assign "metricTitle"}}{{ replace metricTitle "NNN" _{{metric.title.value}}_ }}{{/assign}}
 {% endif %}
-{{/lookup}}
-
-{% if metric.lookup %}{% if metric.lookup == metric.variable %}
-{{#assign "metricValue"}}{{#lookup text _{{metric.variable}}_ as |word| }}{{word}}{{/lookup}}{{/assign}}
+{% if metric.lookup %}
+    {% if metric.lookup == metric.variable %}
+        {{#assign "metricValue"}}{{#lookup text _{{metric.variable}}_ as |word| }}{{word}}{{/lookup}}{{/assign}}
+    {% else %}
+        {{#assign "_metricValue"}}{{text._{{metric.lookup}}_}}{{/assign}}
+        {{#assign "metricValue"}}{{ replace _metricValue "NNN" _{{metric.variable}}_ }}{{/assign}}
+    {% endif %}
 {% else %}
-{{#assign "_metricValue"}}{{text._{{metric.lookup}}_}}{{/assign}}
-{{#assign "metricValue"}}{{ replace _metricValue "NNN" _{{metric.variable}}_ }}{{/assign}}
-{% endif %}
-{% else %}
-{{#assign "metricValue"}}{{ _{{ metric.variable }}_ }}{{/assign}}
+    {{#assign "metricValue"}}{{ _{{ metric.variable }}_ }}{{/assign}}
 {% endif %}
 {{{ snippet "yir metric" icon=_{{ metric.icon or "''"}}_ icon_shape="_{{metric.icon_shape}}_" metrictitle=metricTitle value=metricValue url=_{{metric.url or '""'}}_ css_class="_{{metric.css_class}}_" }}}
+{{/if}}
+
 {% endfor %}
 
         </div>
@@ -134,6 +218,38 @@ env = Environment(
     loader=FunctionLoader(load_template))
 TEMPLATE_SECTION = env.get_template("index.html")
 TEMPLATE_ID = 1308659
+
+SPECIAL_OFFERS = []
+# [
+#     {
+#         "audience":"paidsubs",
+#         "title":"Invite friends to join you for a Calm 2020",
+#         "text":["Share this personalized link to give them our most generous offer of the season."],
+#         "coupon":"uTESt8tS",
+#         "cta":"Share"
+#     },
+#     {
+#         "audience":"trial",
+#         "title":"{{first_name}}, your gift subscription is nearly done.",
+#         "text":"",
+#         "coupon":"igGxPddj",
+#         "cta":"Redeem"
+#     },
+#     {
+#         "audience":"churnsoon",
+#         "title":"{{first_name}}, your subscription is nearly done.",
+#         "text":["Renew today for 25% off."],
+#         "coupon":"8RbI1SfM",
+#         "cta":"Redeem"
+#     },
+#     {
+#         "audience":"churned",
+#         "title":"{{first_name}}, we’d love to have you back for a 2020 of Calm.",
+#         "text":["Renew today for 25% off."],
+#         "coupon":"8RbI1SfM",
+#         "cta":"Redeem"
+#     }
+# ]
 
 IMAGE_FOLDER = "https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/b215951a136f423a9cbb19359fcccb0a/section%20icons/"
 YIR_IMAGE_FOLDER = "https://d15k2d11r6t6rl.cloudfront.net/public/users/Integrators/669d5713-9b6a-46bb-bd7e-c542cff6dd6a/b215951a136f423a9cbb19359fcccb0a/year%20in%20review/"
@@ -455,6 +571,7 @@ TEMPLATE_SKELETON = TEMPLATE_SECTION.render(
     YIR_SESSION_ICONS=YIR_SESSION_ICONS,
     YIR_SLEEP_GENRE_ICONS=YIR_SLEEP_GENRE_ICONS,
     YIR_TIME_ICONS=YIR_TIME_ICONS,
+    SPECIAL_OFFERS=SPECIAL_OFFERS,
     )
 htmlfile = open('./scripts/sample.html', 'w')
 htmlfile.write(TEMPLATE_SKELETON)
@@ -463,32 +580,3 @@ htmlfile.close()
 TEMPLATE_ID = 1308659
 response = iterable('/templates/email/update', data={"templateId":TEMPLATE_ID, "html":TEMPLATE_SKELETON})
 print(response)
-# def convert_data(data):
-#     temp = {}
-#     d = None
-#     for k,v in recipient.items():
-#         if v and k in INT_VARS:
-#              d = int(v)
-#         elif k in BOOL_VARS:
-#             d = bool(v)
-#         else:
-#             d = v
-#         temp[k] = d
-#     return temp
-#
-# data_template = Template(TEMPLATE_SKELETON)
-#
-# userupdates = []
-# # Simulate Iterable render step.
-# for recipient in reader:
-#     # convert data
-#     data = convert_data(recipient)
-#     updata = {"email":recipient['email'], "dataFields": {"yirv2019":data}}
-#     userupdates.append(updata)
-#     output = data_template.render(**data).replace('[[[', '{{{',).replace(']]]', '}}}').replace('[[', '{{',).replace(']]', '}}')
-#     htmlfile = open('./scripts/%s.html' % (recipient.get('name','na') ), 'w')
-#     htmlfile.write(output)
-#     htmlfile.close()
-#
-#
-# response = iterable('/users/bulkUpdate', data={"users":userupdates})
