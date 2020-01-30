@@ -1,12 +1,24 @@
 {% load rest_framework %}
+{% load iterablegen_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <title>{{var}}</title>
 </head>
 <body>
-<pre>
-{{output}}
-</pre>
+
+  <p>{{campaign.name}}</p>
+  <h1>Subject: {{campaign.subject}}</h1>
+
+  <table>
+  {% for content in campaign.iterablecampaignsnippet_set.all %}
+  <tr>
+    <td>{{content.order}}</td>
+    <td>{{content.snippet}}</td>
+    <td>{% render_content_snippet content %}</td>
+  </tr>
+  {% endfor %}
+  </table>
+
 </body>
 </html>

@@ -56,6 +56,7 @@ class ProgramAdmin(admin.ModelAdmin):
         'narrator_image', 'titled_background_image',
         'language', 'description',
         'meditation_type', 'import_program_link']
+
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
@@ -108,8 +109,52 @@ class GuideAdmin(admin.ModelAdmin):
     ordering = ('program__title', 'position', 'title' , )
     list_display = ['program_title', 'position', 'title', 'meditation_type', 'a_deeplink']
     fields = ['title', 'program', 'guide_id', 'a_deeplink', 'position', 'yaml_data', 'data', ]
-    readonly_fields = ['title', 'a_deeplink', 'guide_id', 'yaml_data', 'program', 'position']
+    readonly_fields = ['title', 'a_deeplink', 'guide_id', 'yaml_data', 'program', 'position', 'import_guide_link']
     inlines = []
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            path('<int:id>/import',
+            self.admin_site.admin_view(self.import_guide_view),
+            name='admin_import_guide'),
+        ]
+        return my_urls + urls
+
+    def import_guide_view(self, request, id):
+        context = dict(self.admin_site.each_context(request))
+        program = self.model.objects.get(pk=id)
+        data = program.fetch()
+        updated = program.sync(ProgramSerializer, data=data)
+
+        # check and update child guides.
+        update_count = 0
+        if updated.is_valid():
+            for g in data['guides']:
+                guide_data = Guide.translate_api_for_serializer(None, g)
+                try:
+                    guide = Guide.objects.get(guide_id=g['guide_id'])
+                    guide.sync(GuideSerializer, data=guide_data)
+                    update_count += 1
+                except:
+                    del g['id']
+                    g['program'] = id
+                    guide = GuideSerializer(data=guide_data)
+                    if guide.is_valid():
+                        g = guide.save()
+                        logger.debug("saved guide", g)
+                    else:
+                        raise
+        # return HttpResponse(updated.errors or updated)
+        messages.add_message(request, messages.INFO, "Updated %s guides" % update_count)
+        return HttpResponseRedirect(reverse('admin:calm_guide_change', args=(id, )))
+
+    def import_guide_link(self, obj):
+        if obj and obj.id:
+            return format_html('<a href="{}">Import</a>', '../import')
+        else:
+            return "Save first"
+    import_guide_link.allow_tags = True
 
     def get_form(self, request, obj=None, **kwargs):
         kwargs['form'] = GuideForm

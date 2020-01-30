@@ -1,0 +1,13 @@
+{% load iterablegen_tags %}
+<p>{{campaign.name}}</p>
+<h1>Subject: {{campaign.subject}}</h1>
+
+<table>
+{% for content in campaign.iterablecampaignsnippet_set.all %}
+<tr>
+  <td>{{content.order}}</td>
+  <td>{{content.snippet}}</td>
+  <td>{% render_content_snippet content %}</td>
+</tr>
+{% endfor %}
+</table>

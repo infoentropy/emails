@@ -94,7 +94,7 @@ class GuideEmailCampaignViewSet(viewsets.ModelViewSet):
         data = self.apply_overrides(request)
 
         fudge = []
-        fudge.append("""{{{ snippet "wrapper - open" button_color="calm-blue green blue red" }}}""")
+        fudge.append("""{{{ snippet "wrapper - open" button_color="calm-blue green blue red purple violet orange" }}}""")
         for b in data['iterablecampaignsnippet_set']:
             # set up snippet args
             bdata = b['data']

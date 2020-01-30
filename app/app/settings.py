@@ -149,6 +149,8 @@ STATICFILES_DIRS = [
 MJML_BACKEND_MODE = 'cmd'
 MJML_EXEC_CMD = '/Users/jlee/work/lifecycle-email/mjml/node_modules/mjml/bin/mjml'
 ITERABLE_API_KEY = os.environ.get('ITERABLE_API_KEY', None)
+SMARTLING_SECRET = os.environ.get('SMARTLING_SECRET', None)
+SMARTLING_USER = os.environ.get('SMARTLING_USER', None)
 
 
 LOGGING = {
@@ -174,3 +176,6 @@ LOGGING = {
 if DEBUG:
     import app.devsettings
     ITERABLE_API_KEY = app.devsettings.ITERABLE_API_KEY
+    ITERABLE_API_KEY_DEV = app.devsettings.ITERABLE_API_KEY_DEV
+    SMARTLING_USER = app.devsettings.SMARTLING_USER
+    SMARTLING_SECRET = app.devsettings.SMARTLING_SECRET

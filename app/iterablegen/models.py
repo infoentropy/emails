@@ -74,6 +74,9 @@ class IterableSnippet(MetadataMixin):
     markup = models.TextField(blank=True, null=True)
     needsWrap = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.name or str(self.pk)
+
 class IterableCampaign(MetadataMixin):
     STATUS_CHOICES = [
         ('draft', 'Draft'),

@@ -18,7 +18,7 @@ h1 { font-weight:400; }
 .copy { font-size:18px;Margin:15px 0;color:#6D7278 }
 .section { color:#ffffff; font-family: 'Avenir Next', 'Avenir', 'Helvetica', sans-serif; Margin:5px auto 15px auto; max-width:500px;}
 .yir { padding:30px 32px 10px 32px; }
-.section h1.title { font-size:30px; Margin-bottom:30px;}
+.section h1.title { font-size:30px; }
 .section1 { background-color:#60B4E7;}
 .section2 { background-color:#619FE5;}
 .section3 { background-color:#628BE4;}
@@ -54,6 +54,7 @@ h1 { font-weight:400; }
 
 {{#assign "text"}}
 <div style="max-width:380px;Margin:40px auto;">
+{{#if first_name}}<h1 style="color:#333333;Margin:10px 0 0 0;">{{first_name}},</h1>{{/if}}
 <h1 style="color:#333333;Margin:10px 0 0 0;">What a year!</h1>
 <p style="Margin:35px 0;font-size:18px;color:#6D7278">Through it all, you made time to invite more peace and relaxation into your life.</p>
 <p style="Margin:35px 0;font-size:18px;color:#6D7278">Scroll through to reflect on 2019 and inspire new ways to care for your mind in 2020.</p>
@@ -155,11 +156,17 @@ INDEX_TEMPLATE = """
 {{#assign "_title"}}{{#lookup _{{section.title.lookup}}_ as |lookuptitle|}}{{lookuptitle}}{{/lookup}}{{/assign}}
 {{_title}}
 {% else %}
-{{#assign "_title"}}{{ text._{{section.title.keyname}}_ }}{{/assign}}
+{{#assign "_title"}}{{{ text._{{section.title.keyname}}_ }}}{{/assign}}
 {% endif %}
+{{#assign "defaultTitle"}}_{{section.title.default}}_{{/assign}}
 <div class="section _{{section.css_class}}_" style="max-width:500px;">
     <div class="yir">
-        <div><h1 class="title">{{{ defaultIfEmpty _title "_{{section.title.default}}_" }}}</h1></div>
+        <div style="Margin-bottom:30px">
+        <h1 class="title">{{{ defaultIfEmpty _title defaultTitle }}}</h1>
+        {%if section.title.subtitle %}
+        <div class="subtitle">_{{section.title.subtitle}}_</div>
+        {% endif %}
+        </div>
         <div class="body">
 
 {% for metric in section.get('data', []) %}
@@ -188,6 +195,8 @@ INDEX_TEMPLATE = """
     {{#assign "metricValue"}}{{ _{{ metric.variable }}_ }}{{/assign}}
 {% endif %}
 {{{ snippet "yir metric" icon=_{{ metric.icon or "''"}}_ icon_shape="_{{metric.icon_shape}}_" metrictitle=metricTitle value=metricValue url=_{{metric.url or '""'}}_ css_class="_{{metric.css_class}}_" }}}
+{{else}}
+{{{ snippet "yir metric" icon=_{{ metric.icon or "''"}}_ icon_shape="_{{metric.icon_shape}}_" metrictitle="_{{metric.title.default}}_" value="_{{metric.ifEmpty}}_" url=_{{metric.url or '""'}}_ css_class="_{{metric.css_class}}_" }}}
 {{/if}}
 
 {% endfor %}
@@ -296,7 +305,7 @@ INT_VARS = {
 year_in_review_sections = [
     {
         "title": {
-            "default":"Your Year of Calm",
+            "default":"{{#if first_name}}{{first_name}}'s{{else}}Your{{/if}} Year of Calm",
             "keyname": "sectiontitle_yearofcalm",
         },
         "css_class":"section1",
@@ -308,7 +317,7 @@ year_in_review_sections = [
         "data":[
             {
                 "title":{
-                    "default":"Your Calm Go-to",
+                    "default":"Your Calm Go-To",
                     "keyname":"metricMostFreq",
                     "value":"sess_type_most_freq",
                 },
@@ -316,6 +325,7 @@ year_in_review_sections = [
                 "lookup":"sess_type_most_freq",
                 "icon": "\"%s%s\"" % (YIR_IMAGE_FOLDER, "Heart_1x.png"),
                 "icon_shape":"square",
+                "ifEmpty":"--"
             },
             {
                 "title":{
@@ -328,12 +338,13 @@ year_in_review_sections = [
                 "icon":"sess_type_most_freq_icon",
                 "icon_shape":"circle",
                 "lookup":'numtimes',
+                "ifEmpty":"0"
             },
             ]
     },
     {
         "title": {
-            "default":"Your Calm Time",
+            "default":"{{#if first_name}}{{first_name}}'s{{else}}Your{{/if}} Calm Time",
             "keyname": "sectiontitle_calmtime",
         },
         "css_class":"section2",
@@ -354,6 +365,7 @@ year_in_review_sections = [
                 "lookup":"time_of_day_most_freq",
                 "icon": "time_of_day_most_freq_icon",
                 "icon_shape":"square",
+                "ifEmpty":"afternoon",
             },
             {
                 "title":{
@@ -365,6 +377,7 @@ year_in_review_sections = [
                 "icon": "\"%s%s\"" % (YIR_IMAGE_FOLDER, "Calendar_1x.png"),
                 "icon_shape":"square",
                 "css_class":"minimargin",
+                "ifEmpty":"wednesday",
             },
             {
                 "title":{
@@ -375,6 +388,7 @@ year_in_review_sections = [
                 "variable":"viz_n_day_of_week_sun",
                 "icon": "",
                 "css_class": "calendar nomargin",
+                "ifEmpty":"",
             },
             {
                 "title":{
@@ -385,6 +399,7 @@ year_in_review_sections = [
                 "variable":"viz_n_day_of_week_mon",
                 "icon": "",
                 "css_class": "calendar nomargin",
+                "ifEmpty":"",
             },
             {
                 "title":{
@@ -395,6 +410,7 @@ year_in_review_sections = [
                 "variable":"viz_n_day_of_week_tue",
                 "icon": "",
                 "css_class": "calendar nomargin",
+                "ifEmpty":"",
             },
             {
                 "title":{
@@ -405,6 +421,7 @@ year_in_review_sections = [
                 "variable":"viz_n_day_of_week_wed",
                 "icon": "",
                 "css_class": "calendar nomargin",
+                "ifEmpty":"",
             },
             {
                 "title":{
@@ -415,6 +432,7 @@ year_in_review_sections = [
                 "variable":"viz_n_day_of_week_thu",
                 "icon": "",
                 "css_class": "calendar nomargin",
+                "ifEmpty":"",
             },
             {
                 "title":{
@@ -425,6 +443,7 @@ year_in_review_sections = [
                 "variable":"viz_n_day_of_week_fri",
                 "icon": "",
                 "css_class": "calendar nomargin",
+                "ifEmpty":"",
             },
             {
                 "title":{
@@ -435,12 +454,13 @@ year_in_review_sections = [
                 "variable":"viz_n_day_of_week_sat",
                 "icon": "",
                 "css_class": "calendar",
+                "ifEmpty":"",
             },
             ]
     },
     {
         "title": {
-            "default":"Bedtime with Calm",
+            "default":"{{#if first_name}}{{first_name}}'s{{else}}Your{{/if}} Bedtime with Calm",
             "keyname": "sectiontitle_bedtime",
         },
         "css_class":"section3",
@@ -461,6 +481,7 @@ year_in_review_sections = [
                 "icon_shape":"rounded",
                 "url":"most_freq_sleep_story_program_url",
                 "css_class": "bigimage minimargin",
+                "ifEmpty":"--",
             },
             {
                 "title":{
@@ -472,7 +493,8 @@ year_in_review_sections = [
                 "icon":"",
                 "icon_shape":"",
                 "css_class": "bigimage",
-                "lookup": 'numtimes'
+                "lookup": 'numtimes',
+                "ifEmpty":"0",
             },
             {
                 "title":{
@@ -485,6 +507,7 @@ year_in_review_sections = [
                 "icon_shape":"circle",
                 "url":"narrator_url",
                 "css_class": "bigimage minimargin",
+                "ifEmpty":"--",
             },
             {
                 "title":{
@@ -496,7 +519,8 @@ year_in_review_sections = [
                 "icon":"",
                 "icon_shape":"circle",
                 "css_class": "bigimage",
-                "lookup": 'numtimes'
+                "lookup": 'numtimes',
+                "ifEmpty":"0",
             },
             {
                 "title":{
@@ -508,6 +532,7 @@ year_in_review_sections = [
                 "icon":"sleep_story_genre_most_freq_icon",
                 "icon_shape":"circle",
                 "css_class": "bigimage minimargin",
+                "ifEmpty":"--",
             },
             {
                 "title":{
@@ -519,7 +544,8 @@ year_in_review_sections = [
                 "icon": "",
                 "icon_shape":"circle",
                 "css_class": "bigimage",
-                "lookup": 'numtimes'
+                "lookup": 'numtimes',
+                "ifEmpty":"0",
             },
             ]
     },
@@ -527,6 +553,7 @@ year_in_review_sections = [
         "title": {
             "default":"Yours to Discover",
             "keyname": "sectiontitle_discover",
+            "subtitle":"We like your style. Here are a few recommendations we think you’ll like.",
         },
         "css_class":"section4",
         "style": {
@@ -546,6 +573,7 @@ year_in_review_sections = [
                 "icon_shape":"circle",
                 "url":"try_this_sess_type_program_url",
                 "css_class": "bigimage",
+                "ifEmpty":"Meditation",
             },
             {
                 "title":{
@@ -558,6 +586,7 @@ year_in_review_sections = [
                 "icon_shape":"circle",
                 "url":"try_this_sleep_story_genre_program_url",
                 "css_class": "bigimage",
+                "ifEmpty":"Afternoon Nap",
             },
             ]
     },

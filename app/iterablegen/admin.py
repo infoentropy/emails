@@ -138,6 +138,7 @@ class IterableSnippetAdmin(admin.ModelAdmin):
     search_fields = ['name', ]
     ordering = ('name', )
 
+
 class IterableCampaignSnippetAdmin(admin.ModelAdmin):
     model = IterableCampaignSnippet
     list_display = ['campaign', 'snippet', 'order']

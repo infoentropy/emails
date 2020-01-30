@@ -28,8 +28,8 @@ IterableCampaignSerializer,
 )
 
 SNIPPET_OUTPUT = "{{{ snippet '%s' %s }}}"
-TEMPLATE_BEGIN = '{{#assign "promocard"}}{{{ snippet "content - new releases CSS" }}}{{/assign}}\n{{{ snippet "wrapper - open promocard" button_color="calm-blue blue green pink red orange" promocard=promocard }}}'
-TEMPLATE_END = '{{{ snippet "wrapper - close" }}}'
+TEMPLATE_BEGIN = '{{#assign "promocard"}}{{{ snippet "content - new releases CSS" }}}{{/assign}}\n{{{ snippet "wrapper - open promocard" button_color="calm-blue blue green pink red orange violet" promocard=promocard }}}'
+TEMPLATE_END = '{{{ snippet "wrapper - close configurable" social="false" }}}'
 def center():
     return "\n{{{ snippet 'wrapper - table center' body=output }}}"
 
