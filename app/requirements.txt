@@ -1,4 +1,4 @@
-Django==2.2.4
+Django==2.2.27
 gunicorn>=19.9
 Jinja2
 jinja2-cli
