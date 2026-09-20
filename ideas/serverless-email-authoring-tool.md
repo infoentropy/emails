@@ -16,7 +16,7 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 
 - Block schemas are **code-defined**, not end-user-defined. The set of available block types and their fields is authored by developers (in the tool's source/config); end users choose from existing block types and fill in field values — they don't create new block types or add/remove fields.
 - Each block type's schema is declared as a **JSON Schema** document (fields as `properties`, with `type`, and whatever else JSON Schema offers — required fields, descriptions, etc.).
-- Fields within a schema have a fixed **order**, and that order is meaningful: e.g. a "content card" block might define `title`, `body`, `cta` in that order. The order drives both how the authoring form lays out its inputs and the field order in the output. (JSON Schema's `properties` object doesn't guarantee key order across all tooling — may need an explicit `order`/`propertyOrder`-style convention if the parser used doesn't preserve it.)
+- Fields within a schema have a fixed **order**, and that order is meaningful: e.g. a "content card" block might define `title`, `body`, `cta` in that order. The order drives both how the authoring form lays out its inputs and the field order in the output. Order is declared explicitly via a `weight` property on each field; fields are sorted by `weight` ascending, rather than relying on `properties` key order (which JSON Schema doesn't guarantee across tooling).
 
 ## Authoring form
 
@@ -33,7 +33,6 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 ## Open questions
 
 - The field `type` values (`integer`/`float`/`text`/`paragraph`/`markdown`/`date`) aren't JSON Schema's own `type` vocabulary (`string`/`number`/`integer`/`boolean`/`array`/`object`/`null`) — needs deciding whether this `type` is a custom keyword alongside/instead of JSON Schema's native `type`, and how each maps to a JSON Schema `type`+`format` pair for validation.
-- How is field order preserved/declared reliably given JSON Schema's `properties` key order isn't guaranteed by all tooling.
 - Exact shape of the output JSON (the authored email document) — likely validated against the block JSON Schemas, but shape not yet defined.
 
 ## Status
