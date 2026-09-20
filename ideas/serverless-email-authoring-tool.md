@@ -14,7 +14,8 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 ## Block schemas
 
 - Block schemas are **code-defined**, not end-user-defined. The set of available block types and their fields is authored by developers (in the tool's source/config); end users choose from existing block types and fill in field values — they don't create new block types or add/remove fields.
-- Fields within a schema have a fixed **order**, and that order is meaningful: e.g. a "content card" block might define `title`, `body`, `cta` in that order. The order drives both how the authoring form lays out its inputs and the field order in the output.
+- Each block type's schema is declared as a **JSON Schema** document (fields as `properties`, with `type`, and whatever else JSON Schema offers — required fields, descriptions, etc.).
+- Fields within a schema have a fixed **order**, and that order is meaningful: e.g. a "content card" block might define `title`, `body`, `cta` in that order. The order drives both how the authoring form lays out its inputs and the field order in the output. (JSON Schema's `properties` object doesn't guarantee key order across all tooling — may need an explicit `order`/`propertyOrder`-style convention if the parser used doesn't preserve it.)
 
 ## Authoring form
 
@@ -32,10 +33,11 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 
 ## Open questions
 
-- How are code-defined block schemas declared (a config file per block type? a schema language? plain code)?
+- How is `textarea` vs. default text input signaled in the JSON Schema for a field, since that's a UI concern JSON Schema doesn't natively express (a custom annotation keyword? `format`?).
+- How is field order preserved/declared reliably given JSON Schema's `properties` key order isn't guaranteed by all tooling.
 - What counts as a "medium" beyond email — is web/landing-page rendering in scope now or later?
 - Where do themes live, and how do they differ from mediums (a theme reskins a block, a medium may need a structurally different block)?
-- Exact shape of the output JSON.
+- Exact shape of the output JSON (the authored email document) — likely validated against the block JSON Schemas, but shape not yet defined.
 
 ## Status
 
