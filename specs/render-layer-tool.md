@@ -1,0 +1,47 @@
+# Render layer tool
+
+## Problem
+
+The serverless email authoring tool (`serverless-email-authoring-tool.md`, in this folder) produces a JSON document describing an authored email: an ordered list of blocks, each with a `blockType` and `data` validated against that block's JSON Schema. That document needs to become actual email HTML. Rendering was explicitly kept out of scope for the authoring tool — this is that separate tool.
+
+## Core idea
+
+- Input: the authored email JSON document (blocks, in order, each with `id`, `blockType`, `data`) plus a **theme**.
+- Each `blockType` maps to an HTML template/partial that knows how to render that block's `data` into email-safe markup (table layout, inline styles, MSO conditionals — see `../CLAUDE.md` for the HTML conventions already used in this repo's templates).
+- The theme controls the visual styling applied on top (colors, fonts, spacing, etc.) without changing which blocks exist or their content — themes live entirely in this tool (per the authoring tool spec), not in the authored document.
+- Output: a single HTML file/string for the email, ready to send or preview — same as `flipboard/techdigest.html` and `traction/index.html` in shape, but generated rather than hand-written.
+- Medium is email only, matching the authoring tool's scope.
+- No server required — should work as a static/local tool, same constraint as the authoring tool.
+
+## Relationship to the authoring tool
+
+- `blockType` → template mapping is **code-defined**, mirroring how the authoring tool's block schemas are code-defined — the same set of block types should be known to both tools.
+- This tool **cannot** assume the input document is valid. The authoring tool's validation is advisory, not blocking (by design — half-finished emails need to be saveable), so a document that fails its block schemas can still be exported. Decide per case whether to validate on the way in or to render defensively; either way, "it was already validated" is not true.
+- Unknown `blockType` is a hard error: this tool has no template for it and cannot produce correct HTML. (The authoring tool takes the opposite line and preserves unknown blocks, so that round-tripping a document through an older copy never destroys content.)
+
+### Compatibility with evolving schemas
+
+The authoring tool's **Schema evolution** section fixes the rules that make version skew survivable, and they impose two requirements on templates here:
+
+- A field missing from a block's `data` takes the `default` declared in its schema. Old documents predate fields a newer template expects, and this is what fills the gap.
+- A field present in `data` that the template doesn't use is **ignored**, never an error. This is what lets a stale template render a newer document.
+
+Because schemas may only ever gain optional fields — renames and removals become a new `blockType` instead — a template written for version *N* of a schema keeps working against every later version. Lockstep shipping is not required, which matters because the two tools have no shared distribution path: this one is a Python script, the other a static HTML file users keep local copies of.
+
+## Implementation
+
+- A **Python 3** script, run locally/on demand — no server process.
+- Templating via **Jinja2** (the standard, widely-used Python templating engine): one Jinja2 template per `blockType`, each block's `data` rendered through its template, then the rendered blocks concatenated into the final email HTML (wrapped in whatever outer document shell the theme provides).
+- Basic shape: script takes the authored JSON document (and a theme selection) as input, and writes the rendered HTML as output.
+
+## Open questions
+
+Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above.
+
+- How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
+- Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme is selected, where block templates and themes are located on disk.
+- How do `fieldType` values that need non-trivial rendering get handled — e.g. `markdown` (needs markdown→HTML conversion, likely a Python markdown library used inside the Jinja2 template), `date` (needs a display format)?
+
+## Status
+
+Early spec — core shape and implementation approach (Python 3 + Jinja2) agreed, but the open questions above need answers before implementation starts.

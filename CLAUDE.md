@@ -14,4 +14,12 @@ The HTML files use classic email-safe markup: XHTML transitional doctype, inline
 
 There is no local server or renderer in this repo — preview the HTML files by opening them directly in a browser or an email client testing tool.
 
-Note: a previous version of this repository contained a Django app (`app/`) with models named `calm`, `hbemail`, and `iterablegen` that generated the campaign JSON/XML seen in `content/`. That app has been removed; `content/weekly.json` and `content/weekly.xml` remain as static examples of its output format.
+## Project management
+
+Work is tracked as markdown files moving through four folders (see each folder's README for details):
+
+1. `ideas/` — early, unscoped ideas.
+2. `feedback/` — refinements requested for already-launched features.
+3. `specs/` — scoped work ready to implement. Pull work from here.
+4. `completed/` — finished specs, moved from `specs/` via `git mv` (not deleted) once the work lands, as part of the same commit/PR that finishes it.
+
