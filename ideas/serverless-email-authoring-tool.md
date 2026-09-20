@@ -20,9 +20,7 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 
 ## Authoring form
 
-- Each field renders as a form input based on its type. For now, only two are needed:
-  - default: single-line text input
-  - `textarea`: multi-line text box
+- Each field declares a `type`, and the form input it renders as is determined by that type. Field types: `integer`, `float`, `text` (single-line input), `paragraph` (multi-line textarea), `markdown` (textarea authored in markdown), `date`.
 - Other field types (image picker, color picker, link picker, etc.) are explicitly deferred — not needed for a first version.
 
 ## Target shape
@@ -34,7 +32,7 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 
 ## Open questions
 
-- How is `textarea` vs. default text input signaled in the JSON Schema for a field, since that's a UI concern JSON Schema doesn't natively express (a custom annotation keyword? `format`?).
+- The field `type` values (`integer`/`float`/`text`/`paragraph`/`markdown`/`date`) aren't JSON Schema's own `type` vocabulary (`string`/`number`/`integer`/`boolean`/`array`/`object`/`null`) — needs deciding whether this `type` is a custom keyword alongside/instead of JSON Schema's native `type`, and how each maps to a JSON Schema `type`+`format` pair for validation.
 - How is field order preserved/declared reliably given JSON Schema's `properties` key order isn't guaranteed by all tooling.
 - Exact shape of the output JSON (the authored email document) — likely validated against the block JSON Schemas, but shape not yet defined.
 
