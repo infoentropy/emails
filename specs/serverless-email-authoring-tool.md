@@ -26,6 +26,31 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 - Each block type's schema is declared as a **JSON Schema** document (fields as `properties`, and whatever else JSON Schema offers — required fields, descriptions, etc.). `type` stays JSON Schema's own type (`string`, `number`, `integer`, ...); the widget/form-control choice is a separate custom `fieldType` keyword (see Authoring form), so schemas remain valid JSON Schema.
 - Fields within a schema have a fixed **order**, and that order is meaningful: e.g. a "content card" block might define `title`, `body`, `cta` in that order. The order drives both how the authoring form lays out its inputs and the field order in the output. Order is declared explicitly via a `weight` property on each field; fields are sorted by `weight` ascending, rather than relying on `properties` key order (which JSON Schema doesn't guarantee across tooling).
 
+### Schema evolution
+
+Block schemas are code-defined, but authored documents are files on disk that outlive any particular copy of either tool — and the two tools share no distribution path (this one is a static HTML file users keep locally; the render layer is a Python script). Version skew is structural, so schemas evolve under a rule rather than a migration system.
+
+- Each block schema carries a `version` integer, starting at `1`. It is a changelog aid for developers — **nothing validates against it**, and block instances do not record it.
+- **Allowed** (bump `version`): add a new field, provided it is optional and declares a `default`; widen an `enum`; remove a field from `required`; edit `title`/`description`.
+- **Forbidden**: renaming, removing or retyping a field; adding a field to `required`; narrowing an `enum`. Any of these is a new block type with a new `blockType`, not a revision of the existing one.
+- Retiring a block type: set `"deprecated": true` on its schema. The authoring tool hides it from the add-block palette but still renders its form for existing instances, so old documents stay editable.
+
+The point of the rule is that it makes migration unnecessary: a document authored against version *N* of a schema is valid against every later version **by construction**, because later versions only ever add optional fields. There is no migration machinery in v1 and none is planned.
+
+Two companion rules give the render layer the other direction of compatibility — a stale template receiving a newer document:
+
+- A field missing from a block's `data` takes the `default` declared in its schema.
+- A field present in `data` that the schema doesn't know is **ignored**, never an error.
+
+### What belongs in a block schema
+
+The authored document is meant to be theme-independent, so presentation values generally belong to the theme, not the schema. But the line is drawn **per field, by asking whether the value carries meaning or only styling** — not by a blanket ban on anything that looks like a measurement:
+
+- A spacer's `height` *is* the block's entire content; without it the block means nothing. It stays in the schema.
+- A button's `width` or a header's `padding` are styling decisions the theme should own. They don't.
+
+Applying this to each field of the real block set is the block library's job, not this spec's.
+
 ### Which block types ship
 
 Deferred to a **separate spec** — this spec defines the document format and the tool, not the block library. The concrete set of block types (and their field definitions) is worked out in `../ideas/email-block-library.md`.
@@ -66,7 +91,8 @@ The authoring UI supports, per email:
 ## Validation
 
 - The JSON Schema serves two purposes: it drives form layout (via `fieldType`/`weight`/`title`) and it describes what valid data looks like.
-- v1 does **not** bundle a full JSON Schema validator — vendoring one inline conflicts with the single-file, no-dependency constraint. Instead the tool hand-rolls a check over the subset it actually uses: `required`, `type`, and `format: date`.
+- v1 does **not** bundle a full JSON Schema validator — vendoring one inline conflicts with the single-file, no-dependency constraint. Instead the tool hand-rolls a check over the subset it actually uses: `required`, `type`, `enum`, `format: date` and `format: uri`.
+- `enum` and `format: uri` matter more than they look. Because v1 keeps the text-only `fieldType` set (see above), constrained values like brand colour tokens and every image and link URL are authored as free text — validation is the **only** guard rail on them, so the validator covers both even though no widget enforces them.
 - Validation is **advisory, not blocking**: problems are surfaced next to the offending field and in a summary, but the author can still export a document that doesn't validate. Half-finished emails need to be saveable.
 
 ## Persistence
@@ -170,8 +196,13 @@ Called out explicitly so these read as decisions, not oversights:
 
 ## Open questions
 
-- **Block schema versioning.** `version` covers the document format, but a block instance records only its `blockType` — nothing about which revision of that block's schema it was authored against. If a block schema gains or renames a field later, existing documents have no way to signal staleness. Probably needs solving before the block library spec lands.
-- **Unknown block types on import.** If a document references a `blockType` the tool doesn't have a schema for, does it drop the block, preserve it opaquely, or refuse the import? Preserving it is safest for round-tripping, but means rendering a block the form can't edit.
+Both of the questions previously listed here are now settled — see **Schema evolution** above, and **Unknown block types** below.
+
+## Unknown block types
+
+If a document references a `blockType` this tool has no schema for, the tool **preserves the block**: it shows a read-only placeholder naming the unknown type, and writes the block back out on export with its `data` untouched. Opening a newer document in an older copy of the tool and saving must never silently destroy content.
+
+The render layer takes the opposite line and fails loudly, since it cannot produce correct HTML for a block it has no template for.
 
 ## Status
 

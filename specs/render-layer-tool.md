@@ -16,7 +16,17 @@ The serverless email authoring tool (`serverless-email-authoring-tool.md`, in th
 ## Relationship to the authoring tool
 
 - `blockType` → template mapping is **code-defined**, mirroring how the authoring tool's block schemas are code-defined — the same set of block types should be known to both tools.
-- This tool trusts the input document (it was already validated against the block JSON Schemas by the authoring tool); it doesn't need to re-validate, though it may want to fail loudly on an unknown `blockType`.
+- This tool **cannot** assume the input document is valid. The authoring tool's validation is advisory, not blocking (by design — half-finished emails need to be saveable), so a document that fails its block schemas can still be exported. Decide per case whether to validate on the way in or to render defensively; either way, "it was already validated" is not true.
+- Unknown `blockType` is a hard error: this tool has no template for it and cannot produce correct HTML. (The authoring tool takes the opposite line and preserves unknown blocks, so that round-tripping a document through an older copy never destroys content.)
+
+### Compatibility with evolving schemas
+
+The authoring tool's **Schema evolution** section fixes the rules that make version skew survivable, and they impose two requirements on templates here:
+
+- A field missing from a block's `data` takes the `default` declared in its schema. Old documents predate fields a newer template expects, and this is what fills the gap.
+- A field present in `data` that the template doesn't use is **ignored**, never an error. This is what lets a stale template render a newer document.
+
+Because schemas may only ever gain optional fields — renames and removals become a new `blockType` instead — a template written for version *N* of a schema keeps working against every later version. Lockstep shipping is not required, which matters because the two tools have no shared distribution path: this one is a Python script, the other a static HTML file users keep local copies of.
 
 ## Implementation
 
@@ -26,10 +36,11 @@ The serverless email authoring tool (`serverless-email-authoring-tool.md`, in th
 
 ## Open questions
 
+Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above.
+
 - How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
 - Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme is selected, where block templates and themes are located on disk.
 - How do `fieldType` values that need non-trivial rendering get handled — e.g. `markdown` (needs markdown→HTML conversion, likely a Python markdown library used inside the Jinja2 template), `date` (needs a display format)?
-- What happens when a block's schema evolves (new field added) but a template hasn't been updated yet — is there a compatibility/versioning story, or is it always assumed both tools ship in lockstep?
 
 ## Status
 

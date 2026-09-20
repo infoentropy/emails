@@ -6,7 +6,7 @@ Lives in `ideas/` rather than `specs/` because it isn't scoped yet — the block
 
 ## What this needs to produce
 
-A set of JSON Schema documents, one per block type, in the format the authoring tool spec defines: `$id` of `block:<name>`, a `title`, `properties` with a `fieldType` and `weight` on each field, and a `required` list.
+A set of JSON Schema documents, one per block type, in the format the authoring tool spec defines: `$id` of `block:<name>`, a `title`, a `version` integer, `properties` with a `fieldType` and `weight` on each field, and a `required` list. Schemas must follow the additive-only evolution rule in that spec.
 
 ## Source material
 
@@ -22,25 +22,38 @@ A set of JSON Schema documents, one per block type, in the format the authoring 
 
 `flipboard/techdigest.html` and `traction/index.html` are the other reference points — the block types they'd decompose into may differ from the list above.
 
-## Tension to resolve
+## Settled: images, colours and links are text fields
 
-The authoring tool's v1 `fieldType` set is `text`, `paragraph`, `markdown`, `date`, `integer`, `float` — no image picker, no color picker, no link picker. But **most fields above are images, colors or links**. Options:
+The authoring tool keeps its text-only `fieldType` set for v1 (`text`, `paragraph`, `markdown`, `date`, `integer`, `float`). No image, colour, link, select or checkbox widgets. So every image URL, link URL and colour value in this library is modelled as `fieldType: text`, and widgets get upgraded in a later pass.
 
-1. Model them as `text` fields holding a URL or hex string for now, and upgrade the widgets later. Ugly to author, but unblocks everything.
-2. Pull image/color/link pickers forward into the tool's v1, contradicting its current "explicitly deferred" line.
-3. Pick a first block set that avoids them — which, looking at the table, means roughly `spacer` and `divider`. Not enough to be useful.
+Consequences to design around rather than discover later:
 
-This is the main thing to settle before this becomes a spec.
+- **Schemas should still declare `enum` and `format: uri`** even though the widget is a plain text box. The authoring tool's validator checks both, so constrained values and URLs are at least flagged when wrong — validation is the only guard rail here. This matters: the sample data contains `"bg_color": "##446740"`, a double-hash typo that shipped.
+- **Authors hand-type CloudFront URLs.** Unpleasant but not blocking; the images are hosted externally already, and a serverless tool has nowhere to upload to regardless.
+- **`icon_image_visible` has no representation.** It is a boolean, and there is no `boolean` fieldType. Options: drop the field, model it as a `text` enum of `"true"`/`"false"` (which lies about its JSON Schema `type`), or make `boolean` the first addition when the fieldType set is revisited. Unresolved — the only field in the source material that v1 genuinely cannot express.
+
+## Applying the layout principle
+
+The authoring tool spec keeps a presentation field only where the value *is* the content. Provisional verdicts:
+
+| Field | Verdict |
+|---|---|
+| `height` (spacer) | **Schema** — the block's entire meaning |
+| `body`, `preheader`, `coupon_code`, `cta_text`, `expires_text`, `text`, `feature_type` | **Schema** — content |
+| `bg_image`, `icon_image`, `avatar_image`, `*_link` | **Schema** — content |
+| `padding`, `width`, `bg_position`, `bg_color` | **Theme** — styling |
+
+Two things fall out of this:
+
+- **`large divider` becomes a zero-field block.** Its only field is `color`, which is styling. That's fine — it renders as a themed rule with nothing to author, like `<hr>` — but the authoring UI needs to handle a block whose form is empty.
+- **`button.color` is the one case the principle doesn't settle.** `"calm-blue"` reads as a styling value, but in practice it is probably selecting a *variant* (primary vs. secondary), which is semantic and belongs in the schema. If so it should be renamed — `variant`, with an enum of semantic names rather than colour names, so the theme decides what "primary" looks like. Needs a decision from whoever owns the brand tokens.
 
 ## Other open questions
 
 - **Naming.** Old names are prose (`component - discount header`). New `blockType` values should be identifier-shaped (`discount_header`). Straight rename, or reconsider the taxonomy?
-- **`body` holds HTML.** In `weekly.json` the discount header's `body` is `"<p>THIS IS THE BEST I CAN DO</p>\n<p>wow it is great</p>"`. The authoring tool bans raw HTML editing, so this wants to be `fieldType: markdown` — meaning the render layer, not the tool, converts markdown to HTML. Needs confirming with whoever owns the render layer.
-- **Enum-ish fields.** `color: "calm-blue"`, `feature_type: "sleep"`, `bg_position: "bottom center"` are clearly constrained value sets, not free text. JSON Schema `enum` covers this, but no `fieldType` maps to a select/dropdown widget yet. Probably needs one.
-- **Layout fields.** `padding: "10px 20px 10px 20px"` and `width: 220` are presentation, and the authoring tool's premise is that content is theme-independent. Do these belong in the schema layer at all, or are they the render layer's job?
-- **`icon_image_visible`** is a boolean — another `fieldType` the v1 list doesn't have.
+- **`body` holds HTML.** In `weekly.json` the discount header's `body` is `"<p>THIS IS THE BEST I CAN DO</p>\n<p>wow it is great</p>"`. The authoring tool bans raw HTML editing, so this wants to be `fieldType: markdown` — meaning the render layer, not the tool, converts markdown to HTML. The render layer spec has this as an open question too.
 - **Per-block `preheader`.** Several blocks have a `preheader` field that is heading text within the block, unrelated to the email-level `preheader` (inbox preview text). Worth renaming to avoid the collision.
 
 ## Next step
 
-Decide the tension above, pick a first block set, then write the schemas out and move this to `../specs/`.
+Settle the `boolean` gap and `button.color`, pick a first block set, then write the schemas out and move this to `../specs/`.
