@@ -12,11 +12,25 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 - Each block schema maps to an HTML template/partial that renders it. Swapping a block's HTML (a different theme) doesn't change the schema or the authored content, only the rendering.
 - Medium is **email only** — no other output medium (e.g. web) is in scope.
 
+## Tool shape
+
+- The tool is a **single static HTML file** — one self-contained document with inline `<style>` and `<script>`, no build step, no package manager, no bundler.
+- It must work when opened directly from disk (`file://`). That rules out `fetch()`ing sibling `.json` or `.js` files, since browsers block those requests under `file://`.
+- Consequently, **block schemas are embedded in the file itself** as a JavaScript object literal (the JSON Schema documents, inlined). "Code-defined schemas" means a developer edits that literal in the source; there is no schema loader and no runtime schema fetching.
+- No external dependencies, including CDN `<script>` tags — the tool must work offline. Anything it needs is vendored inline or hand-rolled.
+- This matches how the rest of this repo works: standalone HTML files you open in a browser.
+
 ## Block schemas
 
 - Block schemas are **code-defined**, not end-user-defined. The set of available block types and their fields is authored by developers (in the tool's source/config); end users choose from existing block types and fill in field values — they don't create new block types or add/remove fields.
 - Each block type's schema is declared as a **JSON Schema** document (fields as `properties`, and whatever else JSON Schema offers — required fields, descriptions, etc.). `type` stays JSON Schema's own type (`string`, `number`, `integer`, ...); the widget/form-control choice is a separate custom `fieldType` keyword (see Authoring form), so schemas remain valid JSON Schema.
 - Fields within a schema have a fixed **order**, and that order is meaningful: e.g. a "content card" block might define `title`, `body`, `cta` in that order. The order drives both how the authoring form lays out its inputs and the field order in the output. Order is declared explicitly via a `weight` property on each field; fields are sorted by `weight` ascending, rather than relying on `properties` key order (which JSON Schema doesn't guarantee across tooling).
+
+### Which block types ship
+
+Deferred to a **separate spec** — this spec defines the document format and the tool, not the block library. The concrete set of block types (and their field definitions) is worked out in `../ideas/email-block-library.md`.
+
+For development and testing, this tool ships with a small number of throwaway fixture schemas (e.g. the `content_card` below). They exist to exercise the form, reordering and export paths, and are expected to be replaced wholesale by the real library.
 
 ## Authoring form
 
@@ -32,13 +46,54 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
   | `float`      | `number`            | —                      |
 
 - Other field types (image picker, color picker, link picker, etc.) are explicitly deferred — not needed for a first version.
+- A field's `title` is its form label; its `description`, if present, renders as help text under the input.
+
+### Block operations
+
+The authoring UI supports, per email:
+
+- **Add** a block — pick a block type from a palette of the available types; the new block is appended to the end with empty/default field values.
+- **Delete** a block.
+- **Move up / move down** — reordering is one position at a time. Drag-and-drop is deferred.
+- **Duplicate** a block — copies its field values into a new block instance with a fresh `id`.
+
+### Block instance ids
+
+- Ids are **incrementing and document-local**: `b1`, `b2`, `b3`, …
+- The next id is derived on demand as `b` + (highest existing numeric suffix in the document + 1). No counter is stored in the document — that keeps the exported JSON clean, at the cost of an id being reusable after the last block is deleted.
+- That's acceptable because ids are only used by the UI to key and reference blocks *within a single document*. They are **not stable identifiers** across exports, and nothing outside the document should reference them.
+
+## Validation
+
+- The JSON Schema serves two purposes: it drives form layout (via `fieldType`/`weight`/`title`) and it describes what valid data looks like.
+- v1 does **not** bundle a full JSON Schema validator — vendoring one inline conflicts with the single-file, no-dependency constraint. Instead the tool hand-rolls a check over the subset it actually uses: `required`, `type`, and `format: date`.
+- Validation is **advisory, not blocking**: problems are surfaced next to the offending field and in a summary, but the author can still export a document that doesn't validate. Half-finished emails need to be saveable.
+
+## Persistence
+
+- **localStorage** holds the in-progress document, autosaved on every change, so a refresh or crashed tab doesn't lose work.
+- **Export** writes the document out as a downloaded `.json` file. **Import** reads one back in via a file picker. The file is the real save format and the thing handed to the render layer; localStorage is only crash protection, not a document library.
+- On load, the tool restores from localStorage if anything is there; otherwise it starts a new empty document.
+- Import replaces the current document (with a confirmation prompt, since it discards unsaved work).
 
 ## Target shape
 
 - **Schema layer**: describes the structure of an email — which blocks, in what order, and their field values, each per its code-defined block schema. This is the thing that's authored/edited and is theme-independent.
-- **Output**: this tool's goal output is a JSON document/schema capturing the authored email (blocks, order, field values). It doesn't render HTML itself.
+- **Output**: this tool's goal output is a JSON document/schema capturing the authored email (campaign metadata, blocks, order, field values). It doesn't render HTML itself.
 - **Render layer** (separate tool/idea): takes the JSON output + a theme and produces email HTML. Themes live outside this tool entirely (owned by the render layer, not authored or stored here). Out of scope for this tool.
 - No server required to author — should work as a static/local tool.
+
+### Document format
+
+The exported document wraps the block list in campaign-level metadata, mirroring the fields in the existing sample data at `content/weekly.json` (`name`, `subject`, `preheaderText`):
+
+- `version` — integer format version, currently `1`. Lets the render layer reject documents it doesn't understand. This versions the *document format*, not individual block schemas.
+- `name` — internal campaign name, not sent to recipients.
+- `subject` — the email subject line.
+- `preheader` — preview text shown after the subject in the inbox. (Note: renamed from `preheaderText` in `weekly.json`. Distinct from any per-block `preheader` field a block schema may define for its own heading text.)
+- `blocks` — ordered array of block instances.
+
+These four campaign fields are fixed in the tool's source, not schema-driven — they're part of the document format rather than a block type.
 
 ## Example
 
@@ -77,6 +132,10 @@ An authored email using it, alongside another block (block order is array order 
 
 ```json
 {
+  "version": 1,
+  "name": "Sample Campaign",
+  "subject": "Big Sale This Week",
+  "preheader": "Everything is 20% off through Friday.",
   "blocks": [
     {
       "id": "b1",
@@ -98,9 +157,21 @@ An authored email using it, alongside another block (block order is array order 
 }
 ```
 
+## Out of scope for v1
+
+Called out explicitly so these read as decisions, not oversights:
+
+- **No HTML preview.** Rendering belongs to the render layer, which this tool doesn't contain. The tool instead shows a live, read-only pane of the JSON document as it's authored — that pane is the only "preview".
+- **No theme selection or storage.** Themes are the render layer's concern.
+- **No multi-document library.** One document at a time; managing many emails is done with files on disk.
+- **No image, color or link pickers** — see the deferred `fieldType` list above.
+- **No drag-and-drop reordering** — move up/down only.
+- **No collaboration, sharing or sync** of any kind. There's no server.
+
 ## Open questions
 
-- Exact `id` format (UUID? incrementing? content-hash?) — not yet settled, just that each block instance needs one.
+- **Block schema versioning.** `version` covers the document format, but a block instance records only its `blockType` — nothing about which revision of that block's schema it was authored against. If a block schema gains or renames a field later, existing documents have no way to signal staleness. Probably needs solving before the block library spec lands.
+- **Unknown block types on import.** If a document references a `blockType` the tool doesn't have a schema for, does it drop the block, preserve it opaquely, or refuse the import? Preserving it is safest for round-tripping, but means rendering a block the form can't edit.
 
 ## Status
 
