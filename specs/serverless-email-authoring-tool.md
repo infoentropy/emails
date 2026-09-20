@@ -104,4 +104,4 @@ An authored email using it, alongside another block (block order is array order 
 
 ## Status
 
-Early idea, not scoped. Needs a spec before implementation — see `../specs/README.md`.
+Scoped, ready to implement. Move this file to `../completed/` via `git mv` once the work lands.
