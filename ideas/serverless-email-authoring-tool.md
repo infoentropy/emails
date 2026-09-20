@@ -73,12 +73,13 @@ A "content card" block schema:
 }
 ```
 
-An authored email using it, alongside another block (block order is array order — no `weight` needed at this level):
+An authored email using it, alongside another block (block order is array order — no `weight` needed at this level; each block instance has its own `id`, distinct from `blockType`, so the UI can reorder/reference a specific block even if the same `blockType` appears more than once):
 
 ```json
 {
   "blocks": [
     {
+      "id": "b1",
       "blockType": "content_card",
       "data": {
         "title": "Big Sale This Week",
@@ -87,6 +88,7 @@ An authored email using it, alongside another block (block order is array order 
       }
     },
     {
+      "id": "b2",
       "blockType": "footer",
       "data": {
         "unsubscribe_text": "Unsubscribe"
@@ -98,7 +100,7 @@ An authored email using it, alongside another block (block order is array order 
 
 ## Open questions
 
-- Exact shape of the output JSON (the authored email document) — the example above is a first pass, not yet settled (e.g. does a block need its own `id`? Is `blockType` the right key name?).
+- Exact `id` format (UUID? incrementing? content-hash?) — not yet settled, just that each block instance needs one.
 
 ## Status
 
