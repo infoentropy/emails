@@ -30,17 +30,12 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 - **Render layer** (separate tool/idea): takes the JSON output + a theme/medium and produces HTML. Swappable independently of the schema, and out of scope for this tool.
 - No server required to author — should work as a static/local tool.
 
-## Prior art in this repo
-
-The old Django app (removed, see `CLAUDE.md`) had a similar shape: `hbemail` had `Template`/`TemplateRegion`/`Component`/`ComponentSchema` concepts, and `iterablegen` produced campaigns as an ordered list of snippets with per-snippet `data` — see `content/weekly.json` / `content/weekly.xml` for what that output looked like (a campaign with a `iterablecampaignsnippet_set` list, each snippet having a `data` dict of fields and a `snippet` name/type). That's close to the block+schema model described above, minus the server dependency.
-
 ## Open questions
 
 - How are code-defined block schemas declared (a config file per block type? a schema language? plain code)?
-- How much of the old `hbemail`/`iterablegen` schema shapes are reusable vs. need rethinking for a serverless design?
 - What counts as a "medium" beyond email — is web/landing-page rendering in scope now or later?
 - Where do themes live, and how do they differ from mediums (a theme reskins a block, a medium may need a structurally different block)?
-- Exact shape of the output JSON — is it closer to the old `iterablecampaignsnippet_set` list shape, or something new?
+- Exact shape of the output JSON.
 
 ## Status
 
