@@ -18,14 +18,19 @@ The serverless email authoring tool (`serverless-email-authoring-tool.md`, in th
 - `blockType` → template mapping is **code-defined**, mirroring how the authoring tool's block schemas are code-defined — the same set of block types should be known to both tools.
 - This tool trusts the input document (it was already validated against the block JSON Schemas by the authoring tool); it doesn't need to re-validate, though it may want to fail loudly on an unknown `blockType`.
 
+## Implementation
+
+- A **Python 3** script, run locally/on demand — no server process.
+- Templating via **Jinja2** (the standard, widely-used Python templating engine): one Jinja2 template per `blockType`, each block's `data` rendered through its template, then the rendered blocks concatenated into the final email HTML (wrapped in whatever outer document shell the theme provides).
+- Basic shape: script takes the authored JSON document (and a theme selection) as input, and writes the rendered HTML as output.
+
 ## Open questions
 
-- How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)?
-- Templating approach for turning `blockType` + `data` into HTML (a templating engine? plain string interpolation?) — needs to preserve the email-safe HTML patterns from `../CLAUDE.md`.
-- How do `fieldType` values that need non-trivial rendering get handled — e.g. `markdown` (needs markdown→HTML conversion), `date` (needs a display format)?
+- How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
+- Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme is selected, where block templates and themes are located on disk.
+- How do `fieldType` values that need non-trivial rendering get handled — e.g. `markdown` (needs markdown→HTML conversion, likely a Python markdown library used inside the Jinja2 template), `date` (needs a display format)?
 - What happens when a block's schema evolves (new field added) but a template hasn't been updated yet — is there a compatibility/versioning story, or is it always assumed both tools ship in lockstep?
-- Where do block templates live relative to themes — is a template theme-specific, or one template per `blockType` with the theme only supplying style values?
 
 ## Status
 
-Early spec — core shape agreed, but the open questions above need answers before implementation starts.
+Early spec — core shape and implementation approach (Python 3 + Jinja2) agreed, but the open questions above need answers before implementation starts.
