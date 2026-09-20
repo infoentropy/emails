@@ -9,7 +9,8 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 - An email is a sequence of **blocks** (e.g. header, discount banner, content card, CTA, footer).
 - Each block type has a fixed **schema**: a defined set of fields (text, image URL, color, link, etc.) — not free-form HTML.
 - Authoring an email = picking blocks, filling in their fields, and reordering them (move up/down). No raw HTML editing.
-- Each block schema maps to an HTML template/partial that renders it. Swapping the HTML for a block (different theme, different medium — email vs. web) doesn't change the schema or the authored content, only the rendering.
+- Each block schema maps to an HTML template/partial that renders it. Swapping a block's HTML (a different theme) doesn't change the schema or the authored content, only the rendering.
+- Medium is **email only** — no other output medium (e.g. web) is in scope.
 
 ## Block schemas
 
@@ -28,15 +29,13 @@ Building marketing emails today means hand-editing table-based HTML (see `flipbo
 
 - **Schema layer**: describes the structure of an email — which blocks, in what order, and their field values, each per its code-defined block schema. This is the thing that's authored/edited and is theme-independent.
 - **Output**: this tool's goal output is a JSON document/schema capturing the authored email (blocks, order, field values). It doesn't render HTML itself.
-- **Render layer** (separate tool/idea): takes the JSON output + a theme/medium and produces HTML. Swappable independently of the schema, and out of scope for this tool.
+- **Render layer** (separate tool/idea): takes the JSON output + a theme and produces email HTML. Themes live outside this tool entirely (owned by the render layer, not authored or stored here). Out of scope for this tool.
 - No server required to author — should work as a static/local tool.
 
 ## Open questions
 
 - How is `textarea` vs. default text input signaled in the JSON Schema for a field, since that's a UI concern JSON Schema doesn't natively express (a custom annotation keyword? `format`?).
 - How is field order preserved/declared reliably given JSON Schema's `properties` key order isn't guaranteed by all tooling.
-- What counts as a "medium" beyond email — is web/landing-page rendering in scope now or later?
-- Where do themes live, and how do they differ from mediums (a theme reskins a block, a medium may need a structurally different block)?
 - Exact shape of the output JSON (the authored email document) — likely validated against the block JSON Schemas, but shape not yet defined.
 
 ## Status
