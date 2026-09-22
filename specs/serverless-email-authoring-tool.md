@@ -54,10 +54,7 @@ Where a distinction genuinely is the author's to make — a prominent call to ac
 
 **The one exception is image dimensions.** An image field carries its own pixel size as sibling `<field>_width` and `<field>_height` integers. This is not a styling preference: email clients need explicit `width` and `height` attributes to reserve layout space while images are blocked, which is the state most messages are first opened in. The numbers describe the asset, not a design decision.
 
-Two caveats on that exception, recorded so they are not rediscovered:
-
-- Nothing in the current block library has an image field, so the convention has no user yet. It is written down anyway because it is a property of the schema layer rather than of any one block, and because a naming convention costs nothing to carry — unlike a `fieldType` or a widget, which is why `boolean` was removed when its only field went.
-- Sibling fields can drift: nothing ties the numbers to the URL, so replacing an image can leave stale dimensions behind. Grouping the three into one object-valued field would prevent that, at the cost of introducing nested objects to the schema layer, the form renderer and the validator. Worth revisiting if image fields become common.
+One caveat on that exception: sibling fields can drift, since nothing ties the numbers to the URL, so replacing an image can leave stale dimensions behind. Grouping the three into one object-valued field would prevent it, at the cost of introducing nested objects to the schema layer, the form renderer and the validator. Worth revisiting if image fields become common.
 
 ### Shared vocabularies: `variant`
 
@@ -70,9 +67,9 @@ Some blocks need the author to distinguish two instances of the same block type 
 
 Because the values are brand-neutral, they need no sign-off from whoever owns a brand's colour palette. What a brand owns is the *theme mapping*, not the vocabulary.
 
-A `layout` vocabulary (`image_left` / `image_right`) was drafted here and then removed. Which side an image sits on is positional, and admitting it — even as a named arrangement rather than a measurement — would have made the content-only rule a rule with exceptions, which is how such rules stop being load-bearing. **Image dimensions remain the only exception**, and they earn it by describing the asset rather than a design decision.
+**Arrangement is the theme's too.** Which side an image sits on, and any comparable positional choice, is not expressible in the document. Naming an arrangement as a word rather than a number does not make it content — positional is positional, and admitting it would make this a rule with exceptions, which is how such rules stop being load-bearing.
 
-The consequence is that arrangement is entirely the theme's: an author adds image-and-text blocks, and the theme decides which side each image sits on, whether that is a fixed side or an alternating rhythm down the email. An author cannot override it for a particular block. That is the deliberate trade — see the render layer spec, where how a theme makes that choice is part of the open theme-structure question.
+The consequence is that an author adds blocks and the theme decides how they are arranged, whether that is a fixed side or an alternating rhythm down the email, with no per-block override. How a theme makes that choice is part of the open theme-structure question in the render layer spec.
 
 ### Which block types ship
 
@@ -94,8 +91,7 @@ For development and testing, this tool ships with a small number of throwaway fi
   | `float`      | `number`            | —                      |
 
 - `markdown` fields are converted to HTML by the render layer, not by this tool, and **raw HTML in a markdown field is escaped rather than passed through** — it renders as visible literal text. Standard markdown converters allow HTML through, which would leave this tool's ban on raw HTML editing stated but unenforced; escaping is what makes the rule real.
-- A `boolean` fieldType was added and then removed. It existed for one field, `icon_image_visible`, and when that field was reclassified as theme-owned it left `boolean` with no user — carrying a widget nothing exercises is the speculative addition this spec avoids elsewhere. Re-add it when a real boolean field appears.
-- Other field types (image picker, colour picker, link picker, select/dropdown, etc.) remain deferred — images, links and constrained values are authored as `text` for now, and the widgets get upgraded in a later pass.
+- **A `fieldType` is added when a real field needs it, not in anticipation.** A widget nothing exercises is dead weight in a tool that must stay a single readable file. Image, colour and link pickers, selects and checkboxes are all deferred on these grounds — images, links and constrained values are authored as `text` for now, and the widgets get upgraded in a later pass.
 - A field's `title` is its form label; its `description`, if present, renders as help text under the input.
 
 ### Block operations
@@ -220,10 +216,6 @@ Called out explicitly so these read as decisions, not oversights:
 - **No image, color or link pickers** — see the deferred `fieldType` list above.
 - **No drag-and-drop reordering** — move up/down only.
 - **No collaboration, sharing or sync** of any kind. There's no server.
-
-## Open questions
-
-Both of the questions previously listed here are now settled — see **Schema evolution** above, and **Unknown block types** below.
 
 ## Unknown block types
 
