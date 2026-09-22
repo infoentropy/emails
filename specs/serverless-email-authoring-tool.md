@@ -51,6 +51,17 @@ The authored document is meant to be theme-independent, so presentation values g
 
 Applying this to each field of the real block set is the block library's job, not this spec's.
 
+### Shared vocabularies: `variant`
+
+Some blocks need the author to distinguish two instances of the same block type — a primary call-to-action versus a secondary one. That selector is semantic and lives in the document; the *appearance* it maps to belongs to the theme. The convention:
+
+- The field is named `variant`, with `fieldType: text` and a JSON Schema `enum`.
+- The enum is a **single shared scale reused by every block type that needs one**: `primary` and `secondary`. A button's `primary` and a divider's `primary` need not look remotely alike — the theme resolves `(blockType, variant)` to an appearance, so one vocabulary covers every block and new block types inherit it for free.
+- `variant` is **optional, defaulting to `primary`**. This is what the additive-only rule requires of any new field, and it means a document written before a block type gained its `variant` still renders correctly.
+- The scale starts at two values deliberately. Widening an `enum` is an allowed schema change, so real campaigns can pull in further values later at no cost to existing documents — whereas guessing at a richer scale now would bake in distinctions nothing has asked for.
+
+Because the values are brand-neutral, they need no sign-off from whoever owns a brand's colour palette. What a brand owns is the *theme mapping*, not the vocabulary.
+
 ### Which block types ship
 
 Deferred to a **separate spec** — this spec defines the document format and the tool, not the block library. The concrete set of block types (and their field definitions) is worked out in `../ideas/email-block-library.md`.

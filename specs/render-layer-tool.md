@@ -19,6 +19,12 @@ The serverless email authoring tool (`serverless-email-authoring-tool.md`, in th
 - This tool **cannot** assume the input document is valid. The authoring tool's validation is advisory, not blocking (by design — half-finished emails need to be saveable), so a document that fails its block schemas can still be exported. Decide per case whether to validate on the way in or to render defensively; either way, "it was already validated" is not true.
 - Unknown `blockType` is a hard error: this tool has no template for it and cannot produce correct HTML. (The authoring tool takes the opposite line and preserves unknown blocks, so that round-tripping a document through an older copy never destroys content.)
 
+### Themes and variants
+
+A block may carry a `variant` (`primary` or `secondary` — see the authoring tool spec). The theme owns what each one looks like, resolving `(blockType, variant)` to an appearance; the document never names a colour.
+
+When a theme has no styling for a variant in use, **render the block as `primary` and emit a warning** naming the block type and the missing variant. Failing hard would be worse than it looks: widening the `variant` enum is an allowed schema change, so a hard error would turn every such widening into a breaking change for every existing theme. A warning keeps the email building while leaving the gap visible to whoever maintains the theme.
+
 ### Compatibility with evolving schemas
 
 The authoring tool's **Schema evolution** section fixes the rules that make version skew survivable, and they impose two requirements on templates here:

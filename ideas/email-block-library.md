@@ -35,14 +35,17 @@ Consequences to design around rather than discover later:
 
 ## Settled: `variant` replaces colour names
 
-`button.color` and `large divider.color` both become **`variant`**: a semantic selector with an `enum`, where the theme decides what each value looks like. Colour names leave the document entirely.
+`button.color` and `large divider.color` both become **`variant`**, drawn from the shared `primary` / `secondary` scale the authoring tool spec defines. Colour names leave the document entirely; the theme resolves `(blockType, variant)` to an appearance.
 
-The reasoning: the sample campaign uses two differently-coloured buttons (`calm-blue` and `blue`) in one email, so authors *do* differentiate and some selector has to stay in the document. But the existing vocabulary is already incoherent — `large divider` is also `blue`, and nothing says whether `blue` and `calm-blue` are the same token or two different ones. Semantic names fix that and keep the document theme-independent.
+The reasoning: the sample campaign uses two differently-coloured buttons (`calm-blue` and `blue`) in one email, so authors *do* differentiate and some selector has to stay in the document. But the existing vocabulary is already incoherent — `large divider` is also `blue`, and nothing says whether `blue` and `calm-blue` are the same token or two different ones.
 
-- `button.variant` — provisionally `primary` / `secondary`.
-- `large_divider.variant` — provisionally `subtle` / `strong`. This reverses the earlier finding that the divider would be a zero-field block; it now has exactly one field.
+Settled details:
 
-Both enums are **provisional vocabulary**, not decisions: whoever owns the brand tokens should confirm the value names before the schemas are written. The shape is settled; the words are not.
+- `button.variant` — `primary` / `secondary`, optional, defaults to `primary`.
+- `large_divider.variant` — the same scale, same default. This reverses the earlier finding that the divider would be a zero-field block; it now has exactly one field.
+- The names need no brand sign-off, because they name emphasis rather than colour. What the brand owner owns is the theme's mapping.
+
+Worth noting how thin the evidence for a *divider* variant is: `flipboard/techdigest.html` contains ten dividers, all byte-identical (`1px solid #d8d8d8`), and `weekly.json` has exactly one. Buttons, by contrast, vary within a single campaign. In practice dividers may only ever use `primary` — which costs nothing, since the field is optional and the enum is shared rather than invented per block.
 
 ## Applying the layout principle
 
@@ -69,6 +72,5 @@ Both questions this originally raised are now resolved above: `large divider` is
 
 The two blockers are cleared. What remains before this becomes a spec:
 
-1. Confirm the provisional `variant` vocabularies with whoever owns the brand tokens.
-2. Decide the three open questions above (naming, markdown `body`, `preheader` collision) — all smaller than the two just settled.
-3. Pick the first block set, write the schemas out, and `git mv` this to `../specs/`.
+1. Decide the three open questions above (naming, markdown `body`, `preheader` collision) — all smaller than the ones already settled, and the `body` question is shared with the render layer spec, so it is worth deciding once for both.
+2. Pick the first block set, write the schemas out, and `git mv` this to `../specs/`.
