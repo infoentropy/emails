@@ -64,7 +64,7 @@ Because the values are brand-neutral, they need no sign-off from whoever owns a 
 
 ### Which block types ship
 
-Deferred to a **separate spec** — this spec defines the document format and the tool, not the block library. The concrete set of block types (and their field definitions) is worked out in `../ideas/email-block-library.md`.
+Deferred to a **separate spec** — this spec defines the document format and the tool, not the block library. The concrete set of block types (and their field definitions) is worked out in `email-block-library.md`, in this folder, with the schemas themselves in `../blocks/`.
 
 For development and testing, this tool ships with a small number of throwaway fixture schemas (e.g. the `content_card` below). They exist to exercise the form, reordering and export paths, and are expected to be replaced wholesale by the real library.
 
@@ -107,6 +107,8 @@ The authoring UI supports, per email:
 - The JSON Schema serves two purposes: it drives form layout (via `fieldType`/`weight`/`title`) and it describes what valid data looks like.
 - v1 does **not** bundle a full JSON Schema validator — vendoring one inline conflicts with the single-file, no-dependency constraint. Instead the tool hand-rolls a check over the subset it actually uses: `required`, `type`, `enum`, `format: date` and `format: uri`.
 - `enum` and `format: uri` matter more than they look. Apart from `boolean`, v1 has no constraining widgets, so enumerated values (such as a block's `variant`) and every image and link URL are authored as free text — validation is the **only** guard rail on them, so the validator covers both even though no widget enforces them.
+- **An empty string in an optional field means "not filled in"**, and `format` and `enum` checks are skipped for it. Without this rule, every optional URL field would report an error the moment it was left blank, since `""` is not a valid URI.
+- **A `default` must satisfy its own field's constraints** — it must be one of the field's `enum` values if it has one, and must be non-empty if the field is `required`. A required field defaulting to `""` is a contradiction: the default can never satisfy the requirement.
 - Validation is **advisory, not blocking**: problems are surfaced next to the offending field and in a summary, but the author can still export a document that doesn't validate. Half-finished emails need to be saveable.
 
 ## Persistence

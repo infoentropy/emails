@@ -8,6 +8,7 @@ This repository holds static HTML email templates and sample campaign data — t
 
 - `flipboard/techdigest.html` — standalone HTML email template (table-based layout with MSO/Outlook conditional comments for email client compatibility).
 - `traction/index.html` — standalone HTML email template ("Traction coding sample"), plus `traction/smallpaw.png`, an image it references.
+- `blocks/*.json` — the block schema library: one JSON Schema document per block type, authored per `specs/serverless-email-authoring-tool.md`. These are the source of truth, consumed by the render layer directly and hand-inlined into the authoring tool (which embeds its schemas, since it must work from `file://`).
 - `content/weekly.json` / `content/weekly.xml` — the same sample campaign data (a snippet-based email campaign structure: name, subject, preheader, and a list of content snippets with per-snippet data like background image/color, copy, and CTA text) expressed in JSON and XML respectively.
 
 The HTML files use classic email-safe markup: XHTML transitional doctype, inline `<style>` blocks, table layouts, and Outlook (`mso`)/`ExternalClass` conditional CSS. When editing them, preserve these email-client compatibility patterns rather than modernizing to standard responsive/CSS-grid techniques, which many email clients don't support.

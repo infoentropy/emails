@@ -1,12 +1,14 @@
 # Email block library
 
-Split out of `../specs/serverless-email-authoring-tool.md`, which defines the document format and the authoring tool but deliberately doesn't commit to a set of block types. This file is where that set gets worked out.
+Split out of `serverless-email-authoring-tool.md`, which defines the document format and the authoring tool but deliberately doesn't commit to a set of block types. This file is where that set gets worked out.
 
-Lives in `ideas/` rather than `specs/` because it isn't scoped yet — the block list and field definitions below are candidates, not decisions.
+Moved to `specs/` once every open question was settled; the schemas it describes are drafted in `../blocks/`.
 
-## What this needs to produce
+## What this produces
 
-A set of JSON Schema documents, one per block type, in the format the authoring tool spec defines: `$id` of `block:<name>`, a `title`, a `version` integer, `properties` with a `fieldType` and `weight` on each field, and a `required` list. Schemas must follow the additive-only evolution rule in that spec.
+A set of JSON Schema documents, one per block type, in the format the authoring tool spec defines: `$id` of `block:<name>`, a `title`, a `version` integer, `properties` with a `fieldType` and `weight` on each field, and a `required` list. Schemas follow the additive-only evolution rule in that spec.
+
+**A first cut of all five now exists in `../blocks/`.** They were checked mechanically against the conventions above and against `content/weekly.json`: the only fields the migration drops are the four assigned to the theme (`bg_color`, `bg_position`, `padding`, `width`), and no required field is empty in the source data.
 
 ## Source material
 
@@ -79,10 +81,11 @@ That has one migration consequence: the legacy `body` in `weekly.json` is raw HT
 
 ## Next step
 
-**There are no open questions left.** Every decision this file was waiting on — the `boolean` gap, `button.color`, the `variant` vocabulary, `blockType` naming, `body`, and the `preheader` collision — is settled above.
+Every decision this file was waiting on — the `boolean` gap, `button.color`, the `variant` vocabulary, `blockType` naming, `body`, and the `preheader` collision — is settled above, and the schemas are drafted in `../blocks/`.
 
-What remains is the work itself:
+Two things surfaced while writing them that are worth a decision:
 
-1. Confirm the block set. The five in the table above are the obvious candidates, being the ones that actually shipped, but nothing has formally committed to them.
-2. Write the schemas out, applying the decisions above.
-3. `git mv` this file to `../specs/` once it describes work someone could start from without further clarification.
+- **`feature_type` cannot gain an `enum` later.** It is free text today, and the evolution rule forbids *narrowing* an enum — constraining a previously-unconstrained field is exactly that. So either its vocabulary gets enumerated now, or the field stays free text for the life of the block type. This is the one place where deferring is genuinely not free, and it applies to any field we leave unconstrained.
+- **`spacer.height` declares `minimum: 1`, which nothing enforces.** The validator subset is `required` / `type` / `enum` / `format`, so `minimum` is decorative. Either extend the subset by one comparison, or drop the keyword rather than imply a guarantee that does not hold.
+
+Remaining work: confirm the block set is the right five, resolve the two points above, then this file and the schemas move on together.

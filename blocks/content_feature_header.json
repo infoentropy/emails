@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "block:content_feature_header",
+  "title": "Content Feature Header",
+  "version": 1,
+  "type": "object",
+  "properties": {
+    "heading": {
+      "title": "Heading",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 1
+    },
+    "feature_type": {
+      "title": "Feature type",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 2,
+      "description": "Which product area this feature belongs to, e.g. sleep. Free text for now - see the note on enums in the block library."
+    },
+    "avatar_image": {
+      "title": "Feature image",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 3,
+      "format": "uri",
+      "default": ""
+    },
+    "avatar_link": {
+      "title": "Feature link",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 4,
+      "format": "uri",
+      "default": ""
+    },
+    "bg_image": {
+      "title": "Background image",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 5,
+      "format": "uri",
+      "default": ""
+    },
+    "icon_image": {
+      "title": "Icon image",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 6,
+      "format": "uri",
+      "default": ""
+    },
+    "icon_link": {
+      "title": "Icon link",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 7,
+      "format": "uri",
+      "default": ""
+    },
+    "icon_image_visible": {
+      "title": "Show icon",
+      "type": "boolean",
+      "fieldType": "boolean",
+      "weight": 8,
+      "default": true,
+      "description": "The icon renders only when Icon image is filled in AND this is on."
+    }
+  },
+  "required": [
+    "heading",
+    "feature_type"
+  ]
+}

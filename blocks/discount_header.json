@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "block:discount_header",
+  "title": "Discount Header",
+  "version": 1,
+  "type": "object",
+  "properties": {
+    "heading": {
+      "title": "Heading",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 1
+    },
+    "body": {
+      "title": "Body",
+      "type": "string",
+      "fieldType": "markdown",
+      "weight": 2,
+      "default": "",
+      "description": "Authored in markdown. Raw HTML is escaped, not rendered."
+    },
+    "coupon_code": {
+      "title": "Coupon code",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 3
+    },
+    "expires_text": {
+      "title": "Expiry note",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 4,
+      "default": "",
+      "description": "Short urgency line, e.g. EXPIRES TOMORROW."
+    },
+    "cta_text": {
+      "title": "Call to action",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 5
+    },
+    "bg_image": {
+      "title": "Background image",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 6,
+      "format": "uri",
+      "default": ""
+    },
+    "icon_image": {
+      "title": "Icon image",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 7,
+      "format": "uri",
+      "default": ""
+    },
+    "icon_link": {
+      "title": "Icon link",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 8,
+      "format": "uri",
+      "default": ""
+    },
+    "icon_image_visible": {
+      "title": "Show icon",
+      "type": "boolean",
+      "fieldType": "boolean",
+      "weight": 9,
+      "default": true,
+      "description": "The icon renders only when Icon image is filled in AND this is on."
+    }
+  },
+  "required": [
+    "heading",
+    "coupon_code",
+    "cta_text"
+  ]
+}

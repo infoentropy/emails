@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "block:large_divider",
+  "title": "Large Divider",
+  "version": 1,
+  "type": "object",
+  "properties": {
+    "variant": {
+      "title": "Variant",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 1,
+      "enum": [
+        "primary",
+        "secondary"
+      ],
+      "default": "primary",
+      "description": "Emphasis, resolved to an appearance by the theme. Shared vocabulary; see the authoring tool spec."
+    }
+  }
+}
