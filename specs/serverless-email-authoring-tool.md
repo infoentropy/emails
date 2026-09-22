@@ -44,12 +44,20 @@ Two companion rules give the render layer the other direction of compatibility �
 
 ### What belongs in a block schema
 
-The authored document is meant to be theme-independent, so presentation values generally belong to the theme, not the schema. But the line is drawn **per field, by asking whether the value carries meaning or only styling** — not by a blanket ban on anything that looks like a measurement:
+**Only content.** The authored document says what the email *says*; the theme decides everything about how it looks. This is a blanket rule, not a per-field judgement:
 
-- A spacer's `height` *is* the block's entire content; without it the block means nothing. It stays in the schema.
-- A button's `width` or a header's `padding` are styling decisions the theme should own. They don't.
+- **No measurements.** No block declares its own width, height, padding, margin or spacing. There is no spacer block either — how much air sits between blocks is the theme's decision about vertical rhythm, not the author's.
+- **No colours, backgrounds or positioning.** Background images and colours, background position and per-block colour values all belong to the theme.
+- **No decoration.** An icon slot or ornament carrying no message is styling.
 
-Applying this to each field of the real block set is the block library's job, not this spec's.
+Where a distinction genuinely is the author's to make — a prominent call to action versus a quiet one — it is expressed semantically through `variant`, never as a measurement or a colour.
+
+**The one exception is image dimensions.** An image field carries its own pixel size as sibling `<field>_width` and `<field>_height` integers. This is not a styling preference: email clients need explicit `width` and `height` attributes to reserve layout space while images are blocked, which is the state most messages are first opened in. The numbers describe the asset, not a design decision.
+
+Two caveats on that exception, recorded so they are not rediscovered:
+
+- Nothing in the current block library has an image field, so the convention has no user yet. It is written down anyway because it is a property of the schema layer rather than of any one block, and because a naming convention costs nothing to carry — unlike a `fieldType` or a widget, which is why `boolean` was removed when its only field went.
+- Sibling fields can drift: nothing ties the numbers to the URL, so replacing an image can leave stale dimensions behind. Grouping the three into one object-valued field would prevent that, at the cost of introducing nested objects to the schema layer, the form renderer and the validator. Worth revisiting if image fields become common.
 
 ### Shared vocabularies: `variant`
 

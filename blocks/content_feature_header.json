@@ -17,22 +17,6 @@
       "fieldType": "text",
       "weight": 2,
       "description": "Which product area this feature belongs to, e.g. sleep. Free text for now - see the note on enums in the block library."
-    },
-    "avatar_image": {
-      "title": "Feature image",
-      "type": "string",
-      "fieldType": "text",
-      "weight": 3,
-      "format": "uri",
-      "default": ""
-    },
-    "avatar_link": {
-      "title": "Feature link",
-      "type": "string",
-      "fieldType": "text",
-      "weight": 4,
-      "format": "uri",
-      "default": ""
     }
   },
   "required": [

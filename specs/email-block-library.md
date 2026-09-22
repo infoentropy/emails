@@ -8,9 +8,15 @@ Moved to `specs/` once every open question was settled; the schemas it describes
 
 A set of JSON Schema documents, one per block type, in the format the authoring tool spec defines: `$id` of `block:<name>`, a `title`, a `version` integer, `properties` with a `fieldType` and `weight` on each field, and a `required` list. Schemas follow the additive-only evolution rule in that spec.
 
-**A first cut of all five now exists in `../blocks/`.** They were checked mechanically against the conventions above and against `content/weekly.json`: every field the migration drops is theme-owned, and no required field is empty in the source data.
+**All four schemas exist in `../blocks/`** — `discount_header`, `content_feature_header`, `button` and `divider`. They are checked mechanically against the conventions above and against `content/weekly.json`: every surviving field is content, and no required field is empty in the source data.
 
-One migration consequence is real rather than cosmetic. Most dropped fields were either styling values (`bg_color`, `bg_position`, `padding`, `width`) or empty in the source (`icon_image`, `icon_link`), but **`bg_image` held a genuine CloudFront URL in both header blocks**, and it now has to come from the theme instead. That is a capability change, not just a relocation: a theme styles a *block type*, so every `discount_header` in every campaign gets the same background, where the old model allowed a different one per block instance. The sample campaign has only one of each header, so nothing there exercises the difference — but if per-campaign backgrounds turn out to matter, the answer is a theme per campaign rather than putting the field back.
+Migrating the sample campaign under the content-only rule loses more than field names, and the losses are worth stating plainly:
+
+- **The spacer instance disappears entirely.** Its block type no longer exists, so there is nothing to migrate it into. Whatever gap it was creating becomes the theme's problem.
+- **`bg_image` held genuine CloudFront URLs** in both header blocks and now comes from the theme. That is a capability change rather than a relocation: a theme styles a *block type*, so every `discount_header` shares a background where each instance could previously differ. Nothing in the sample exercises this, since it has one of each header — but if per-campaign backgrounds matter, the answer is a theme per campaign, not restoring the field.
+- **The feature header's avatar is gone**, taking the library's last image field with it. That leaves the image-dimensions convention in the authoring tool spec with no user, which is deliberate and recorded there.
+
+Everything else dropped was either a styling value (`bg_color`, `bg_position`, `padding`, `width`) or empty in the source (`icon_image`, `icon_link`).
 
 ## Source material
 
@@ -20,11 +26,13 @@ One migration consequence is real rather than cosmetic. Most dropped fields were
 |---------------------------------|-----------------|--------|
 | `component - discount header`   | `discount_header` | `bg_color`, `bg_image`, `bg_position`, `body`, `coupon_code`, `cta_text`, `expires_text`, `icon_image`, `icon_link`, `padding`, `preheader` |
 | `component - content feature header` | `content_feature_header` | `avatar_image`, `avatar_link`, `bg_color`, `bg_image`, `bg_position`, `feature_type`, `icon_image`, `icon_image_visible`, `icon_link`, `preheader` |
-| `component - spacer`            | `spacer` | `height` |
+| `component - spacer`            | *(removed)* | `height` |
 | `component - button`            | `button` | `color`, `link`, `text`, `width` |
-| `component - large divider`     | `large_divider` | `color` |
+| `component - large divider`     | `divider` | `color` |
 
-Field names in that table are the **old** ones; `preheader` becomes `heading` and `color` becomes `variant`, per the sections below.
+Field names in that table are the **old** ones; `preheader` becomes `heading` and `color` becomes `variant`, per the sections below. Most of the rest do not survive the content-only rule.
+
+Two block types changed identity. `spacer` is gone entirely: its only field was a measurement, and vertical rhythm is the theme's. `large divider` becomes `divider`, because `large` is a size descriptor smuggled into an identifier — the `variant` carries any weight distinction.
 
 `flipboard/techdigest.html` and `traction/index.html` are the other reference points — the block types they'd decompose into may differ from the list above.
 
@@ -47,27 +55,32 @@ The reasoning: the sample campaign uses two differently-coloured buttons (`calm-
 Settled details:
 
 - `button.variant` — `primary` / `secondary`, optional, defaults to `primary`.
-- `large_divider.variant` — the same scale, same default. This reverses the earlier finding that the divider would be a zero-field block; it now has exactly one field.
+- `divider.variant` — the same scale, same default. It is the block's only field.
 - The names need no brand sign-off, because they name emphasis rather than colour. What the brand owner owns is the theme's mapping.
 
 Worth noting how thin the evidence for a *divider* variant is: `flipboard/techdigest.html` contains ten dividers, all byte-identical (`1px solid #d8d8d8`), and `weekly.json` has exactly one. Buttons, by contrast, vary within a single campaign. In practice dividers may only ever use `primary` — which costs nothing, since the field is optional and the enum is shared rather than invented per block.
 
-## Applying the layout principle
+## Applying the content-only rule
 
-The authoring tool spec keeps a presentation field only where the value *is* the content. Provisional verdicts:
+The authoring tool spec now bans presentation values outright rather than judging field by field. Applied to the source material, almost nothing survives:
 
 | Field | Verdict |
 |---|---|
-| `height` (spacer) | **Schema** — the block's entire meaning |
-| `body`, `heading` (was `preheader`), `coupon_code`, `cta_text`, `expires_text`, `text`, `feature_type` | **Schema** — content |
+| `heading` (was `preheader`), `body`, `coupon_code`, `cta_text`, `expires_text`, `text`, `feature_type` | **Schema** — content |
 | `variant` (was `color`, on button and divider) | **Schema** — a semantic selector, not styling |
-| `avatar_image`, `avatar_link` | **Schema** — the specific feature being promoted, not decoration |
-| `bg_image`, `icon_image`, `icon_link`, `icon_image_visible` | **Theme** — backgrounds and icon slots are styling |
-| `padding`, `width`, `bg_position`, `bg_color` | **Theme** — styling |
+| `bg_color`, `bg_image`, `bg_position`, `padding`, `width` | **Theme** — styling |
+| `icon_image`, `icon_link`, `icon_image_visible` | **Theme** — an ornament carrying no message |
+| `avatar_image`, `avatar_link` | **Removed** — the feature header no longer carries its own imagery |
+| `height` (spacer) | **Removed with its block** — spacing is the theme's |
 
-The icon fields are worth a note: they are empty in every block of the only real campaign we have, while `icon_image_visible` was set `true` next to an empty icon. A slot built and never filled reads as decoration, so the theme owns it. Removing it also removed the library's only boolean, which is why that `fieldType` went with it.
+The result is four block types, all of them pure copy plus semantics:
 
-Both questions this originally raised are now resolved above: `large divider` is not a zero-field block after all (it keeps a `variant`), and `button.color` becomes `button.variant`. No block in the library now has an empty form, so the authoring UI does not strictly need to handle that case — still worth building defensively, since the additive-only rule leaves a field-free block possible in future.
+- `discount_header` — heading, body, coupon_code, expires_text, cta_text
+- `content_feature_header` — heading, feature_type
+- `button` — text, link, variant
+- `divider` — variant
+
+`content_feature_header` is thin enough to question: with the avatar gone it is a heading plus a category. That is coherent if the theme keys its imagery off `feature_type`, which is a reasonable division of labour — but it makes `feature_type` load-bearing in a way it was not before, and sharpens the enum question below.
 
 ## Settled: naming
 
@@ -88,7 +101,8 @@ Every decision this file was waiting on — the `boolean` gap, `button.color`, t
 
 Two things surfaced while writing them that are worth a decision:
 
-- **`feature_type` cannot gain an `enum` later.** It is free text today, and the evolution rule forbids *narrowing* an enum — constraining a previously-unconstrained field is exactly that. So either its vocabulary gets enumerated now, or the field stays free text for the life of the block type. This is the one place where deferring is genuinely not free, and it applies to any field we leave unconstrained.
-- **`spacer.height` declares `minimum: 1`, which nothing enforces.** The validator subset is `required` / `type` / `enum` / `format`, so `minimum` is decorative. Either extend the subset by one comparison, or drop the keyword rather than imply a guarantee that does not hold.
+- **`feature_type` cannot gain an `enum` later, and this now matters more.** It is one of only two fields left on its block, and if the theme selects imagery from it then its values must be known to the theme — which is an argument for enumerating them now rather than leaving it free text.
+- **The original wording, still applicable:** It is free text today, and the evolution rule forbids *narrowing* an enum — constraining a previously-unconstrained field is exactly that. So either its vocabulary gets enumerated now, or the field stays free text for the life of the block type. This is the one place where deferring is genuinely not free, and it applies to any field we leave unconstrained.
+- ~~`spacer.height` declares a `minimum` nothing enforces~~ — moot: the spacer block is gone. The underlying gap remains, though, should any future field use a keyword outside the validator's `required` / `type` / `enum` / `format` subset.
 
 Remaining work: confirm the block set is the right five, resolve the two points above, then this file and the schemas move on together.
