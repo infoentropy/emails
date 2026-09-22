@@ -77,7 +77,7 @@ The authoring tool spec now bans presentation values outright rather than judgin
 The result is five block types:
 
 - `content_feature_header` — heading, feature_type
-- `image_with_text` — heading, body, image (+ alt, width, height), layout
+- `image_with_text` — heading, body, image (+ alt, width, height)
 - `article` — headline, link, image (+ alt, width, height), variant
 - `button` — text, link, variant
 - `divider` — variant
@@ -178,7 +178,7 @@ The authoring tool spec now bans presentation values outright rather than judgin
 The result is five block types:
 
 - `content_feature_header` — heading, feature_type
-- `image_with_text` — heading, body, image (+ alt, width, height), layout
+- `image_with_text` — heading, body, image (+ alt, width, height)
 - `article` — headline, link, image (+ alt, width, height), variant
 - `button` — text, link, variant
 - `divider` — variant

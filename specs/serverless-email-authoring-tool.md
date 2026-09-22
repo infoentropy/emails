@@ -59,7 +59,7 @@ Two caveats on that exception, recorded so they are not rediscovered:
 - Nothing in the current block library has an image field, so the convention has no user yet. It is written down anyway because it is a property of the schema layer rather than of any one block, and because a naming convention costs nothing to carry — unlike a `fieldType` or a widget, which is why `boolean` was removed when its only field went.
 - Sibling fields can drift: nothing ties the numbers to the URL, so replacing an image can leave stale dimensions behind. Grouping the three into one object-valued field would prevent that, at the cost of introducing nested objects to the schema layer, the form renderer and the validator. Worth revisiting if image fields become common.
 
-### Shared vocabularies: `variant` and `layout`
+### Shared vocabularies: `variant`
 
 Some blocks need the author to distinguish two instances of the same block type — a primary call-to-action versus a secondary one. That selector is semantic and lives in the document; the *appearance* it maps to belongs to the theme. The convention:
 
@@ -70,9 +70,9 @@ Some blocks need the author to distinguish two instances of the same block type 
 
 Because the values are brand-neutral, they need no sign-off from whoever owns a brand's colour palette. What a brand owns is the *theme mapping*, not the vocabulary.
 
-**`layout`** is a second shared vocabulary, on the same pattern: a `text` field with an `enum`, optional with a default, naming an arrangement the author chooses rather than a measurement. Its values are `image_left` and `image_right`.
+A `layout` vocabulary (`image_left` / `image_right`) was drafted here and then removed. Which side an image sits on is positional, and admitting it — even as a named arrangement rather than a measurement — would have made the content-only rule a rule with exceptions, which is how such rules stop being load-bearing. **Image dimensions remain the only exception**, and they earn it by describing the asset rather than a design decision.
 
-This is the one place the content-only rule bends, and it is worth being honest about rather than letting it pass unnoticed. Which side an image sits on is positional. It is admitted because it is an editorial decision an author genuinely makes — alternating sides down a long email is a deliberate rhythm, not a styling preference — and because it is expressed as a named arrangement the theme resolves, never as a measurement or a coordinate. The test for admitting anything else here is the same: it must be a choice the author means, expressible as a word rather than a number.
+The consequence is that arrangement is entirely the theme's: an author adds image-and-text blocks, and the theme decides which side each image sits on, whether that is a fixed side or an alternating rhythm down the email. An author cannot override it for a particular block. That is the deliberate trade — see the render layer spec, where how a theme makes that choice is part of the open theme-structure question.
 
 ### Which block types ship
 

@@ -44,18 +44,6 @@
       "type": "integer",
       "fieldType": "integer",
       "weight": 6
-    },
-    "layout": {
-      "title": "Layout",
-      "type": "string",
-      "fieldType": "text",
-      "weight": 7,
-      "enum": [
-        "image_left",
-        "image_right"
-      ],
-      "default": "image_left",
-      "description": "Which side the image sits on. Shared layout vocabulary; the theme renders it."
     }
   },
   "required": [

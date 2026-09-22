@@ -45,6 +45,7 @@ Because schemas may only ever gain optional fields — renames and removals beco
 Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above.
 
 - How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
+- **Which side does an `image_with_text` image sit on?** The authoring document deliberately does not say — a `layout` field was drafted and removed to keep the schema content-only — so this is entirely the theme's call. A fixed side, or alternating down the email? Alternating needs the template to know a block's position among its siblings, which is more context than rendering one block in isolation provides.
 - Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme is selected, where block templates and themes are located on disk.
 - How should a `date` field be formatted for display? Still open.
 
