@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Email Block Composer</title>
+<style>
+:root{
+  --ground:#f6f8fa; --surface:#ffffff; --surface-2:#eef2f6;
+  --ink:#152029; --muted:#5b6b7b; --line:#dbe3ea; --line-strong:#c3cfda;
+  --accent:#0b6b5e; --accent-soft:#e0f0ec; --warn:#8a5200; --warn-soft:#fbf0dd;
+  --radius:10px; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ground:#0e141a; --surface:#161d25; --surface-2:#1d262f;
+  --ink:#e4ebf2; --muted:#93a3b3; --line:#27313c; --line-strong:#38454f;
+  --accent:#54cfba; --accent-soft:#12302c; --warn:#e3a85c; --warn-soft:#2e2312;
+}}
+:root[data-theme="dark"]{
+  --ground:#0e141a; --surface:#161d25; --surface-2:#1d262f;
+  --ink:#e4ebf2; --muted:#93a3b3; --line:#27313c; --line-strong:#38454f;
+  --accent:#54cfba; --accent-soft:#12302c; --warn:#e3a85c; --warn-soft:#2e2312;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);-webkit-text-size-adjust:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);
+     border-bottom:1px solid var(--line)}
+.bar-in{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.brand{font-weight:650;letter-spacing:-.01em;margin-right:auto;display:flex;align-items:baseline;gap:9px}
+.brand small{font:500 11px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+button{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line-strong);
+       border-radius:7px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:550}
+.primary:hover{color:#fff;filter:brightness(1.08)}
+
+.wrap{max-width:1200px;margin:0 auto;padding-block:22px 64px;padding-left:20px;padding-right:20px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:26px;align-items:start}
+@media (max-width:900px){ .grid{grid-template-columns:minmax(0,1fr)} }
+
+h2{font:600 13px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.meta{border-left:3px solid var(--accent);padding-left:16px;margin-bottom:26px}
+.meta .row{display:grid;gap:4px;margin-bottom:12px}
+label{font:550 11px/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+input,textarea{width:100%;font:inherit;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px}
+textarea{resize:vertical;min-height:70px}
+.help{font-size:12.5px;color:var(--muted)}
+.err{font-size:12.5px;color:var(--warn);font-weight:550}
+
+.stack{display:flex;flex-direction:column;gap:14px}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.block.bad{border-color:var(--warn)}
+.bhead{display:flex;gap:8px;align-items:center;padding:9px 12px;background:var(--surface-2);
+       border-bottom:1px solid var(--line)}
+.chip{font:600 11px/1 var(--mono);letter-spacing:.05em;color:var(--accent);background:var(--accent-soft);
+      border-radius:5px;padding:5px 7px}
+.bid{font:500 11px/1 var(--mono);color:var(--muted)}
+.bhead .sp{margin-left:auto;display:flex;gap:5px}
+.icon{padding:4px 8px;font:500 13px/1.3 var(--mono);min-width:30px}
+.fields{padding:14px 12px;display:grid;gap:13px}
+.f{display:grid;gap:4px}
+
+.unknown{padding:14px 12px;font-size:13.5px;color:var(--muted);background:var(--warn-soft)}
+.unknown code{font-family:var(--mono);color:var(--ink)}
+
+.palette{margin-top:24px;border-top:1px dashed var(--line-strong);padding-top:16px}
+.pal-btns{display:flex;flex-wrap:wrap;gap:8px}
+
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.panel h2{padding:12px 14px 0;margin-bottom:8px}
+pre{margin:0;padding:0 14px 14px;font:12.5px/1.55 var(--mono);white-space:pre;overflow-x:auto;max-height:52vh;overflow-y:auto}
+.issues{padding:0 14px 14px;display:flex;flex-direction:column;gap:7px;font-size:13px;max-height:24vh;overflow-y:auto}
+.issue{color:var(--warn)}
+.issue b{font-family:var(--mono);font-size:12px;font-weight:600}
+.ok{padding:0 14px 14px;font-size:13px;color:var(--muted)}
+.note{font-size:12.5px;color:var(--muted);padding:0 14px 14px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="bar"><div class="bar-in">
+  <div class="brand">Email Block Composer <small id="saved">·</small></div>
+  <button id="copy">Copy JSON</button>
+  <button id="paste">Paste JSON</button>
+  <input type="file" id="file" accept="application/json,.json" hidden>
+  <button id="open">Open file</button>
+  <button id="blank">New</button>
+</div></div>
+
+<div class="wrap"><div class="grid">
+  <div>
+    <h2>Campaign</h2>
+    <div class="meta" id="meta"></div>
+    <h2>Blocks</h2>
+    <div class="stack" id="stack"></div>
+    <div class="palette">
+      <h2>Add a block</h2>
+      <div class="pal-btns" id="pal"></div>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="panel">
+      <h2>Validation</h2>
+      <div id="issues"></div>
+    </div>
+    <div class="panel">
+      <h2>Document</h2>
+      <pre id="json"></pre>
+      <div class="note">This is the output. There is no HTML preview — rendering belongs to the render layer.</div>
+    </div>
+  </div>
+</div></div>
+
+<script>
+"use strict";
+const SCHEMAS = {
+  "article": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "block:article",
+    "title": "Article",
+    "version": 1,
+    "type": "object",
+    "properties": {
+      "headline": {
+        "title": "Headline",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 1
+      },
+      "link": {
+        "title": "Article link",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 2,
+        "format": "uri"
+      },
+      "image": {
+        "title": "Image URL",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 3,
+        "format": "uri"
+      },
+      "image_alt": {
+        "title": "Image alt text",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 4,
+        "description": "Describes the image for recipients whose client blocks images, which is most on first open."
+      },
+      "image_width": {
+        "title": "Image width (px)",
+        "type": "integer",
+        "fieldType": "integer",
+        "weight": 5
+      },
+      "image_height": {
+        "title": "Image height (px)",
+        "type": "integer",
+        "fieldType": "integer",
+        "weight": 6
+      },
+      "variant": {
+        "title": "Variant",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 7,
+        "enum": [
+          "primary",
+          "secondary"
+        ],
+        "default": "secondary",
+        "description": "primary is the lead feature, secondary a regular item. Defaults to secondary: a newspaper has one lead and many regulars."
+      }
+    },
+    "required": [
+      "headline",
+      "link",
+      "image",
+      "image_alt",
+      "image_width",
+      "image_height"
+    ]
+  },
+  "button": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "block:button",
+    "title": "Button",
+    "version": 1,
+    "type": "object",
+    "properties": {
+      "text": {
+        "title": "Label",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 1
+      },
+      "link": {
+        "title": "Link",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 2,
+        "format": "uri"
+      },
+      "variant": {
+        "title": "Variant",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 3,
+        "enum": [
+          "primary",
+          "secondary"
+        ],
+        "default": "primary",
+        "description": "Emphasis, resolved to an appearance by the theme. Shared vocabulary; see the authoring tool spec."
+      }
+    },
+    "required": [
+      "text",
+      "link"
+    ]
+  },
+  "content_feature_header": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "block:content_feature_header",
+    "title": "Content Feature Header",
+    "version": 1,
+    "type": "object",
+    "properties": {
+      "heading": {
+        "title": "Heading",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 1
+      },
+      "feature_type": {
+        "title": "Feature type",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 2,
+        "description": "Which product area this feature belongs to. The theme selects imagery from it. Values are drawn only from evidence in content/weekly.json: 'sleep' appears as a feature_type and in the feature link, 'meditate' as the destination of both buttons. Widening this enum is a permitted schema change, so add values as real campaigns need them.",
+        "enum": [
+          "meditate",
+          "sleep"
+        ]
+      }
+    },
+    "required": [
+      "heading",
+      "feature_type"
+    ]
+  },
+  "divider": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "block:divider",
+    "title": "Divider",
+    "version": 1,
+    "type": "object",
+    "properties": {
+      "variant": {
+        "title": "Variant",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 1,
+        "enum": [
+          "primary",
+          "secondary"
+        ],
+        "default": "primary",
+        "description": "Emphasis, resolved to an appearance by the theme. Shared vocabulary; see the authoring tool spec."
+      }
+    }
+  },
+  "image_with_text": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "block:image_with_text",
+    "title": "Image with Text",
+    "version": 1,
+    "type": "object",
+    "properties": {
+      "heading": {
+        "title": "Heading",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 1
+      },
+      "body": {
+        "title": "Body",
+        "type": "string",
+        "fieldType": "markdown",
+        "weight": 2,
+        "default": "",
+        "description": "Authored in markdown. Raw HTML is escaped, not rendered."
+      },
+      "image": {
+        "title": "Image URL",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 3,
+        "format": "uri"
+      },
+      "image_alt": {
+        "title": "Image alt text",
+        "type": "string",
+        "fieldType": "text",
+        "weight": 4,
+        "description": "Describes the image for recipients whose client blocks images, which is most on first open."
+      },
+      "image_width": {
+        "title": "Image width (px)",
+        "type": "integer",
+        "fieldType": "integer",
+        "weight": 5
+      },
+      "image_height": {
+        "title": "Image height (px)",
+        "type": "integer",
+        "fieldType": "integer",
+        "weight": 6
+      }
+    },
+    "required": [
+      "heading",
+      "image",
+      "image_alt",
+      "image_width",
+      "image_height"
+    ]
+  }
+};
+const KEY = "email-block-composer/doc";
+
+const sorted = s => Object.entries(s.properties).sort((a,b) => a[1].weight - b[1].weight);
+
+const SAMPLE = {
+  version:1,
+  name:"Sleep Stories — weekly (sample)",
+  subject:"Three new Sleep Stories for this week",
+  preheader:"Narrated by voices you'll actually drift off to",
+  blocks:[
+    {id:"b1",blockType:"content_feature_header",data:{heading:"New This Week",feature_type:"sleep"}},
+    {id:"b2",blockType:"article",data:{headline:"A Slow Train Through the Alps",
+      link:"https://www.calm.com/sleep/slow-train",image:"https://assets.example.com/sleep/alps.jpg",
+      image_alt:"Night train winding along a moonlit mountain pass",image_width:1200,image_height:630,variant:"primary"}},
+    {id:"b3",blockType:"divider",data:{variant:"secondary"}},
+    {id:"b4",blockType:"article",data:{headline:"The Lighthouse Keeper's Year",
+      link:"https://www.calm.com/sleep/lighthouse",image:"https://assets.example.com/sleep/lighthouse.jpg",
+      image_alt:"A lighthouse beam sweeping over calm water at dusk",image_width:600,image_height:400,variant:"secondary"}},
+    {id:"b5",blockType:"image_with_text",data:{heading:"Why we record at 60 bpm",
+      body:"Every story is narrated just below resting heart rate.\n\nIt is slower than feels natural to read aloud — which is the point.",
+      image:"https://assets.example.com/sleep/studio.jpg",image_alt:"A recording booth lit by a single warm lamp",
+      image_width:800,image_height:500}},
+    {id:"b6",blockType:"button",data:{text:"Open tonight's story",link:"https://www.calm.com/sleep",variant:"primary"}}
+  ]
+};
+
+const blank = () => ({version:1,name:"",subject:"",preheader:"",blocks:[]});
+
+let doc;
+try { const raw = localStorage.getItem(KEY); doc = raw ? JSON.parse(raw) : structuredClone(SAMPLE); }
+catch(e){ doc = structuredClone(SAMPLE); }
+if(!doc || !Array.isArray(doc.blocks)) doc = structuredClone(SAMPLE);
+
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(doc)); flash("saved"); }
+  catch(e){ flash("not saved"); }
+}
+let flashT;
+function flash(word){
+  const el = document.getElementById("saved");
+  el.textContent = "· " + word;
+  clearTimeout(flashT);
+  flashT = setTimeout(()=>{ el.textContent = "·"; }, 1400);
+}
+
+function nextId(){
+  let max = 0;
+  for(const b of doc.blocks){
+    const m = /^b(\d+)$/.exec(String(b.id||""));
+    if(m) max = Math.max(max, +m[1]);
+  }
+  return "b" + (max + 1);
+}
+
+function defaultsFor(type){
+  const s = SCHEMAS[type], d = {};
+  if(!s) return d;
+  for(const [k,f] of sorted(s)) d[k] = ("default" in f) ? f.default : "";
+  return d;
+}
+
+// ---- validation: required / type / enum / format(uri,date). Advisory only. ----
+function issuesFor(block){
+  const s = SCHEMAS[block.blockType];
+  if(!s) return [];
+  const req = new Set(s.required || []), out = [];
+  for(const [k,f] of sorted(s)){
+    const v = block.data[k];
+    const empty = v === undefined || v === null || String(v).trim() === "";
+    if(req.has(k)){
+      if(empty){ out.push([k, f.title + " is required."]); continue; }
+    } else if(empty) continue;          // not filled in: skip every other check
+    const str = String(v).trim();
+    if(f.type === "integer" && !/^-?\d+$/.test(str)) out.push([k, "Must be a whole number."]);
+    else if(f.type === "number" && isNaN(Number(str))) out.push([k, "Must be a number."]);
+    if(f.enum && !f.enum.includes(v)) out.push([k, "Must be one of: " + f.enum.join(", ") + "."]);
+    if(f.format === "uri" && !/^https?:\/\/\S+$/i.test(str)) out.push([k, "Must start with http:// or https://"]);
+    if(f.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(str)) out.push([k, "Must be a date, as YYYY-MM-DD."]);
+  }
+  return out;
+}
+
+// ---- serialise: weight order, numbers as numbers, unknown blocks untouched ----
+function serialise(){
+  const out = {version:doc.version||1, name:doc.name||"", subject:doc.subject||"",
+               preheader:doc.preheader||"", blocks:[]};
+  for(const b of doc.blocks){
+    const s = SCHEMAS[b.blockType];
+    let data;
+    if(!s){ data = JSON.parse(JSON.stringify(b.data ?? {})); }
+    else {
+      data = {};
+      for(const [k,f] of sorted(s)){
+        let v = b.data[k];
+        if(v === undefined) continue;
+        if((f.type === "integer" || f.type === "number") && String(v).trim() !== "" && !isNaN(Number(v))) v = Number(v);
+        data[k] = v;
+      }
+    }
+    out.blocks.push({id:b.id, blockType:b.blockType, data});
+  }
+  return out;
+}
+
+const el = (tag, cls, text) => { const n = document.createElement(tag);
+  if(cls) n.className = cls; if(text !== undefined) n.textContent = text; return n; };
+
+function control(name, f, block){
+  let n;
+  if(f.fieldType === "paragraph" || f.fieldType === "markdown"){
+    n = el("textarea"); n.rows = f.fieldType === "markdown" ? 5 : 3;
+  } else {
+    n = el("input");
+    n.type = f.fieldType === "date" ? "date" : (f.fieldType === "integer" || f.fieldType === "float") ? "number" : "text";
+    if(f.fieldType === "integer") n.step = "1";
+    if(f.fieldType === "float") n.step = "any";
+  }
+  n.id = "f-" + block.id + "-" + name;
+  n.value = block.data[name] ?? "";
+  n.addEventListener("input", () => {
+    block.data[name] = n.value;
+    save(); refreshLive();
+  });
+  return n;
+}
+
+function renderMeta(){
+  const host = document.getElementById("meta");
+  host.textContent = "";
+  for(const [key,label,hint] of [
+    ["name","Campaign name","Internal only — recipients never see this."],
+    ["subject","Subject line",""],
+    ["preheader","Preheader","Preview text after the subject in the inbox."]
+  ]){
+    const row = el("div","row");
+    const lab = el("label", null, label); lab.htmlFor = "m-" + key;
+    const inp = el("input"); inp.id = "m-" + key; inp.value = doc[key] ?? "";
+    inp.addEventListener("input", () => { doc[key] = inp.value; save(); refreshLive(); });
+    row.append(lab, inp);
+    if(hint) row.append(el("div","help",hint));
+    host.append(row);
+  }
+}
+
+function renderBlocks(){
+  const host = document.getElementById("stack");
+  host.textContent = "";
+  if(!doc.blocks.length){
+    host.append(el("div","help","No blocks yet. Add one below."));
+    return;
+  }
+  doc.blocks.forEach((b,i) => {
+    const s = SCHEMAS[b.blockType];
+    const card = el("div","block");
+    const head = el("div","bhead");
+    head.append(el("span","chip", s ? s.title : b.blockType), el("span","bid", b.id));
+    const sp = el("div","sp");
+    const mk = (label, title, fn, disabled) => {
+      const btn = el("button","icon",label); btn.title = title; btn.disabled = !!disabled;
+      if(disabled) btn.style.opacity = ".35";
+      btn.addEventListener("click", fn); return btn;
+    };
+    sp.append(
+      mk("↑","Move up",   () => { const t=doc.blocks[i-1]; doc.blocks[i-1]=b; doc.blocks[i]=t; commit(); }, i===0),
+      mk("↓","Move down", () => { const t=doc.blocks[i+1]; doc.blocks[i+1]=b; doc.blocks[i]=t; commit(); }, i===doc.blocks.length-1),
+      mk("⧉","Duplicate", () => { doc.blocks.splice(i+1,0,{id:nextId(),blockType:b.blockType,
+                                    data:JSON.parse(JSON.stringify(b.data??{}))}); commit(); }),
+      mk("✕","Delete",    () => { if(confirm("Delete this "+(s?s.title:b.blockType)+" block?")){ doc.blocks.splice(i,1); commit(); } })
+    );
+    head.append(sp);
+    card.append(head);
+
+    if(!s){
+      const u = el("div","unknown");
+      u.append(document.createTextNode("Unknown block type "));
+      u.append(el("code",null,b.blockType));
+      u.append(document.createTextNode(". Its fields can't be edited here, but they are kept exactly as they were and written back out on export."));
+      card.append(u);
+    } else {
+      const fields = el("div","fields");
+      for(const [name,f] of sorted(s)){
+        const wrap = el("div","f");
+        const lab = el("label", null, f.title + ((s.required||[]).includes(name) ? " *" : ""));
+        const inp = control(name, f, b);
+        lab.htmlFor = inp.id;
+        wrap.append(lab, inp);
+        if(f.enum) wrap.append(el("div","help","One of: " + f.enum.join(", ")));
+        else if(f.description) wrap.append(el("div","help", f.description));
+        const e = el("div","err"); e.id = "e-" + b.id + "-" + name; e.hidden = true;
+        wrap.append(e);
+        fields.append(wrap);
+      }
+      card.append(fields);
+    }
+    host.append(card);
+  });
+}
+
+function renderPalette(){
+  const host = document.getElementById("pal");
+  host.textContent = "";
+  for(const [type,s] of Object.entries(SCHEMAS)){
+    const b = el("button", null, s.title);
+    b.addEventListener("click", () => {
+      doc.blocks.push({id:nextId(), blockType:type, data:defaultsFor(type)});
+      commit();
+    });
+    host.append(b);
+  }
+}
+
+function refreshLive(){
+  document.getElementById("json").textContent = JSON.stringify(serialise(), null, 2);
+  const box = document.getElementById("issues");
+  box.textContent = "";
+  let n = 0;
+  const list = el("div","issues");
+  for(const b of doc.blocks){
+    const found = issuesFor(b);
+    for(const [k,msg] of found){
+      const e = document.getElementById("e-" + b.id + "-" + k);
+      if(e){ e.textContent = msg; e.hidden = false; }
+    }
+    const s = SCHEMAS[b.blockType];
+    if(s) for(const [k] of sorted(s)){
+      if(!found.some(f => f[0] === k)){
+        const e = document.getElementById("e-" + b.id + "-" + k);
+        if(e){ e.hidden = true; e.textContent = ""; }
+      }
+    }
+    for(const [k,msg] of found){
+      n++;
+      const row = el("div","issue");
+      row.append(el("b",null,b.id + "." + k + " "), document.createTextNode(msg));
+      list.append(row);
+    }
+    const cardEl = document.querySelectorAll(".block")[doc.blocks.indexOf(b)];
+    if(cardEl) cardEl.classList.toggle("bad", found.length > 0);
+  }
+  if(n) box.append(list);
+  else box.append(el("div","ok","Everything checks out. Validation never blocks export — a half-finished email still saves."));
+}
+
+function commit(){ save(); render(); }
+function render(){ renderMeta(); renderBlocks(); renderPalette(); refreshLive(); }
+
+document.getElementById("copy").addEventListener("click", async () => {
+  const text = JSON.stringify(serialise(), null, 2);
+  try { await navigator.clipboard.writeText(text); flash("copied"); }
+  catch(e){ flash("press ⌘C"); const p = document.getElementById("json");
+            const r = document.createRange(); r.selectNodeContents(p);
+            const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+});
+document.getElementById("paste").addEventListener("click", () => {
+  const text = prompt("Paste an email document (JSON). This replaces what's open.");
+  if(text) load(text);
+});
+document.getElementById("open").addEventListener("click", () => document.getElementById("file").click());
+document.getElementById("file").addEventListener("change", ev => {
+  const f = ev.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => load(r.result);
+  r.readAsText(f);
+  ev.target.value = "";
+});
+document.getElementById("blank").addEventListener("click", () => {
+  if(confirm("Start an empty email? What's open now will be discarded.")){ doc = blank(); commit(); }
+});
+
+function load(text){
+  let next;
+  try { next = JSON.parse(text); }
+  catch(e){ alert("That isn't valid JSON, so nothing was changed."); return; }
+  if(!next || !Array.isArray(next.blocks)){ alert("That JSON has no blocks array, so it isn't an email document."); return; }
+  if(!confirm("Replace what's open with this document?")) return;
+  next.blocks = next.blocks.map((b,i) => ({id:b.id || ("b"+(i+1)), blockType:b.blockType, data:b.data ?? {}}));
+  doc = {version:next.version||1, name:next.name||"", subject:next.subject||"",
+         preheader:next.preheader||"", blocks:next.blocks};
+  commit();
+}
+
+render();
+</script>
+</body>
+</html>
