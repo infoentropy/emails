@@ -8,7 +8,9 @@ Moved to `specs/` once every open question was settled; the schemas it describes
 
 A set of JSON Schema documents, one per block type, in the format the authoring tool spec defines: `$id` of `block:<name>`, a `title`, a `version` integer, `properties` with a `fieldType` and `weight` on each field, and a `required` list. Schemas follow the additive-only evolution rule in that spec.
 
-**A first cut of all five now exists in `../blocks/`.** They were checked mechanically against the conventions above and against `content/weekly.json`: the only fields the migration drops are the four assigned to the theme (`bg_color`, `bg_position`, `padding`, `width`), and no required field is empty in the source data.
+**A first cut of all five now exists in `../blocks/`.** They were checked mechanically against the conventions above and against `content/weekly.json`: every field the migration drops is theme-owned, and no required field is empty in the source data.
+
+One migration consequence is real rather than cosmetic. Most dropped fields were either styling values (`bg_color`, `bg_position`, `padding`, `width`) or empty in the source (`icon_image`, `icon_link`), but **`bg_image` held a genuine CloudFront URL in both header blocks**, and it now has to come from the theme instead. That is a capability change, not just a relocation: a theme styles a *block type*, so every `discount_header` in every campaign gets the same background, where the old model allowed a different one per block instance. The sample campaign has only one of each header, so nothing there exercises the difference — but if per-campaign backgrounds turn out to matter, the answer is a theme per campaign rather than putting the field back.
 
 ## Source material
 
@@ -28,14 +30,13 @@ Field names in that table are the **old** ones; `preheader` becomes `heading` an
 
 ## Settled: field representation
 
-The authoring tool keeps images, links and constrained values as `fieldType: text` for v1 — no image, colour, link or select widgets. One exception was carved out: **`boolean` was added to the fieldType set** (see the authoring tool spec), because `icon_image_visible` is a real boolean and every text-based encoding of it would make the schema misdescribe its own data.
+The authoring tool keeps images, links and constrained values as `fieldType: text` for v1 — no image, colour, link or select widgets, and no `boolean` either. A `boolean` type was briefly added for `icon_image_visible`, then removed along with that field when the icons were reclassified as theme-owned; nothing in the library needs it now.
 
 Consequences to design around rather than discover later:
 
 - **Schemas should still declare `enum` and `format: uri`** even though the widget is a plain text box. The authoring tool's validator checks both, so constrained values and URLs are at least flagged when wrong — validation is the only guard rail here. This matters: the sample data contains `"bg_color": "##446740"`, a double-hash typo that shipped.
-- **Authors hand-type CloudFront URLs.** Unpleasant but not blocking; the images are hosted externally already, and a serverless tool has nowhere to upload to regardless.
-- **`icon_image_visible` needs a precedence rule.** The sample has `icon_image_visible: true` sitting next to `icon_image: ""` — the flag says show it, with nothing to show. Define it as: the icon renders **iff `icon_image` is non-empty *and* `icon_image_visible` is true.** Emptiness alone is not enough to hide an icon, and the flag alone cannot conjure one.
-- **`discount header` has no visibility flag** despite carrying the same `icon_image` / `icon_link` pair. Either it gains one for consistency — permitted at zero cost by the additive-only rule, provided it is optional and defaults to `true` — or the inconsistency is deliberate and should be written down as such.
+- **Authors hand-type CloudFront URLs.** Unpleasant but not blocking; the images are hosted externally already, and a serverless tool has nowhere to upload to regardless. Only `content_feature_header` still has URL fields — the avatar pair.
+- **An empty optional field means "not filled in."** The validator skips `format` and `enum` checks on it, and the render layer omits whatever it would have produced. That rule now carries the visibility behaviour an explicit flag used to: a feature image with no URL simply does not render.
 
 ## Settled: `variant` replaces colour names
 
@@ -60,9 +61,11 @@ The authoring tool spec keeps a presentation field only where the value *is* the
 | `height` (spacer) | **Schema** — the block's entire meaning |
 | `body`, `heading` (was `preheader`), `coupon_code`, `cta_text`, `expires_text`, `text`, `feature_type` | **Schema** — content |
 | `variant` (was `color`, on button and divider) | **Schema** — a semantic selector, not styling |
-| `icon_image_visible` | **Schema** — an authoring decision, now a `boolean` field |
-| `bg_image`, `icon_image`, `avatar_image`, `*_link` | **Schema** — content |
+| `avatar_image`, `avatar_link` | **Schema** — the specific feature being promoted, not decoration |
+| `bg_image`, `icon_image`, `icon_link`, `icon_image_visible` | **Theme** — backgrounds and icon slots are styling |
 | `padding`, `width`, `bg_position`, `bg_color` | **Theme** — styling |
+
+The icon fields are worth a note: they are empty in every block of the only real campaign we have, while `icon_image_visible` was set `true` next to an empty icon. A slot built and never filled reads as decoration, so the theme owns it. Removing it also removed the library's only boolean, which is why that `fieldType` went with it.
 
 Both questions this originally raised are now resolved above: `large divider` is not a zero-field block after all (it keeps a `variant`), and `button.color` becomes `button.variant`. No block in the library now has an empty form, so the authoring UI does not strictly need to handle that case — still worth building defensively, since the additive-only rule leaves a field-free block possible in future.
 

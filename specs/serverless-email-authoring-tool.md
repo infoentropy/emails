@@ -70,7 +70,7 @@ For development and testing, this tool ships with a small number of throwaway fi
 
 ## Authoring form
 
-- Each field declares a `fieldType`, and the form input it renders as is determined by that value: `integer`, `float`, `text` (single-line input), `paragraph` (multi-line textarea), `markdown` (textarea authored in markdown), `date`, `boolean` (checkbox). `fieldType` is a custom keyword alongside JSON Schema's own `type`/`format` (used for validation), not a replacement for it. Suggested pairing:
+- Each field declares a `fieldType`, and the form input it renders as is determined by that value: `integer`, `float`, `text` (single-line input), `paragraph` (multi-line textarea), `markdown` (textarea authored in markdown), `date`. `fieldType` is a custom keyword alongside JSON Schema's own `type`/`format` (used for validation), not a replacement for it. Suggested pairing:
 
   | `fieldType`  | JSON Schema `type` | JSON Schema `format` |
   |--------------|---------------------|------------------------|
@@ -80,10 +80,9 @@ For development and testing, this tool ships with a small number of throwaway fi
   | `date`       | `string`            | `date`                 |
   | `integer`    | `integer`           | —                      |
   | `float`      | `number`            | —                      |
-  | `boolean`    | `boolean`           | —                      |
 
 - `markdown` fields are converted to HTML by the render layer, not by this tool, and **raw HTML in a markdown field is escaped rather than passed through** — it renders as visible literal text. Standard markdown converters allow HTML through, which would leave this tool's ban on raw HTML editing stated but unenforced; escaping is what makes the rule real.
-- `boolean` was added after the block library turned up a genuine boolean field (`icon_image_visible`) that no other `fieldType` could express honestly — the alternatives were a `text` enum of `"true"`/`"false"`, or an `integer` 0/1, both of which make the schema misdescribe its own data. It renders as a native checkbox, so it costs no dependency.
+- A `boolean` fieldType was added and then removed. It existed for one field, `icon_image_visible`, and when that field was reclassified as theme-owned it left `boolean` with no user — carrying a widget nothing exercises is the speculative addition this spec avoids elsewhere. Re-add it when a real boolean field appears.
 - Other field types (image picker, colour picker, link picker, select/dropdown, etc.) remain deferred — images, links and constrained values are authored as `text` for now, and the widgets get upgraded in a later pass.
 - A field's `title` is its form label; its `description`, if present, renders as help text under the input.
 
@@ -106,7 +105,7 @@ The authoring UI supports, per email:
 
 - The JSON Schema serves two purposes: it drives form layout (via `fieldType`/`weight`/`title`) and it describes what valid data looks like.
 - v1 does **not** bundle a full JSON Schema validator — vendoring one inline conflicts with the single-file, no-dependency constraint. Instead the tool hand-rolls a check over the subset it actually uses: `required`, `type`, `enum`, `format: date` and `format: uri`.
-- `enum` and `format: uri` matter more than they look. Apart from `boolean`, v1 has no constraining widgets, so enumerated values (such as a block's `variant`) and every image and link URL are authored as free text — validation is the **only** guard rail on them, so the validator covers both even though no widget enforces them.
+- `enum` and `format: uri` matter more than they look. v1 has no constraining widgets at all, so enumerated values (such as a block's `variant`) and every image and link URL are authored as free text — validation is the **only** guard rail on them, so the validator covers both even though no widget enforces them.
 - **An empty string in an optional field means "not filled in"**, and `format` and `enum` checks are skipped for it. Without this rule, every optional URL field would report an error the moment it was left blank, since `""` is not a valid URI.
 - **A `default` must satisfy its own field's constraints** — it must be one of the field's `enum` values if it has one, and must be non-empty if the field is `required`. A required field defaulting to `""` is a contradiction: the default can never satisfy the requirement.
 - Validation is **advisory, not blocking**: problems are surfaced next to the offending field and in a summary, but the author can still export a document that doesn't validate. Half-finished emails need to be saveable.

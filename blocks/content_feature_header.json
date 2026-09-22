@@ -33,38 +33,6 @@
       "weight": 4,
       "format": "uri",
       "default": ""
-    },
-    "bg_image": {
-      "title": "Background image",
-      "type": "string",
-      "fieldType": "text",
-      "weight": 5,
-      "format": "uri",
-      "default": ""
-    },
-    "icon_image": {
-      "title": "Icon image",
-      "type": "string",
-      "fieldType": "text",
-      "weight": 6,
-      "format": "uri",
-      "default": ""
-    },
-    "icon_link": {
-      "title": "Icon link",
-      "type": "string",
-      "fieldType": "text",
-      "weight": 7,
-      "format": "uri",
-      "default": ""
-    },
-    "icon_image_visible": {
-      "title": "Show icon",
-      "type": "boolean",
-      "fieldType": "boolean",
-      "weight": 8,
-      "default": true,
-      "description": "The icon renders only when Icon image is filled in AND this is on."
     }
   },
   "required": [
