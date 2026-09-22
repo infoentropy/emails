@@ -59,16 +59,20 @@ Two caveats on that exception, recorded so they are not rediscovered:
 - Nothing in the current block library has an image field, so the convention has no user yet. It is written down anyway because it is a property of the schema layer rather than of any one block, and because a naming convention costs nothing to carry — unlike a `fieldType` or a widget, which is why `boolean` was removed when its only field went.
 - Sibling fields can drift: nothing ties the numbers to the URL, so replacing an image can leave stale dimensions behind. Grouping the three into one object-valued field would prevent that, at the cost of introducing nested objects to the schema layer, the form renderer and the validator. Worth revisiting if image fields become common.
 
-### Shared vocabularies: `variant`
+### Shared vocabularies: `variant` and `layout`
 
 Some blocks need the author to distinguish two instances of the same block type — a primary call-to-action versus a secondary one. That selector is semantic and lives in the document; the *appearance* it maps to belongs to the theme. The convention:
 
 - The field is named `variant`, with `fieldType: text` and a JSON Schema `enum`.
 - The enum is a **single shared scale reused by every block type that needs one**: `primary` and `secondary`. A button's `primary` and a divider's `primary` need not look remotely alike — the theme resolves `(blockType, variant)` to an appearance, so one vocabulary covers every block and new block types inherit it for free.
-- `variant` is **optional, defaulting to `primary`**. This is what the additive-only rule requires of any new field, and it means a document written before a block type gained its `variant` still renders correctly.
+- `variant` is **optional and always has a default, but the default is chosen per block type** — the vocabulary is shared, the default is not. `button` defaults to `primary`; `article` defaults to `secondary`, because a newspaper has one lead and many regular items, and defaulting a fourteen-article digest to fourteen features would be plainly wrong. Having a default at all is what the additive-only rule requires, so a document written before a block gained its `variant` still renders.
 - The scale starts at two values deliberately. Widening an `enum` is an allowed schema change, so real campaigns can pull in further values later at no cost to existing documents — whereas guessing at a richer scale now would bake in distinctions nothing has asked for.
 
 Because the values are brand-neutral, they need no sign-off from whoever owns a brand's colour palette. What a brand owns is the *theme mapping*, not the vocabulary.
+
+**`layout`** is a second shared vocabulary, on the same pattern: a `text` field with an `enum`, optional with a default, naming an arrangement the author chooses rather than a measurement. Its values are `image_left` and `image_right`.
+
+This is the one place the content-only rule bends, and it is worth being honest about rather than letting it pass unnoticed. Which side an image sits on is positional. It is admitted because it is an editorial decision an author genuinely makes — alternating sides down a long email is a deliberate rhythm, not a styling preference — and because it is expressed as a named arrangement the theme resolves, never as a measurement or a coordinate. The test for admitting anything else here is the same: it must be a choice the author means, expressible as a word rather than a number.
 
 ### Which block types ship
 
