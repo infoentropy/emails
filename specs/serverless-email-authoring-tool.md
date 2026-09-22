@@ -82,6 +82,7 @@ For development and testing, this tool ships with a small number of throwaway fi
   | `float`      | `number`            | —                      |
   | `boolean`    | `boolean`           | —                      |
 
+- `markdown` fields are converted to HTML by the render layer, not by this tool, and **raw HTML in a markdown field is escaped rather than passed through** — it renders as visible literal text. Standard markdown converters allow HTML through, which would leave this tool's ban on raw HTML editing stated but unenforced; escaping is what makes the rule real.
 - `boolean` was added after the block library turned up a genuine boolean field (`icon_image_visible`) that no other `fieldType` could express honestly — the alternatives were a `text` enum of `"true"`/`"false"`, or an `integer` 0/1, both of which make the schema misdescribe its own data. It renders as a native checkbox, so it costs no dependency.
 - Other field types (image picker, colour picker, link picker, select/dropdown, etc.) remain deferred — images, links and constrained values are authored as `text` for now, and the widgets get upgraded in a later pass.
 - A field's `title` is its form label; its `description`, if present, renders as help text under the input.
@@ -129,7 +130,7 @@ The exported document wraps the block list in campaign-level metadata, mirroring
 - `version` — integer format version, currently `1`. Lets the render layer reject documents it doesn't understand. This versions the *document format*, not individual block schemas.
 - `name` — internal campaign name, not sent to recipients.
 - `subject` — the email subject line.
-- `preheader` — preview text shown after the subject in the inbox. (Note: renamed from `preheaderText` in `weekly.json`. Distinct from any per-block `preheader` field a block schema may define for its own heading text.)
+- `preheader` — preview text shown after the subject in the inbox. Renamed from `preheaderText` in `weekly.json`. **There is exactly one preheader, and it lives here, outside the blocks.** The name is reserved for this field: block schemas must not define a `preheader` of their own. (The old app's blocks had fields by that name holding a block's heading text, which is a different thing entirely — those become `heading`.)
 - `blocks` — ordered array of block instances.
 
 These four campaign fields are fixed in the tool's source, not schema-driven — they're part of the document format rather than a block type.

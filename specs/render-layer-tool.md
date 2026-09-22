@@ -46,7 +46,9 @@ Schema evolution and version skew are now settled — see **Compatibility with e
 
 - How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
 - Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme is selected, where block templates and themes are located on disk.
-- How do `fieldType` values that need non-trivial rendering get handled — e.g. `markdown` (needs markdown→HTML conversion, likely a Python markdown library used inside the Jinja2 template), `date` (needs a display format)?
+- How should a `date` field be formatted for display? Still open.
+
+`markdown` is settled: convert to HTML here (a Python markdown library called from the Jinja2 template), configured so that **raw HTML in the source is escaped, not passed through**. The default passthrough behaviour would quietly undo the authoring tool's ban on raw HTML editing. Note that the legacy `body` values in `content/weekly.json` are raw HTML and need converting to markdown as a one-off before they can round-trip.
 
 ## Status
 

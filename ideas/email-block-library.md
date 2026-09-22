@@ -12,13 +12,15 @@ A set of JSON Schema documents, one per block type, in the format the authoring 
 
 `content/weekly.json` is a real campaign from the old Django app and contains the block types that actually shipped, with their real field names:
 
-| Snippet name (old)              | Fields |
-|---------------------------------|--------|
-| `component - discount header`   | `bg_color`, `bg_image`, `bg_position`, `body`, `coupon_code`, `cta_text`, `expires_text`, `icon_image`, `icon_link`, `padding`, `preheader` |
-| `component - content feature header` | `avatar_image`, `avatar_link`, `bg_color`, `bg_image`, `bg_position`, `feature_type`, `icon_image`, `icon_image_visible`, `icon_link`, `preheader` |
-| `component - spacer`            | `height` |
-| `component - button`            | `color`, `link`, `text`, `width` |
-| `component - large divider`     | `color` |
+| Snippet name (old)              | New `blockType` | Fields |
+|---------------------------------|-----------------|--------|
+| `component - discount header`   | `discount_header` | `bg_color`, `bg_image`, `bg_position`, `body`, `coupon_code`, `cta_text`, `expires_text`, `icon_image`, `icon_link`, `padding`, `preheader` |
+| `component - content feature header` | `content_feature_header` | `avatar_image`, `avatar_link`, `bg_color`, `bg_image`, `bg_position`, `feature_type`, `icon_image`, `icon_image_visible`, `icon_link`, `preheader` |
+| `component - spacer`            | `spacer` | `height` |
+| `component - button`            | `button` | `color`, `link`, `text`, `width` |
+| `component - large divider`     | `large_divider` | `color` |
+
+Field names in that table are the **old** ones; `preheader` becomes `heading` and `color` becomes `variant`, per the sections below.
 
 `flipboard/techdigest.html` and `traction/index.html` are the other reference points — the block types they'd decompose into may differ from the list above.
 
@@ -54,7 +56,7 @@ The authoring tool spec keeps a presentation field only where the value *is* the
 | Field | Verdict |
 |---|---|
 | `height` (spacer) | **Schema** — the block's entire meaning |
-| `body`, `preheader`, `coupon_code`, `cta_text`, `expires_text`, `text`, `feature_type` | **Schema** — content |
+| `body`, `heading` (was `preheader`), `coupon_code`, `cta_text`, `expires_text`, `text`, `feature_type` | **Schema** — content |
 | `variant` (was `color`, on button and divider) | **Schema** — a semantic selector, not styling |
 | `icon_image_visible` | **Schema** — an authoring decision, now a `boolean` field |
 | `bg_image`, `icon_image`, `avatar_image`, `*_link` | **Schema** — content |
@@ -62,15 +64,25 @@ The authoring tool spec keeps a presentation field only where the value *is* the
 
 Both questions this originally raised are now resolved above: `large divider` is not a zero-field block after all (it keeps a `variant`), and `button.color` becomes `button.variant`. No block in the library now has an empty form, so the authoring UI does not strictly need to handle that case — still worth building defensively, since the additive-only rule leaves a field-free block possible in future.
 
-## Other open questions
+## Settled: naming
 
-- **Naming.** Old names are prose (`component - discount header`). New `blockType` values should be identifier-shaped (`discount_header`). Straight rename, or reconsider the taxonomy?
-- **`body` holds HTML.** In `weekly.json` the discount header's `body` is `"<p>THIS IS THE BEST I CAN DO</p>\n<p>wow it is great</p>"`. The authoring tool bans raw HTML editing, so this wants to be `fieldType: markdown` — meaning the render layer, not the tool, converts markdown to HTML. The render layer spec has this as an open question too.
-- **Per-block `preheader`.** Several blocks have a `preheader` field that is heading text within the block, unrelated to the email-level `preheader` (inbox preview text). Worth renaming to avoid the collision.
+- **`blockType` values are snake_case identifiers** derived mechanically from the old snippet names, dropping the redundant `component` prefix — every block is a component. See the table above.
+- **`preheader` becomes `heading` on every block that has one.** There is exactly one preheader in the system: the campaign-level metadata field, outside the blocks entirely. The name is reserved for it, and no block schema may define its own. What the old app called a block `preheader` is that block's heading text — and in both cases it is the *only* heading text the block has, so `heading` names it accurately rather than implying a headline it sits above.
+
+## Settled: `body` stays `body`
+
+`body` keeps its name and takes `fieldType: markdown`. Markdown is the notation an author fills the field in with, not a different kind of field — the same way `text` and `paragraph` are both just strings. The render layer converts it to HTML.
+
+Raw HTML in a markdown field is **escaped, not passed through**. Standard markdown converters allow HTML through, which would leave the authoring tool's ban on raw HTML editing stated but unenforced.
+
+That has one migration consequence: the legacy `body` in `weekly.json` is raw HTML (`"<p>THIS IS THE BEST I CAN DO</p>\n<p>wow it is great</p>"`). Under escaping it would render as visible literal angle brackets, so legacy values need converting to markdown as a one-off before any old campaign can round-trip through the new tools.
 
 ## Next step
 
-The two blockers are cleared. What remains before this becomes a spec:
+**There are no open questions left.** Every decision this file was waiting on — the `boolean` gap, `button.color`, the `variant` vocabulary, `blockType` naming, `body`, and the `preheader` collision — is settled above.
 
-1. Decide the three open questions above (naming, markdown `body`, `preheader` collision) — all smaller than the ones already settled, and the `body` question is shared with the render layer spec, so it is worth deciding once for both.
-2. Pick the first block set, write the schemas out, and `git mv` this to `../specs/`.
+What remains is the work itself:
+
+1. Confirm the block set. The five in the table above are the obvious candidates, being the ones that actually shipped, but nothing has formally committed to them.
+2. Write the schemas out, applying the decisions above.
+3. `git mv` this file to `../specs/` once it describes work someone could start from without further clarification.
