@@ -207,16 +207,20 @@ Dropping `discount_header` removed the library's only body-copy field, and with 
 - **There is no way to put prose in an email.** The three remaining blocks offer a heading, a button label, and a divider. Nothing holds a paragraph. Whatever the library is meant to do, a content block with body copy looks like the obvious next addition — the authoring tool spec's `content_card` fixture (title, body, cta) is roughly its shape already.
 - **Only `fieldType: text` is exercised.** `paragraph`, `markdown`, `date`, `integer` and `float` are all declared in the authoring tool spec and used by nothing. That is not the same situation as `boolean`, which was added specifically for one field and removed with it — these came from the original spec and predate any block library. But it is worth knowing that five of the six widgets are currently speculative, and that `markdown` in particular was settled in some detail (including the raw-HTML escaping rule) for a field that no longer exists.
 
-## Next step
+## Status
 
-Every decision this file was waiting on — the `boolean` gap, `button.color`, the `variant` vocabulary, `blockType` naming, `body`, and the `preheader` collision — is settled above, and the schemas are drafted in `../blocks/`.
+Every decision this file was waiting on is settled, and all five schemas exist in `../blocks/`. They validate against the conventions in `serverless-email-authoring-tool.md`, and `content/weekly.json` still migrates into the ones that survived.
 
-Two things surfaced while writing them that are worth a decision:
+Settled since the first draft, for the record:
 
-- **`feature_type` is now enumerated** as `meditate` / `sleep`. Both values come from evidence in `content/weekly.json` and nowhere else: `sleep` appears as the literal `feature_type` and in the feature link, `meditate` as the destination of both buttons. The list was deliberately not padded out with plausible-looking product areas, because the evolution rule makes the risk asymmetric — *widening* an enum is permitted, so a missing value is a one-line change, while *narrowing* is forbidden, so a speculative value is stuck there for the life of the block type. Add values as real campaigns need them.
+- The `boolean` gap, `button.color`, the `variant` vocabulary, `blockType` naming, `body`, and the `preheader` collision.
+- **`feature_type` is enumerated** as `meditate` / `sleep`, both drawn from evidence in `content/weekly.json` and nowhere else. The list was deliberately not padded with plausible product areas: *widening* an enum is permitted, so a missing value is a one-line change, while *narrowing* is forbidden, so a speculative value is stuck for the life of the block type.
+- **The block set was reshaped repeatedly** as the content-only rule tightened. `discount_header` and `spacer` were dropped, `large_divider` became `divider`, and `image_with_text` and `article` were added. The library is now `content_feature_header`, `image_with_text`, `article`, `button` and `divider`.
 
-  This closes the last time-sensitive question: a field left free text could never have been constrained afterwards, and `feature_type` is load-bearing now that the theme selects imagery from it.
+This file stays in `specs/` rather than moving to `../completed/`. The schemas are written, but nothing has shipped: no tool reads them yet. It moves once the render layer can consume them — and the theme work may reshape the set again before then, since arrangement, backgrounds and imagery all now depend on decisions the theme has not made.
 
-- ~~`spacer.height` declares a `minimum` nothing enforces~~ — moot: the spacer block is gone. The underlying gap remains, though, should any future field use a keyword outside the validator's `required` / `type` / `enum` / `format` subset.
+Known limitations, carried rather than resolved:
 
-Remaining work: confirm the block set is the right five, resolve the two points above, then this file and the schemas move on together.
+- **Conditional requirements are not expressible.** `dependentRequired` would say that an image's alt text and dimensions matter only when the image is filled, but the validator subset is `required` / `type` / `enum` / `format`. It does not bite today, because the image fields are required outright — it will the moment one becomes optional. Second keyword found wanting, after `minimum`.
+- **No arrays.** The schema layer is flat scalars, so a block cannot hold a list, and a fourteen-article digest is fourteen blocks. This is the limitation most likely to matter, given the newspaper-style content the library is now aimed at.
+- **`paragraph`, `date` and `float` are declared but unused.** `text`, `markdown` and `integer` are exercised.
