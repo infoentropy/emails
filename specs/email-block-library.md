@@ -8,12 +8,12 @@ Moved to `specs/` once every open question was settled; the schemas it describes
 
 A set of JSON Schema documents, one per block type, in the format the authoring tool spec defines: `$id` of `block:<name>`, a `title`, a `version` integer, `properties` with a `fieldType` and `weight` on each field, and a `required` list. Schemas follow the additive-only evolution rule in that spec.
 
-**All four schemas exist in `../blocks/`** — `discount_header`, `content_feature_header`, `button` and `divider`. They are checked mechanically against the conventions above and against `content/weekly.json`: every surviving field is content, and no required field is empty in the source data.
+**All three schemas exist in `../blocks/`** — `content_feature_header`, `button` and `divider`. They are checked mechanically against the conventions above and against `content/weekly.json`: every surviving field is content, and no required field is empty in the source data.
 
 Migrating the sample campaign under the content-only rule loses more than field names, and the losses are worth stating plainly:
 
-- **The spacer instance disappears entirely.** Its block type no longer exists, so there is nothing to migrate it into. Whatever gap it was creating becomes the theme's problem.
-- **`bg_image` held genuine CloudFront URLs** in both header blocks and now comes from the theme. That is a capability change rather than a relocation: a theme styles a *block type*, so every `discount_header` shares a background where each instance could previously differ. Nothing in the sample exercises this, since it has one of each header — but if per-campaign backgrounds matter, the answer is a theme per campaign, not restoring the field.
+- **Two instances disappear entirely** — the spacer and the discount header — because their block types no longer exist. There is nothing to migrate them into.
+- **`bg_image` held genuine CloudFront URLs** and now comes from the theme. That is a capability change rather than a relocation: a theme styles a *block type*, so every instance of a type shares one background where each could previously differ. If per-campaign backgrounds matter, the answer is a theme per campaign, not restoring the field.
 - **The feature header's avatar is gone**, taking the library's last image field with it. That leaves the image-dimensions convention in the authoring tool spec with no user, which is deliberate and recorded there.
 
 Everything else dropped was either a styling value (`bg_color`, `bg_position`, `padding`, `width`) or empty in the source (`icon_image`, `icon_link`).
@@ -24,7 +24,7 @@ Everything else dropped was either a styling value (`bg_color`, `bg_position`, `
 
 | Snippet name (old)              | New `blockType` | Fields |
 |---------------------------------|-----------------|--------|
-| `component - discount header`   | `discount_header` | `bg_color`, `bg_image`, `bg_position`, `body`, `coupon_code`, `cta_text`, `expires_text`, `icon_image`, `icon_link`, `padding`, `preheader` |
+| `component - discount header`   | *(removed)* | `bg_color`, `bg_image`, `bg_position`, `body`, `coupon_code`, `cta_text`, `expires_text`, `icon_image`, `icon_link`, `padding`, `preheader` |
 | `component - content feature header` | `content_feature_header` | `avatar_image`, `avatar_link`, `bg_color`, `bg_image`, `bg_position`, `feature_type`, `icon_image`, `icon_image_visible`, `icon_link`, `preheader` |
 | `component - spacer`            | *(removed)* | `height` |
 | `component - button`            | `button` | `color`, `link`, `text`, `width` |
@@ -66,16 +66,16 @@ The authoring tool spec now bans presentation values outright rather than judgin
 
 | Field | Verdict |
 |---|---|
-| `heading` (was `preheader`), `body`, `coupon_code`, `cta_text`, `expires_text`, `text`, `feature_type` | **Schema** — content |
+| `heading` (was `preheader`), `text`, `feature_type` | **Schema** — content |
+| `body`, `coupon_code`, `cta_text`, `expires_text` | **Gone with `discount_header`** — content, but their block was dropped |
 | `variant` (was `color`, on button and divider) | **Schema** — a semantic selector, not styling |
 | `bg_color`, `bg_image`, `bg_position`, `padding`, `width` | **Theme** — styling |
 | `icon_image`, `icon_link`, `icon_image_visible` | **Theme** — an ornament carrying no message |
 | `avatar_image`, `avatar_link` | **Removed** — the feature header no longer carries its own imagery |
 | `height` (spacer) | **Removed with its block** — spacing is the theme's |
 
-The result is four block types, all of them pure copy plus semantics:
+The result is three block types:
 
-- `discount_header` — heading, body, coupon_code, expires_text, cta_text
 - `content_feature_header` — heading, feature_type
 - `button` — text, link, variant
 - `divider` — variant
@@ -89,11 +89,20 @@ The result is four block types, all of them pure copy plus semantics:
 
 ## Settled: `body` stays `body`
 
+*(No block currently has a `body` field — `discount_header` was the only one. The decision below stands as the convention for whenever a body-copy block appears.)*
+
 `body` keeps its name and takes `fieldType: markdown`. Markdown is the notation an author fills the field in with, not a different kind of field — the same way `text` and `paragraph` are both just strings. The render layer converts it to HTML.
 
 Raw HTML in a markdown field is **escaped, not passed through**. Standard markdown converters allow HTML through, which would leave the authoring tool's ban on raw HTML editing stated but unenforced.
 
 That has one migration consequence: the legacy `body` in `weekly.json` is raw HTML (`"<p>THIS IS THE BEST I CAN DO</p>\n<p>wow it is great</p>"`). Under escaping it would render as visible literal angle brackets, so legacy values need converting to markdown as a one-off before any old campaign can round-trip through the new tools.
+
+## Gaps this leaves
+
+Dropping `discount_header` removed the library's only body-copy field, and with it the last use of anything but one widget. Two consequences worth deciding on:
+
+- **There is no way to put prose in an email.** The three remaining blocks offer a heading, a button label, and a divider. Nothing holds a paragraph. Whatever the library is meant to do, a content block with body copy looks like the obvious next addition — the authoring tool spec's `content_card` fixture (title, body, cta) is roughly its shape already.
+- **Only `fieldType: text` is exercised.** `paragraph`, `markdown`, `date`, `integer` and `float` are all declared in the authoring tool spec and used by nothing. That is not the same situation as `boolean`, which was added specifically for one field and removed with it — these came from the original spec and predate any block library. But it is worth knowing that five of the six widgets are currently speculative, and that `markdown` in particular was settled in some detail (including the raw-HTML escaping rule) for a field that no longer exists.
 
 ## Next step
 
