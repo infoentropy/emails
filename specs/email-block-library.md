@@ -101,8 +101,10 @@ Every decision this file was waiting on — the `boolean` gap, `button.color`, t
 
 Two things surfaced while writing them that are worth a decision:
 
-- **`feature_type` cannot gain an `enum` later, and this now matters more.** It is one of only two fields left on its block, and if the theme selects imagery from it then its values must be known to the theme — which is an argument for enumerating them now rather than leaving it free text.
-- **The original wording, still applicable:** It is free text today, and the evolution rule forbids *narrowing* an enum — constraining a previously-unconstrained field is exactly that. So either its vocabulary gets enumerated now, or the field stays free text for the life of the block type. This is the one place where deferring is genuinely not free, and it applies to any field we leave unconstrained.
+- **`feature_type` is now enumerated** as `meditate` / `sleep`. Both values come from evidence in `content/weekly.json` and nowhere else: `sleep` appears as the literal `feature_type` and in the feature link, `meditate` as the destination of both buttons. The list was deliberately not padded out with plausible-looking product areas, because the evolution rule makes the risk asymmetric — *widening* an enum is permitted, so a missing value is a one-line change, while *narrowing* is forbidden, so a speculative value is stuck there for the life of the block type. Add values as real campaigns need them.
+
+  This closes the last time-sensitive question: a field left free text could never have been constrained afterwards, and `feature_type` is load-bearing now that the theme selects imagery from it.
+
 - ~~`spacer.height` declares a `minimum` nothing enforces~~ — moot: the spacer block is gone. The underlying gap remains, though, should any future field use a keyword outside the validator's `required` / `type` / `enum` / `format` subset.
 
 Remaining work: confirm the block set is the right five, resolve the two points above, then this file and the schemas move on together.

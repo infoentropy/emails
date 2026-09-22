@@ -16,7 +16,11 @@
       "type": "string",
       "fieldType": "text",
       "weight": 2,
-      "description": "Which product area this feature belongs to, e.g. sleep. Free text for now - see the note on enums in the block library."
+      "description": "Which product area this feature belongs to. The theme selects imagery from it. Values are drawn only from evidence in content/weekly.json: 'sleep' appears as a feature_type and in the feature link, 'meditate' as the destination of both buttons. Widening this enum is a permitted schema change, so add values as real campaigns need them.",
+      "enum": [
+        "meditate",
+        "sleep"
+      ]
     }
   },
   "required": [
