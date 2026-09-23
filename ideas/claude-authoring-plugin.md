@@ -34,6 +34,8 @@ A starter set, using only the blocks that exist today (`../blocks/`):
 - **Authoring tool:** a show/hide toggle per block, with hidden blocks visibly marked. Hidden blocks are still validated but their errors shouldn't nag, since an empty hidden block is the normal case.
 - **Render layer:** skips hidden blocks entirely. That also means a hidden block's `data` never needs to be valid.
 
+Conditional visibility (e.g. "US only") is a separate idea that builds on this: `block-segmentation.md`.
+
 The JSON document is the only thing passed between steps. Each skill reads it and writes it, so a user can also enter the flow partway (e.g. bring an existing JSON document straight to Skill C).
 
 ## Open questions
