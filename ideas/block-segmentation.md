@@ -19,24 +19,33 @@ The rule is **data, not code**: a small fixed vocabulary the authoring tool can 
 
 Start with the one dimension that's actually needed, country, with `in` and `not_in`. Add dimensions (region, language, subscriber tier…) only as they come up. Widening the vocabulary is additive, so this is the same kind of safe change as widening an `enum` under the schema-evolution rules.
 
-## The big question: where is the rule evaluated?
+## Evaluation: one file, conditionals in the ESP's language
 
-The render layer is a static script that has no idea who the recipient is. There are two options:
+**Decided:** the render layer produces **one HTML file** in which each block with an `audience` rule is wrapped in the sending platform's own conditional syntax. The platform then decides per recipient at send time. Blocks without a rule are emitted bare.
 
-1. **Render one HTML file per segment.** The render layer takes a segment (e.g. `country=US`) and drops the blocks whose rule doesn't match. This is simple and ESP-agnostic, and each output is plain HTML. However, the number of outputs grows with the number of segments, and the ESP has to be set up to send each file to the right list.
-2. **Emit conditionals in the ESP's personalisation language** (Liquid, AMPscript, Handlebars, merge tags…). One HTML file is produced, and the ESP decides per recipient at send time. This scales, but it ties the render layer to a specific ESP (or needs one adapter per ESP), and the ESP's field names (`country` vs `Country` vs `geo.country_code`) have to be mapped in config.
+Which syntax to produce is an **output flavor**, a render-layer configuration option (see `../specs/render-layer-tool.md`, **Output flavors**). **Handlebars** is the first flavor; SendGrid, Marketo and others are added later as further flavors. The document itself never names a platform: the same `audience` rule renders as whatever the selected flavor produces.
 
-Which ESP(s) will actually send these emails decides this. Option 1 works everywhere and could come first, with option 2 added as an adapter once the ESP is known.
+Roughly, for `{"country": {"in": ["US", "CA"]}}`:
+
+| Flavor | Shape |
+|---|---|
+| Handlebars | `{{#if (includes recipient.country "US" "CA")}}…{{/if}}`. Plain Handlebars has no built-in comparison helpers, so the sending side must register them. The flavor config names the helpers to use. |
+| SendGrid | Handlebars-based, with its own built-in helpers (`{{#equals}}`, `{{#or}}`…), so it's a separate flavor from plain Handlebars. |
+| Marketo | Velocity via email script tokens, not inline tags. It'll need the most design work of the three. |
+
+Each flavor also needs a **field mapping**: the document says `country`, and the flavor config maps it to the recipient field the platform actually has (`recipient.country`, `Country`, `lead.countryCode`…).
+
+**Escaping is part of each flavor.** Once the output is a Handlebars template, any `{{` in authored copy would be read as a tag at send time. Each flavor must escape its own syntax in rendered content, the same way markdown rendering already escapes raw HTML.
 
 ## Tool touchpoints
 
 - **Authoring tool:** a per-block "audience" control, with blocks that have a rule visibly badged. A **preview-as-segment** switch ("view as: US / non-US / everyone") is probably what makes this usable, because otherwise an author can't see what any given recipient actually gets.
-- **Render layer:** option 1 and/or 2 above. An unknown dimension or operator should be a hard error, since guessing wrong about who sees a block isn't a safe fallback.
+- **Render layer:** wraps ruled blocks in the selected flavor's conditionals, per the section above. An unknown dimension or operator should be a hard error, since guessing wrong about who sees a block isn't a safe fallback.
 - **Plugin, Skill A:** copy docs often carry notes like "US only" or "EU version:". Skill A could turn those into rules instead of leaving the author to add them in the editor.
 
 ## Open questions
 
-- Which ESP, and does it support conditional content? This decides option 1 vs 2.
-- Are country codes ISO 3166-1 alpha-2, and does the ESP use the same codes?
+- Are country codes ISO 3166-1 alpha-2, and does the platform use the same codes?
 - Does anything beyond geo come up soon enough to design for now?
-- Is an email where every block is excluded for some segment an error, a warning, or allowed?
+- An email where every block is excluded for some segment can't be detected at render time any more, since the render layer doesn't know the segments. Should the render layer warn when every block has a rule, or is that the platform's problem?
+- The editor's preview-as-segment switch evaluates rules itself, in JavaScript. It has to match what each flavor's conditionals do at send time.
