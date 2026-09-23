@@ -44,16 +44,36 @@ Two companion rules give the render layer the other direction of compatibility �
 
 ### What belongs in a block schema
 
-The authored document is meant to be theme-independent, so presentation values generally belong to the theme, not the schema. But the line is drawn **per field, by asking whether the value carries meaning or only styling** — not by a blanket ban on anything that looks like a measurement:
+**Only content.** The authored document says what the email *says*; the theme decides everything about how it looks. This is a blanket rule, not a per-field judgement:
 
-- A spacer's `height` *is* the block's entire content; without it the block means nothing. It stays in the schema.
-- A button's `width` or a header's `padding` are styling decisions the theme should own. They don't.
+- **No measurements.** No block declares its own width, height, padding, margin or spacing. There is no spacer block either — how much air sits between blocks is the theme's decision about vertical rhythm, not the author's.
+- **No colours, backgrounds or positioning.** Background images and colours, background position and per-block colour values all belong to the theme.
+- **No decoration.** An icon slot or ornament carrying no message is styling.
 
-Applying this to each field of the real block set is the block library's job, not this spec's.
+Where a distinction genuinely is the author's to make — a prominent call to action versus a quiet one — it is expressed semantically through `variant`, never as a measurement or a colour.
+
+**The one exception is image dimensions.** An image field carries its own pixel size as sibling `<field>_width` and `<field>_height` integers. This is not a styling preference: email clients need explicit `width` and `height` attributes to reserve layout space while images are blocked, which is the state most messages are first opened in. The numbers describe the asset, not a design decision.
+
+One caveat on that exception: sibling fields can drift, since nothing ties the numbers to the URL, so replacing an image can leave stale dimensions behind. Grouping the three into one object-valued field would prevent it, at the cost of introducing nested objects to the schema layer, the form renderer and the validator. Worth revisiting if image fields become common.
+
+### Shared vocabularies: `variant`
+
+Some blocks need the author to distinguish two instances of the same block type — a primary call-to-action versus a secondary one. That selector is semantic and lives in the document; the *appearance* it maps to belongs to the theme. The convention:
+
+- The field is named `variant`, with `fieldType: text` and a JSON Schema `enum`.
+- The enum is a **single shared scale reused by every block type that needs one**: `primary` and `secondary`. A button's `primary` and a divider's `primary` need not look remotely alike — the theme resolves `(blockType, variant)` to an appearance, so one vocabulary covers every block and new block types inherit it for free.
+- `variant` is **optional and always has a default, but the default is chosen per block type** — the vocabulary is shared, the default is not. `button` defaults to `primary`; `article` defaults to `secondary`, because a newspaper has one lead and many regular items, and defaulting a fourteen-article digest to fourteen features would be plainly wrong. Having a default at all is what the additive-only rule requires, so a document written before a block gained its `variant` still renders.
+- The scale starts at two values deliberately. Widening an `enum` is an allowed schema change, so real campaigns can pull in further values later at no cost to existing documents — whereas guessing at a richer scale now would bake in distinctions nothing has asked for.
+
+Because the values are brand-neutral, they need no sign-off from whoever owns a brand's colour palette. What a brand owns is the *theme mapping*, not the vocabulary.
+
+**Arrangement is the theme's too.** Which side an image sits on, and any comparable positional choice, is not expressible in the document. Naming an arrangement as a word rather than a number does not make it content — positional is positional, and admitting it would make this a rule with exceptions, which is how such rules stop being load-bearing.
+
+The consequence is that an author adds blocks and the theme decides how they are arranged, whether that is a fixed side or an alternating rhythm down the email, with no per-block override. How a theme makes that choice is part of the open theme-structure question in the render layer spec.
 
 ### Which block types ship
 
-Deferred to a **separate spec** — this spec defines the document format and the tool, not the block library. The concrete set of block types (and their field definitions) is worked out in `../ideas/email-block-library.md`.
+Deferred to a **separate spec** — this spec defines the document format and the tool, not the block library. The concrete set of block types (and their field definitions) is worked out in `email-block-library.md`, in this folder, with the schemas themselves in `../blocks/`.
 
 For development and testing, this tool ships with a small number of throwaway fixture schemas (e.g. the `content_card` below). They exist to exercise the form, reordering and export paths, and are expected to be replaced wholesale by the real library.
 
@@ -70,7 +90,8 @@ For development and testing, this tool ships with a small number of throwaway fi
   | `integer`    | `integer`           | —                      |
   | `float`      | `number`            | —                      |
 
-- Other field types (image picker, color picker, link picker, etc.) are explicitly deferred — not needed for a first version.
+- `markdown` fields are converted to HTML by the render layer, not by this tool, and **raw HTML in a markdown field is escaped rather than passed through** — it renders as visible literal text. Standard markdown converters allow HTML through, which would leave this tool's ban on raw HTML editing stated but unenforced; escaping is what makes the rule real.
+- **A `fieldType` is added when a real field needs it, not in anticipation.** A widget nothing exercises is dead weight in a tool that must stay a single readable file. Image, colour and link pickers, selects and checkboxes are all deferred on these grounds — images, links and constrained values are authored as `text` for now, and the widgets get upgraded in a later pass.
 - A field's `title` is its form label; its `description`, if present, renders as help text under the input.
 
 ### Block operations
@@ -92,7 +113,9 @@ The authoring UI supports, per email:
 
 - The JSON Schema serves two purposes: it drives form layout (via `fieldType`/`weight`/`title`) and it describes what valid data looks like.
 - v1 does **not** bundle a full JSON Schema validator — vendoring one inline conflicts with the single-file, no-dependency constraint. Instead the tool hand-rolls a check over the subset it actually uses: `required`, `type`, `enum`, `format: date` and `format: uri`.
-- `enum` and `format: uri` matter more than they look. Because v1 keeps the text-only `fieldType` set (see above), constrained values like brand colour tokens and every image and link URL are authored as free text — validation is the **only** guard rail on them, so the validator covers both even though no widget enforces them.
+- `enum` and `format: uri` matter more than they look. v1 has no constraining widgets at all, so enumerated values (such as a block's `variant`) and every image and link URL are authored as free text — validation is the **only** guard rail on them, so the validator covers both even though no widget enforces them.
+- **An empty string in an optional field means "not filled in"**, and `format` and `enum` checks are skipped for it. Without this rule, every optional URL field would report an error the moment it was left blank, since `""` is not a valid URI.
+- **A `default` must satisfy its own field's constraints** — it must be one of the field's `enum` values if it has one, and must be non-empty if the field is `required`. A required field defaulting to `""` is a contradiction: the default can never satisfy the requirement.
 - Validation is **advisory, not blocking**: problems are surfaced next to the offending field and in a summary, but the author can still export a document that doesn't validate. Half-finished emails need to be saveable.
 
 ## Persistence
@@ -116,7 +139,7 @@ The exported document wraps the block list in campaign-level metadata, mirroring
 - `version` — integer format version, currently `1`. Lets the render layer reject documents it doesn't understand. This versions the *document format*, not individual block schemas.
 - `name` — internal campaign name, not sent to recipients.
 - `subject` — the email subject line.
-- `preheader` — preview text shown after the subject in the inbox. (Note: renamed from `preheaderText` in `weekly.json`. Distinct from any per-block `preheader` field a block schema may define for its own heading text.)
+- `preheader` — preview text shown after the subject in the inbox. Renamed from `preheaderText` in `weekly.json`. **There is exactly one preheader, and it lives here, outside the blocks.** The name is reserved for this field: block schemas must not define a `preheader` of their own. (The old app's blocks had fields by that name holding a block's heading text, which is a different thing entirely — those become `heading`.)
 - `blocks` — ordered array of block instances.
 
 These four campaign fields are fixed in the tool's source, not schema-driven — they're part of the document format rather than a block type.
@@ -194,10 +217,6 @@ Called out explicitly so these read as decisions, not oversights:
 - **No drag-and-drop reordering** — move up/down only.
 - **No collaboration, sharing or sync** of any kind. There's no server.
 
-## Open questions
-
-Both of the questions previously listed here are now settled — see **Schema evolution** above, and **Unknown block types** below.
-
 ## Unknown block types
 
 If a document references a `blockType` this tool has no schema for, the tool **preserves the block**: it shows a read-only placeholder naming the unknown type, and writes the block back out on export with its `data` untouched. Opening a newer document in an older copy of the tool and saving must never silently destroy content.
@@ -206,4 +225,17 @@ The render layer takes the opposite line and fails loudly, since it cannot produ
 
 ## Status
 
-Scoped, ready to implement. Move this file to `../completed/` via `git mv` once the work lands.
+Implemented as `../authoring/index.html`: one static HTML file with a single inline `<style>` and
+`<script>`, no external dependencies and no `fetch()`, so it opens from `file://` as **Tool shape**
+requires. Block schemas are embedded as a JavaScript object literal; the form is built from
+`fieldType`/`weight`/`title`; validation covers `required`, `type`, `enum`, `format: uri` and
+`format: date` and stays advisory; ids are document-local `b1`, `b2`, …; unknown block types are
+preserved and written back untouched; reordering is move up/down only, as scoped.
+
+**Persistence** is met in full: *Save as…* writes the document out as a `.json` file, through the
+browser's save dialog where one is offered and as a download otherwise, named after the campaign.
+*Copy JSON* sits alongside it for pasting straight into another tool, and import through the file
+picker works as specified.
+
+The same schemas also exist as standalone documents under `../blocks/`, and the render layer this spec
+puts out of scope is specced separately in `../specs/render-layer-tool.md`.

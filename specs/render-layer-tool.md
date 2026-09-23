@@ -19,6 +19,12 @@ The serverless email authoring tool (`serverless-email-authoring-tool.md`, in th
 - This tool **cannot** assume the input document is valid. The authoring tool's validation is advisory, not blocking (by design — half-finished emails need to be saveable), so a document that fails its block schemas can still be exported. Decide per case whether to validate on the way in or to render defensively; either way, "it was already validated" is not true.
 - Unknown `blockType` is a hard error: this tool has no template for it and cannot produce correct HTML. (The authoring tool takes the opposite line and preserves unknown blocks, so that round-tripping a document through an older copy never destroys content.)
 
+### Themes and variants
+
+A block may carry a `variant` (`primary` or `secondary` — see the authoring tool spec). The theme owns what each one looks like, resolving `(blockType, variant)` to an appearance; the document never names a colour.
+
+When a theme has no styling for a variant in use, **render the block as `primary` and emit a warning** naming the block type and the missing variant. Failing hard would be worse than it looks: widening the `variant` enum is an allowed schema change, so a hard error would turn every such widening into a breaking change for every existing theme. A warning keeps the email building while leaving the gap visible to whoever maintains the theme.
+
 ### Compatibility with evolving schemas
 
 The authoring tool's **Schema evolution** section fixes the rules that make version skew survivable, and they impose two requirements on templates here:
@@ -39,8 +45,11 @@ Because schemas may only ever gain optional fields — renames and removals beco
 Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above.
 
 - How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
+- **Which side does an `image_with_text` image sit on?** The authoring document deliberately does not say — a `layout` field was drafted and removed to keep the schema content-only — so this is entirely the theme's call. A fixed side, or alternating down the email? Alternating needs the template to know a block's position among its siblings, which is more context than rendering one block in isolation provides.
 - Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme is selected, where block templates and themes are located on disk.
-- How do `fieldType` values that need non-trivial rendering get handled — e.g. `markdown` (needs markdown→HTML conversion, likely a Python markdown library used inside the Jinja2 template), `date` (needs a display format)?
+- How should a `date` field be formatted for display? Still open.
+
+`markdown` is settled: convert to HTML here (a Python markdown library called from the Jinja2 template), configured so that **raw HTML in the source is escaped, not passed through**. The default passthrough behaviour would quietly undo the authoring tool's ban on raw HTML editing. Note that the legacy `body` values in `content/weekly.json` are raw HTML and need converting to markdown as a one-off before they can round-trip.
 
 ## Status
 

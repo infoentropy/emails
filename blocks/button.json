@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "block:button",
+  "title": "Button",
+  "version": 1,
+  "type": "object",
+  "properties": {
+    "text": {
+      "title": "Label",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 1
+    },
+    "link": {
+      "title": "Link",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 2,
+      "format": "uri"
+    },
+    "variant": {
+      "title": "Variant",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 3,
+      "enum": [
+        "primary",
+        "secondary"
+      ],
+      "default": "primary",
+      "description": "Emphasis, resolved to an appearance by the theme. Shared vocabulary; see the authoring tool spec."
+    }
+  },
+  "required": [
+    "text",
+    "link"
+  ]
+}

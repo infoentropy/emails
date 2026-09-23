@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "block:article",
+  "title": "Article",
+  "version": 1,
+  "type": "object",
+  "properties": {
+    "headline": {
+      "title": "Headline",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 1
+    },
+    "link": {
+      "title": "Article link",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 2,
+      "format": "uri"
+    },
+    "image": {
+      "title": "Image URL",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 3,
+      "format": "uri"
+    },
+    "image_alt": {
+      "title": "Image alt text",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 4,
+      "description": "Describes the image for recipients whose client blocks images, which is most on first open."
+    },
+    "image_width": {
+      "title": "Image width (px)",
+      "type": "integer",
+      "fieldType": "integer",
+      "weight": 5
+    },
+    "image_height": {
+      "title": "Image height (px)",
+      "type": "integer",
+      "fieldType": "integer",
+      "weight": 6
+    },
+    "variant": {
+      "title": "Variant",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 7,
+      "enum": [
+        "primary",
+        "secondary"
+      ],
+      "default": "secondary",
+      "description": "primary is the lead feature, secondary a regular item. Defaults to secondary: a newspaper has one lead and many regulars."
+    }
+  },
+  "required": [
+    "headline",
+    "link",
+    "image",
+    "image_alt",
+    "image_width",
+    "image_height"
+  ]
+}

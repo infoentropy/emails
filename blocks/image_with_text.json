@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "block:image_with_text",
+  "title": "Image with Text",
+  "version": 1,
+  "type": "object",
+  "properties": {
+    "heading": {
+      "title": "Heading",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 1
+    },
+    "body": {
+      "title": "Body",
+      "type": "string",
+      "fieldType": "markdown",
+      "weight": 2,
+      "default": "",
+      "description": "Authored in markdown. Raw HTML is escaped, not rendered."
+    },
+    "image": {
+      "title": "Image URL",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 3,
+      "format": "uri"
+    },
+    "image_alt": {
+      "title": "Image alt text",
+      "type": "string",
+      "fieldType": "text",
+      "weight": 4,
+      "description": "Describes the image for recipients whose client blocks images, which is most on first open."
+    },
+    "image_width": {
+      "title": "Image width (px)",
+      "type": "integer",
+      "fieldType": "integer",
+      "weight": 5
+    },
+    "image_height": {
+      "title": "Image height (px)",
+      "type": "integer",
+      "fieldType": "integer",
+      "weight": 6
+    }
+  },
+  "required": [
+    "heading",
+    "image",
+    "image_alt",
+    "image_width",
+    "image_height"
+  ]
+}
