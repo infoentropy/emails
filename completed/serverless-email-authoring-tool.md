@@ -225,4 +225,16 @@ The render layer takes the opposite line and fails loudly, since it cannot produ
 
 ## Status
 
-Scoped, ready to implement. Move this file to `../completed/` via `git mv` once the work lands.
+Implemented as `../authoring/index.html`: one static HTML file with a single inline `<style>` and
+`<script>`, no external dependencies and no `fetch()`, so it opens from `file://` as **Tool shape**
+requires. Block schemas are embedded as a JavaScript object literal; the form is built from
+`fieldType`/`weight`/`title`; validation covers `required`, `type`, `enum`, `format: uri` and
+`format: date` and stays advisory; ids are document-local `b1`, `b2`, …; unknown block types are
+preserved and written back untouched; reordering is move up/down only, as scoped.
+
+One deviation from **Persistence**: export copies the document to the clipboard rather than writing a
+downloaded `.json` file. Import through the file picker works as specified. If the downloaded file
+matters, that belongs in `../feedback/` as a refinement rather than reopening this spec.
+
+The same schemas also exist as standalone documents under `../blocks/`, and the render layer this spec
+puts out of scope is specced separately in `../specs/render-layer-tool.md`.
