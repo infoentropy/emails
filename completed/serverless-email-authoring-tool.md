@@ -232,9 +232,10 @@ requires. Block schemas are embedded as a JavaScript object literal; the form is
 `format: date` and stays advisory; ids are document-local `b1`, `b2`, …; unknown block types are
 preserved and written back untouched; reordering is move up/down only, as scoped.
 
-One deviation from **Persistence**: export copies the document to the clipboard rather than writing a
-downloaded `.json` file. Import through the file picker works as specified. If the downloaded file
-matters, that belongs in `../feedback/` as a refinement rather than reopening this spec.
+**Persistence** is met in full: *Save as…* writes the document out as a `.json` file, through the
+browser's save dialog where one is offered and as a download otherwise, named after the campaign.
+*Copy JSON* sits alongside it for pasting straight into another tool, and import through the file
+picker works as specified.
 
 The same schemas also exist as standalone documents under `../blocks/`, and the render layer this spec
 puts out of scope is specced separately in `../specs/render-layer-tool.md`.

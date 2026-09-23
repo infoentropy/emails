@@ -89,6 +89,7 @@ pre{margin:0;padding:0 14px 14px;font:12.5px/1.55 var(--mono);white-space:pre;ov
 
 <div class="bar"><div class="bar-in">
   <div class="brand">Email Block Composer <small id="saved">·</small></div>
+  <button id="save" class="primary">Save as&hellip;</button>
   <button id="copy">Copy JSON</button>
   <button id="paste">Paste JSON</button>
   <input type="file" id="file" accept="application/json,.json" hidden>
@@ -583,6 +584,41 @@ function refreshLive(){
 
 function commit(){ save(); render(); }
 function render(){ renderMeta(); renderBlocks(); renderPalette(); refreshLive(); }
+
+function filename(){
+  const base = String(doc.name || doc.subject || "")
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+  return (base || "email-document") + ".json";
+}
+
+async function saveAs(){
+  const text = JSON.stringify(serialise(), null, 2);
+  const name = filename();
+  if(window.showSaveFilePicker){
+    try {
+      const handle = await showSaveFilePicker({ suggestedName:name,
+        types:[{description:"Email document", accept:{"application/json":[".json"]}}] });
+      const w = await handle.createWritable();
+      await w.write(text);
+      await w.close();
+      flash("saved to disk");
+      return;
+    } catch(e){
+      if(e && e.name === "AbortError") return;      // the author closed the dialog
+      // no picker permission here (file:// among others) — fall through and download
+    }
+  }
+  const url = URL.createObjectURL(new Blob([text], {type:"application/json"}));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  flash("downloaded");
+}
+document.getElementById("save").addEventListener("click", saveAs);
 
 document.getElementById("copy").addEventListener("click", async () => {
   const text = JSON.stringify(serialise(), null, 2);
