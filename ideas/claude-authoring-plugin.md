@@ -24,7 +24,15 @@ A starter set, using only the blocks that exist today (`../blocks/`):
 | Feature announcement | `content_feature_header`, `image_with_text`, `button` |
 | Newsletter | `content_feature_header`, `image_with_text`, `divider`, n `secondary` `article`s, `button` |
 
-"n" marks a repeating block: its count comes from the copy, not the type. Still to decide: whether blocks can be optional within a type (e.g. no `button` when the copy has no call to action), or whether every block in the set is always emitted.
+"n" marks a repeating block: its count comes from the copy, not the type.
+
+**Every block in the type is always emitted.** A block the copy has nothing for (e.g. a `button` when there's no call to action) is kept but marked **hidden**. The document's shape therefore always matches its type, and the user can unhide and fill the block in the editor rather than having to know it was ever an option.
+
+`hidden` doesn't exist yet, and it touches all three tools:
+
+- **Document format:** a block-level flag next to `id` and `blockType`, not inside `data`. It says whether the block is shown, not what it contains, so it doesn't belong to any block schema, and every block type gets it without a schema change. Optional, default `false`, so existing documents are unaffected.
+- **Authoring tool:** a show/hide toggle per block, with hidden blocks visibly marked. Hidden blocks are still validated but their errors shouldn't nag, since an empty hidden block is the normal case.
+- **Render layer:** skips hidden blocks entirely. That also means a hidden block's `data` never needs to be valid.
 
 The JSON document is the only thing passed between steps. Each skill reads it and writes it, so a user can also enter the flow partway (e.g. bring an existing JSON document straight to Skill C).
 
@@ -40,3 +48,4 @@ The JSON document is the only thing passed between steps. Each skill reads it an
 ## Prerequisites
 
 - Render layer tool (`../specs/render-layer-tool.md`).
+- Block-level `hidden` flag in the document format, the authoring tool and the render layer (see **Email types**).
