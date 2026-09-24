@@ -23,17 +23,16 @@ Start with the one dimension that's actually needed, country, with `in` and `not
 
 **Decided:** the render layer produces **one HTML file** in which each block with an `audience` rule is wrapped in the sending platform's own conditional syntax. The platform then decides per recipient at send time. Blocks without a rule are emitted bare.
 
-Which syntax to produce is an **output flavor**, a render-layer configuration option (see `../specs/render-layer-tool.md`, **Output flavors**). **Handlebars** is the first flavor; SendGrid, Marketo and others are added later as further flavors. The document itself never names a platform: the same `audience` rule renders as whatever the selected flavor produces.
+Which syntax to produce is an **output flavor**, a render-layer configuration option (see `../specs/render-layer-tool.md`, **Output flavors**). **Iterable** (Iterable's Handlebars dialect) is the first flavor; SendGrid, whose Handlebars dialect differs, is expected to follow as its own flavor. The document itself never names a platform: the same `audience` rule renders as whatever the selected flavor produces.
 
 Roughly, for `{"country": {"in": ["US", "CA"]}}`:
 
 | Flavor | Shape |
 |---|---|
-| Handlebars | `{{#if (includes recipient.country "US" "CA")}}…{{/if}}`. Plain Handlebars has no built-in comparison helpers, so the sending side must register them. The flavor config names the helpers to use. |
-| SendGrid | Handlebars-based, with its own built-in helpers (`{{#equals}}`, `{{#or}}`…), so it's a separate flavor from plain Handlebars. |
-| Marketo | Velocity via email script tokens, not inline tags. It'll need the most design work of the three. |
+| Iterable | Iterable's Handlebars comes with its own comparison helpers (e.g. `{{#ifEq}}`), so nothing needs registering on the sending side. A multi-country `in` needs either an or-combination of equality checks or a single contains-style check. Before building, confirm the exact helper set, and which of these work as nested expressions, against Iterable's docs. |
+| SendGrid | Also Handlebars-based, but with a different set of built-in helpers (`{{#equals}}`, `{{#or}}`…), so it's a separate flavor from Iterable. |
 
-Each flavor also needs a **field mapping**: the document says `country`, and the flavor config maps it to the recipient field the platform actually has (`recipient.country`, `Country`, `lead.countryCode`…).
+Each flavor also needs a **field mapping**: the document says `country`, and the flavor config maps it to the recipient field the platform actually has (for Iterable, a user profile field such as `country` or a nested `address.country`).
 
 **Escaping is part of each flavor.** Once the output is a Handlebars template, any `{{` in authored copy would be read as a tag at send time. Each flavor must escape its own syntax in rendered content, the same way markdown rendering already escapes raw HTML.
 

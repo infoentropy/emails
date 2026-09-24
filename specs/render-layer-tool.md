@@ -44,7 +44,7 @@ Because schemas may only ever gain optional fields — renames and removals beco
 
 The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block audience rules, see `../ideas/block-segmentation.md`) is emitted in the flavor's own syntax.
 
-- **Handlebars** is the first flavor. SendGrid and Marketo are expected to follow, each as its own flavor. SendGrid's Handlebars dialect has different built-in helpers from plain Handlebars, so it isn't the same flavor.
+- **Iterable** is the first flavor: Handlebars as Iterable implements it, with Iterable's built-in helpers. SendGrid is expected to follow as its own flavor. It is also Handlebars-based, but its helpers differ, so "Handlebars" alone doesn't identify a flavor.
 - A flavor owns: its conditional syntax, the mapping from document field names (e.g. `country`) to the platform's recipient fields, and **escaping its own syntax** in rendered content (e.g. a literal `{{` in copy must not become a Handlebars tag).
 - The authored document never names a flavor. The same document renders for any flavor.
 
