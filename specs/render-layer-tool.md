@@ -40,13 +40,22 @@ Because schemas may only ever gain optional fields — renames and removals beco
 - Templating via **Jinja2** (the standard, widely-used Python templating engine): one Jinja2 template per `blockType`, each block's `data` rendered through its template, then the rendered blocks concatenated into the final email HTML (wrapped in whatever outer document shell the theme provides).
 - Basic shape: script takes the authored JSON document (and a theme selection) as input, and writes the rendered HTML as output.
 
+### Output flavors
+
+The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block rulesets, see `block-segmentation.md`) is emitted in the flavor's own syntax.
+
+- **Iterable** is the first flavor: Handlebars as Iterable implements it, with Iterable's built-in helpers. SendGrid is expected to follow as its own flavor. It is also Handlebars-based, but its helpers differ, so "Handlebars" alone doesn't identify a flavor.
+- A flavor owns: how conditionals are wrapped around blocks, and **escaping its own syntax** in rendered content (e.g. a literal `{{` in copy must not become a Handlebars tag). The conditions themselves are not the flavor's job. They are AI-translated per environment and handed to the render layer already approved (see the segmentation idea), because which recipient attributes exist can't be known generically.
+- The authored document never names a flavor. The same document renders for any flavor.
+- Block-level fields the render layer must honour (from `block-segmentation.md`, already produced by the authoring tool): `hidden: true` blocks are skipped entirely; a block with a `ruleset` is wrapped in its approved condition; adjacent blocks sharing a `switch` value render as one if / else-if / else chain, first match wins, with a last case lacking a `ruleset` as the `else`. A split switch group is a hard error.
+
 ## Open questions
 
 Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above.
 
 - How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
 - **Which side does an `image_with_text` image sit on?** The authoring document deliberately does not say — a `layout` field was drafted and removed to keep the schema content-only — so this is entirely the theme's call. A fixed side, or alternating down the email? Alternating needs the template to know a block's position among its siblings, which is more context than rendering one block in isolation provides.
-- Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme is selected, where block templates and themes are located on disk.
+- Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme and output flavor are selected, where block templates and themes are located on disk.
 - How should a `date` field be formatted for display? Still open.
 
 `markdown` is settled: convert to HTML here (a Python markdown library called from the Jinja2 template), configured so that **raw HTML in the source is escaped, not passed through**. The default passthrough behaviour would quietly undo the authoring tool's ban on raw HTML editing. Note that the legacy `body` values in `content/weekly.json` are raw HTML and need converting to markdown as a one-off before they can round-trip.
