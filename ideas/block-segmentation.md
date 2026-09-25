@@ -62,12 +62,60 @@ Blocks stay a flat list. One more optional block-level field, `switch`, names a 
 Rules the tools enforce:
 
 - **Group members must be adjacent**, since the whole chain renders in one place. A split group is a validation error in the authoring tool and a hard error in the render layer.
-- **Authoring tool:** shows a group as one bracketed unit with its cases in order and the default last, so reordering can't split it. Case order matters and should be visible.
+- **Authoring tool:** see **Switch groups in the authoring tool** below.
 - The `switch` value is only a label that ties blocks together. It needs to be unique within the document, and nothing more.
 
 The flat shape was chosen over a nested container block (`{"blockType": "switch", "cases": [{"ruleset": …, "blocks": [...]}]}`). That shape states the structure more directly, but every tool so far assumes a flat block list, and nesting would ripple through the editor, validation and rendering.
 
 A related but separate case is when only the copy varies between cases (the button text above) and not the block. A per-field switch inside `data` might be simpler for authors there. Not designed yet.
+
+### Switch groups in the authoring tool
+
+The editor today is a vertical stack of block cards with ↑/↓ buttons, plus an "Add a block" palette. A group becomes one card in that stack, with its cases inside:
+
+```
+┌ Switch ─────────────────────── ↑ ↓ ✕ ┐
+│ Checked top to bottom, first match wins │
+│                                        │
+│ ┌ If  [users in US_____________] ↑↓ 👁 ✕ ┐
+│ │  Button · text "Shop US deals" …       │
+│ └────────────────────────────────────────┘
+│ ┌ Else if [users in GB__________] ↑↓ 👁 ✕ ┐
+│ │  Button · text "Shop UK deals" …       │
+│ └────────────────────────────────────────┘
+│ ┌ Otherwise (everyone else)         👁   ┐
+│ │  Button · text "Shop now" …            │
+│ └────────────────────────────────────────┘
+│ + Add case                              │
+└────────────────────────────────────────┘
+```
+
+**Structure**
+
+- Cases are labelled **If / Else if / Otherwise**. That matches the rendered chain and makes first-match-wins visible without explanation.
+- The group's ↑/↓ move **the whole group**, so the adjacency rule can't be broken from the UI. Case ↑/↓ only reorder cases within the group.
+- Cases are **stacked, not tabbed**. Each one can collapse to a one-line summary. Stacking keeps every version's copy visible for typo checks, which is Skill B's main job, and matches the rest of the editor.
+
+**Creating and dissolving**
+
+- **"Add a version…"** on any plain block turns it into a group. The original block becomes **Otherwise**, and a copy becomes the first **If** case with its ruleset field focused ("Who sees this version?"). Copying the block means the author edits only what's different.
+- **"+ Add case"** copies the default and inserts it above Otherwise. A picker allows a different block type instead.
+- Removing cases down to **one** turns the group back into a plain block that keeps that case's ruleset, if it has one. There's no separate "ungroup" command.
+- The `switch` value is generated automatically and never shown. It only ties blocks together, so there's nothing for the author to name.
+
+**Default case**
+
+- **Otherwise has no ruleset field.** It's the one case without a ruleset, and a field there would invite a second default.
+- **Otherwise can't be moved.** It has no ↑/↓ and always stays last.
+- **Removing Otherwise** turns it into a visible row, "No fallback: everyone else sees nothing", with a button to add it back. A missing fallback is then a choice the author can see, not an accident.
+
+**Validation**
+
+- An If/Else if case with an empty ruleset gets a **warning**: it would match everyone and hide every case below it.
+- A group split up in an imported document (hand edits, older copies) is an **error**, with a **Regroup** fix that moves the cases back together.
+- Hiding a case greys it out in place, the same as hidden plain blocks.
+
+**Not included:** a "view as segment" preview. The editor can't evaluate free-text rulesets, so the translate-and-review step before rendering stays the only place the logic is checked.
 
 ## Evaluation: one file, conditionals in the ESP's language
 
