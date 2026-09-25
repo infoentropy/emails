@@ -42,11 +42,12 @@ Because schemas may only ever gain optional fields — renames and removals beco
 
 ### Output flavors
 
-The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block rulesets, see `../ideas/block-segmentation.md`) is emitted in the flavor's own syntax.
+The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block rulesets, see `block-segmentation.md`) is emitted in the flavor's own syntax.
 
 - **Iterable** is the first flavor: Handlebars as Iterable implements it, with Iterable's built-in helpers. SendGrid is expected to follow as its own flavor. It is also Handlebars-based, but its helpers differ, so "Handlebars" alone doesn't identify a flavor.
 - A flavor owns: how conditionals are wrapped around blocks, and **escaping its own syntax** in rendered content (e.g. a literal `{{` in copy must not become a Handlebars tag). The conditions themselves are not the flavor's job. They are AI-translated per environment and handed to the render layer already approved (see the segmentation idea), because which recipient attributes exist can't be known generically.
 - The authored document never names a flavor. The same document renders for any flavor.
+- Block-level fields the render layer must honour (from `block-segmentation.md`, already produced by the authoring tool): `hidden: true` blocks are skipped entirely; a block with a `ruleset` is wrapped in its approved condition; adjacent blocks sharing a `switch` value render as one if / else-if / else chain, first match wins, with a last case lacking a `ruleset` as the `else`. A split switch group is a hard error.
 
 ## Open questions
 

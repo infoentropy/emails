@@ -1,6 +1,6 @@
 # Block segmentation
 
-Show or hide a block depending on who receives the email, e.g. "show this block only in the US". This generalises the block-level `hidden` flag proposed in `claude-authoring-plugin.md`: `hidden` is an unconditional off switch, and segmentation makes visibility depend on the recipient.
+Show or hide a block depending on who receives the email, e.g. "show this block only in the US". This generalises the block-level `hidden` flag proposed in `../ideas/claude-authoring-plugin.md`: `hidden` is an unconditional off switch, and segmentation makes visibility depend on the recipient.
 
 ## Shape
 
@@ -41,7 +41,7 @@ Blocks stay a flat list. One more optional block-level field, `switch`, names a 
 ```
 
 - Blocks sharing a `switch` value form one group. Cases are checked **in document order and the first match wins**, so at most one block in the group is shown.
-- The block in the group with **no `ruleset` is the default**. There's at most one default. A group with none shows nothing when no case matches.
+- The **last case, if it has no `ruleset`, is the default** ("Otherwise"). A group whose last case has a ruleset has no default and shows nothing when no case matches. An earlier case with no ruleset matches everyone and hides every case below it, so it gets a warning (see the authoring tool section).
 - The group renders as a single if / else-if / else chain in the flavor's syntax, which Iterable supports natively:
 
   ```handlebars
@@ -114,6 +114,8 @@ The editor today is a vertical stack of block cards with ↑/↓ buttons, plus a
 - An If/Else if case with an empty ruleset gets a **warning**: it would match everyone and hide every case below it.
 - A group split up in an imported document (hand edits, older copies) is an **error**, with a **Regroup** fix that moves the cases back together.
 - Hiding a case greys it out in place, the same as hidden plain blocks.
+- Hidden blocks, cases included, aren't validated: they're never sent, and an empty hidden block is the normal case.
+- In the editor's memory, a newly added case carries a blank ruleset until the author types one. That keeps it an If/Else if with a field to fill in, even when it's the last case of a group with no fallback. A blank ruleset is dropped on export, so it reads back as having none.
 
 **Not included:** a "view as segment" preview. The editor can't evaluate free-text rulesets, so the translate-and-review step before rendering stays the only place the logic is checked.
 
@@ -157,3 +159,9 @@ A condition the AI can't map to a real attribute ("our best customers", "people 
 - What form does the environment context take: a hand-written notes file per environment, a sample user profile, or pulled from the platform (e.g. Iterable's API)? Whatever it is, it belongs to the user's environment, not to this repo.
 - Outside the plugin, who runs the translate step? For example, a small script that calls the Claude API, run before the render script.
 - An email where every block is excluded for some segment can't be detected at render time. Should the review step flag rulesets that together leave some audience with nothing?
+
+## Status
+
+**Authoring tool: done** (`../authoring/index.html`). Block-level `hidden`, free-text `ruleset` and `switch` groups are implemented as described above, including the switch-group UX and validation. Block-level keys the tool doesn't know are now kept on export too, matching how unknown block types are already preserved. The sample document ends with a switch group.
+
+**Not built yet:** the translate-and-review step and the rendering of rulesets and switch groups. Both depend on the render layer (`render-layer-tool.md`), which doesn't exist yet. The open questions above are all about those parts.
