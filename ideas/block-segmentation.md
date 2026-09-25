@@ -42,7 +42,19 @@ Blocks stay a flat list. One more optional block-level field, `switch`, names a 
 
 - Blocks sharing a `switch` value form one group. Cases are checked **in document order and the first match wins**, so at most one block in the group is shown.
 - The block in the group with **no `ruleset` is the default**. There's at most one default. A group with none shows nothing when no case matches.
-- The group renders as a single if / else-if / else chain in the flavor's syntax, e.g. `{{#if …}}…{{else if …}}…{{else}}…{{/if}}`. Iterable's support for `{{else if}}` chaining needs confirming, and nested `{{#if}}`s are the fallback if it's missing.
+- The group renders as a single if / else-if / else chain in the flavor's syntax, which Iterable supports natively:
+
+  ```handlebars
+  {{#if condition1}}
+    …b3…
+  {{else if condition2}}
+    …b4…
+  {{else}}
+    …b5…
+  {{/if}}
+  ```
+
+  A group with no default omits the `{{else}}` branch.
 - There's no `switch(variable)`. Each case keeps its own free-text ruleset for the AI to translate, so cases don't have to test the same attribute ("users in US" and "paying users" can be cases in one group). The group only adds ordering and the fallback.
 - `hidden` on a case drops just that case from the chain. If the default is hidden, the group has no default.
 - Blocks in a group don't have to share a `blockType`: a US `image_with_text` can fall back to a generic `article`.
