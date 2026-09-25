@@ -23,6 +23,40 @@ A note can hold several conditions ("in US, CA or GB" *and* "is a paying subscri
 
 The note alone doesn't say exactly what will happen. Its meaning only becomes fixed once it's translated, so the translation step below is where review has to happen.
 
+## Switch groups: one of several blocks
+
+Separate rulesets can overlap. With one block for "users in US" and another for "paying users", a paying US user gets both. And there's no clean way to say "everyone else": a fallback block's ruleset would have to restate the negation of all the others, and it goes wrong as soon as a case is added. A **switch group** handles both problems.
+
+Blocks stay a flat list. One more optional block-level field, `switch`, names a group:
+
+```json
+"blocks": [
+  { "id": "b3", "blockType": "button", "switch": "cta", "ruleset": "users in US",
+    "data": { "text": "Shop US deals" } },
+  { "id": "b4", "blockType": "button", "switch": "cta", "ruleset": "users in GB",
+    "data": { "text": "Shop UK deals" } },
+  { "id": "b5", "blockType": "button", "switch": "cta",
+    "data": { "text": "Shop now" } }
+]
+```
+
+- Blocks sharing a `switch` value form one group. Cases are checked **in document order and the first match wins**, so at most one block in the group is shown.
+- The block in the group with **no `ruleset` is the default**. There's at most one default. A group with none shows nothing when no case matches.
+- The group renders as a single if / else-if / else chain in the flavor's syntax, e.g. `{{#if …}}…{{else if …}}…{{else}}…{{/if}}`. Iterable's support for `{{else if}}` chaining needs confirming, and nested `{{#if}}`s are the fallback if it's missing.
+- There's no `switch(variable)`. Each case keeps its own free-text ruleset for the AI to translate, so cases don't have to test the same attribute ("users in US" and "paying users" can be cases in one group). The group only adds ordering and the fallback.
+- `hidden` on a case drops just that case from the chain. If the default is hidden, the group has no default.
+- Blocks in a group don't have to share a `blockType`: a US `image_with_text` can fall back to a generic `article`.
+
+Rules the tools enforce:
+
+- **Group members must be adjacent**, since the whole chain renders in one place. A split group is a validation error in the authoring tool and a hard error in the render layer.
+- **Authoring tool:** shows a group as one bracketed unit with its cases in order and the default last, so reordering can't split it. Case order matters and should be visible.
+- The `switch` value is only a label that ties blocks together. It needs to be unique within the document, and nothing more.
+
+The flat shape was chosen over a nested container block (`{"blockType": "switch", "cases": [{"ruleset": …, "blocks": [...]}]}`). That shape states the structure more directly, but every tool so far assumes a flat block list, and nesting would ripple through the editor, validation and rendering.
+
+A related but separate case is when only the copy varies between cases (the button text above) and not the block. A per-field switch inside `data` might be simpler for authors there. Not designed yet.
+
 ## Evaluation: one file, conditionals in the ESP's language
 
 **Decided:** the render layer produces **one HTML file** in which each block with a `ruleset` is wrapped in the sending platform's own conditional syntax. The platform then decides per recipient at send time. Blocks without a `ruleset` are emitted bare.
@@ -53,7 +87,7 @@ A condition the AI can't map to a real attribute ("our best customers", "people 
 
 ## Tool touchpoints
 
-- **Authoring tool:** a per-block free-text "ruleset" field, with blocks that have one visibly badged. No validation beyond "is it text".
+- **Authoring tool:** a per-block free-text "ruleset" field, with blocks that have one visibly badged, plus switch groups as described above. No validation of ruleset text beyond "is it text".
 - **Render layer:** consumes approved translations as described above. Its Python script never calls an AI.
 - **Plugin:** Skill A copies notes like "US only" or "paying subscribers only" from the copy doc straight into `ruleset`; since rulesets are free text, no interpretation is needed at this stage. Skill C runs the translate-and-review step before rendering.
 
