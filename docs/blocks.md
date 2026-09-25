@@ -100,7 +100,7 @@ Schema-level keywords:
 | `title` | Shown in the palette and on block cards. |
 | `version` | Integer changelog aid. **Nothing checks it**, and block instances don't record it. Bump it on every allowed change. |
 | `required` | Fields that must be non-empty. |
-| `deprecated` | Specified, but **not implemented yet**: the plan is to hide the type from the add-block palette while keeping existing instances editable. The tool ignores it today. |
+| `deprecated` | `true` retires the type: the authoring tool leaves it out of the add-block palette and a switch's *Add case of another type* picker, but existing blocks of that type keep their form, validation and export, so old documents stay editable. See [Retiring a block type](#retiring-a-block-type). |
 
 Field keywords:
 
@@ -209,6 +209,7 @@ It adds a `{{else if …}}` for each further case, and omits `{{else}}` when the
 - **`serialise()`** builds the exported document: `data` keys in `weight` order, numeric strings from `integer`/`float` fields converted to numbers, block-level keys as described above.
 - **Nothing unknown is lost.** A block whose `blockType` has no schema shows as a read-only placeholder and is written back out untouched. Block-level keys the tool doesn't recognise are kept too. Opening a newer document in an older copy of the tool and saving must never destroy content.
 - **Persistence:** every change autosaves to `localStorage` under `email-block-composer/doc`. That's crash protection only: the `.json` file (via *Save as…* / *Copy JSON*) is the real format, and *Open file* / *Paste JSON* load one back in.
+- **Deprecated types can't be added.** `addableTypes()` filters `deprecated: true` schemas out of the palette and the add-case select. Everything else still uses `SCHEMAS` directly, so existing blocks of a deprecated type render and export as before.
 - **Structure in the UI:** `units()` splits the flat `blocks` array into plain blocks and switch groups. Groups move as one unit. A group can't be split from the UI, only by importing a document, and the *Regroup* fix then moves the cases back together.
 
 ## Changing block types
@@ -250,6 +251,10 @@ The render layer's side of the contract: a field missing from `data` takes its s
 ### Changing an existing block type
 
 Check the change against the table above. If it's allowed, edit both copies, bump `version`, run the check in step 3, and update the library table here.
+
+### Retiring a block type
+
+Set `"deprecated": true` on the schema, in both copies, and bump `version`. The type disappears from the tool's add pickers, but existing blocks of that type stay editable and still export. *+ Add case* still copies an existing case, whatever its type. Don't delete the schema: documents that use the type would lose their form and fall back to the read-only unknown-type placeholder.
 
 ## Where things are decided
 
