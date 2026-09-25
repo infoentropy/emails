@@ -160,8 +160,186 @@ A condition the AI can't map to a real attribute ("our best customers", "people 
 - Outside the plugin, who runs the translate step? For example, a small script that calls the Claude API, run before the render script.
 - An email where every block is excluded for some segment can't be detected at render time. Should the review step flag rulesets that together leave some audience with nothing?
 
+## Example output
+
+Both documents below are exported from the authoring tool.
+
+### Without visibility fields
+
+A document that uses none of these features comes out exactly as before, with no `hidden`, `ruleset` or `switch` keys. This one round-trips through the tool byte-for-byte:
+
+```json
+{
+  "version": 1,
+  "name": "Sleep Stories — weekly (sample)",
+  "subject": "Three new Sleep Stories for this week",
+  "preheader": "Narrated by voices you'll actually drift off to",
+  "blocks": [
+    {
+      "id": "b1",
+      "blockType": "content_feature_header",
+      "data": {
+        "heading": "New This Week",
+        "feature_type": "sleep"
+      }
+    },
+    {
+      "id": "b3",
+      "blockType": "divider",
+      "data": {
+        "variant": "secondary"
+      }
+    },
+    {
+      "id": "b4",
+      "blockType": "article",
+      "data": {
+        "headline": "The Lighthouse Keeper's Year",
+        "link": "https://www.calm.com/sleep/lighthouse",
+        "image": "https://assets.example.com/sleep/lighthouse.jpg",
+        "image_alt": "A lighthouse beam sweeping over calm water at dusk",
+        "image_width": 600,
+        "image_height": 400,
+        "variant": "secondary"
+      }
+    },
+    {
+      "id": "b2",
+      "blockType": "article",
+      "data": {
+        "headline": "A Slow Train Through the Alps",
+        "link": "https://www.calm.com/sleep/slow-train",
+        "image": "https://assets.example.com/sleep/alps.jpg",
+        "image_alt": "Night train winding along a moonlit mountain pass",
+        "image_width": 1200,
+        "image_height": 630,
+        "variant": "primary"
+      }
+    },
+    {
+      "id": "b5",
+      "blockType": "image_with_text",
+      "data": {
+        "heading": "Why we record at 60 bpm",
+        "body": "Every story is narrated just below resting heart rate.\n\nIt is slower than feels natural to read aloud — which is the point.",
+        "image": "https://assets.example.com/sleep/studio.jpg",
+        "image_alt": "A recording booth lit by a single warm lamp",
+        "image_width": 800,
+        "image_height": 500
+      }
+    },
+    {
+      "id": "b6",
+      "blockType": "button",
+      "data": {
+        "text": "Open tonight's story",
+        "link": "https://www.calm.com/sleep",
+        "variant": "primary"
+      }
+    }
+  ]
+}
+```
+
+### With visibility fields
+
+The same email after two edits in the tool. First, **Add a version…** on the closing button, with the new If case given a ruleset and trial copy; the original button becomes Otherwise. Second, **Hide** on the `image_with_text` block.
+
+```json
+{
+  "version": 1,
+  "name": "Sleep Stories — weekly (sample)",
+  "subject": "Three new Sleep Stories for this week",
+  "preheader": "Narrated by voices you'll actually drift off to",
+  "blocks": [
+    {
+      "id": "b1",
+      "blockType": "content_feature_header",
+      "data": {
+        "heading": "New This Week",
+        "feature_type": "sleep"
+      }
+    },
+    {
+      "id": "b3",
+      "blockType": "divider",
+      "data": {
+        "variant": "secondary"
+      }
+    },
+    {
+      "id": "b4",
+      "blockType": "article",
+      "data": {
+        "headline": "The Lighthouse Keeper's Year",
+        "link": "https://www.calm.com/sleep/lighthouse",
+        "image": "https://assets.example.com/sleep/lighthouse.jpg",
+        "image_alt": "A lighthouse beam sweeping over calm water at dusk",
+        "image_width": 600,
+        "image_height": 400,
+        "variant": "secondary"
+      }
+    },
+    {
+      "id": "b2",
+      "blockType": "article",
+      "data": {
+        "headline": "A Slow Train Through the Alps",
+        "link": "https://www.calm.com/sleep/slow-train",
+        "image": "https://assets.example.com/sleep/alps.jpg",
+        "image_alt": "Night train winding along a moonlit mountain pass",
+        "image_width": 1200,
+        "image_height": 630,
+        "variant": "primary"
+      }
+    },
+    {
+      "id": "b5",
+      "blockType": "image_with_text",
+      "hidden": true,
+      "data": {
+        "heading": "Why we record at 60 bpm",
+        "body": "Every story is narrated just below resting heart rate.\n\nIt is slower than feels natural to read aloud — which is the point.",
+        "image": "https://assets.example.com/sleep/studio.jpg",
+        "image_alt": "A recording booth lit by a single warm lamp",
+        "image_width": 800,
+        "image_height": 500
+      }
+    },
+    {
+      "id": "b7",
+      "blockType": "button",
+      "switch": "s1",
+      "ruleset": "users in US, CA, GB. not a paying subscriber",
+      "data": {
+        "text": "Start your free trial",
+        "link": "https://www.calm.com/trial",
+        "variant": "primary"
+      }
+    },
+    {
+      "id": "b6",
+      "blockType": "button",
+      "switch": "s1",
+      "data": {
+        "text": "Open tonight's story",
+        "link": "https://www.calm.com/sleep",
+        "variant": "primary"
+      }
+    }
+  ]
+}
+```
+
+Notes:
+
+- The new case (`b7`) is inserted **before** the original (`b6`), because the original becomes the fallback and the fallback is always last.
+- Ids are document-local and never reused, so the new case gets the next free id (`b7`) even though it sits earlier in the array.
+- `switch` and `ruleset` sit at block level next to `hidden`, outside `data`. Blank rulesets and `hidden: false` are omitted rather than written out.
+- The render layer would output `b7` and `b6` as `{{#if <approved condition>}}…{{else}}…{{/if}}`, and leave out `b5` entirely.
+
 ## Status
 
-**Authoring tool: done** (`../authoring/index.html`). Block-level `hidden`, free-text `ruleset` and `switch` groups are implemented as described above, including the switch-group UX and validation. Block-level keys the tool doesn't know are now kept on export too, matching how unknown block types are already preserved. The sample document ends with a switch group.
+**Done: the authoring tool** (`../authoring/index.html`). Block-level `hidden`, free-text `ruleset` and `switch` groups are implemented as described above, including the switch-group UX and validation. Block-level keys the tool doesn't know are now kept on export too, matching how unknown block types are already preserved. The sample document ends with a switch group.
 
-**Not built yet:** the translate-and-review step and the rendering of rulesets and switch groups. Both depend on the render layer (`render-layer-tool.md`), which doesn't exist yet. The open questions above are all about those parts.
+**Not built, and tracked in `../specs/render-layer-tool.md`:** the translate-and-review step, and the rendering of hidden blocks, rulesets and switch groups. Both depend on the render layer, which doesn't exist yet. This file stays the reference for how those should behave. Its open questions are about those parts and move with them.

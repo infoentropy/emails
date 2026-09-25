@@ -42,12 +42,21 @@ Because schemas may only ever gain optional fields — renames and removals beco
 
 ### Output flavors
 
-The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block rulesets, see `block-segmentation.md`) is emitted in the flavor's own syntax.
+The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block rulesets, see `../completed/block-segmentation.md`) is emitted in the flavor's own syntax.
 
 - **Iterable** is the first flavor: Handlebars as Iterable implements it, with Iterable's built-in helpers. SendGrid is expected to follow as its own flavor. It is also Handlebars-based, but its helpers differ, so "Handlebars" alone doesn't identify a flavor.
 - A flavor owns: how conditionals are wrapped around blocks, and **escaping its own syntax** in rendered content (e.g. a literal `{{` in copy must not become a Handlebars tag). The conditions themselves are not the flavor's job. They are AI-translated per environment and handed to the render layer already approved (see the segmentation idea), because which recipient attributes exist can't be known generically.
 - The authored document never names a flavor. The same document renders for any flavor.
-- Block-level fields the render layer must honour (from `block-segmentation.md`, already produced by the authoring tool): `hidden: true` blocks are skipped entirely; a block with a `ruleset` is wrapped in its approved condition; adjacent blocks sharing a `switch` value render as one if / else-if / else chain, first match wins, with a last case lacking a `ruleset` as the `else`. A split switch group is a hard error.
+- Block-level fields the render layer must honour (from `../completed/block-segmentation.md`, already produced by the authoring tool): `hidden: true` blocks are skipped entirely; a block with a `ruleset` is wrapped in its approved condition; adjacent blocks sharing a `switch` value render as one if / else-if / else chain, first match wins, with a last case lacking a `ruleset` as the `else`. A split switch group is a hard error.
+
+### Ruleset translation (carried over from block segmentation)
+
+Before rendering, each distinct `ruleset` needs an AI-translated and human-approved condition for the chosen flavor and environment. The design is in `../completed/block-segmentation.md` (**Translation: ruleset → conditional**). The parts that land here:
+
+- A **translate step** (AI, run before this script: Claude inside the plugin's Skill C, or a small script calling the Claude API) that writes a translations file of ruleset text → condition, cached by (ruleset text, environment, flavor).
+- A **review** of each ruleset, the AI's reading of it and the generated condition, before the file counts as approved.
+- This script **reads approved translations and never calls an AI**. A ruleset with no approved translation is a hard error.
+- Still open from that spec: where the translations file lives (inside the document or next to it), what form the environment context takes, and whether review should flag an audience left with no blocks.
 
 ## Open questions
 
