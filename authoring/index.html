@@ -781,7 +781,7 @@ function groupCard(us, k){
   const sel = el("select");
   sel.setAttribute("aria-label","Add a case of another block type");
   sel.append(new Option("+ Add case of another type…", ""));
-  for(const [type,s] of Object.entries(SCHEMAS)) sel.append(new Option(s.title, type));
+  for(const [type,s] of addableTypes()) sel.append(new Option(s.title, type));
   sel.addEventListener("change", () => { if(sel.value) addCase(u, sel.value); });
   foot.append(sel);
   g.append(foot);
@@ -799,10 +799,13 @@ function renderBlocks(){
   us.forEach((u,k) => host.append(u.kind === "group" ? groupCard(us, k) : plainCard(us, k)));
 }
 
+// Deprecated types are retired: new blocks can't be added, but existing ones stay editable.
+const addableTypes = () => Object.entries(SCHEMAS).filter(([, s]) => s.deprecated !== true);
+
 function renderPalette(){
   const host = document.getElementById("pal");
   host.textContent = "";
-  for(const [type,s] of Object.entries(SCHEMAS)){
+  for(const [type,s] of addableTypes()){
     const b = el("button", null, s.title);
     b.addEventListener("click", () => {
       doc.blocks.push({id:nextId(), blockType:type, data:defaultsFor(type)});
