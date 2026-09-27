@@ -10,7 +10,7 @@ Now that the authoring tool exists, wrap the whole pipeline in a Claude plugin, 
    1. Offers a series of options: what kind of email is this (e.g. weekly digest, single feature announcement, newsletter).
    2. Parses the copy doc into the authored-email JSON document (see `../completed/serverless-email-authoring-tool.md`) for the chosen option: blocks in order, each `data` filled to its schema in `../blocks/`.
 4. **Skill B: open the editor.** Opens the authoring tool (`../authoring/index.html`) loaded with Skill A's document. The user fixes typos and makes structural changes (reorder, add or drop blocks).
-5. **Skill C: render.** Runs the render script to output the HTML email.
+5. **Skill C: test in Iterable.** Translates the rulesets, has the user review them, renders the platform template, pushes it to Iterable and sends proofs (`../specs/render-layer-tool.md`, **Testing in Iterable**). The visual review happens earlier, in the editor's live preview.
 
 ## Email types
 
@@ -41,13 +41,13 @@ The JSON document is the only thing passed between steps. Each skill reads it an
 ## Open questions
 
 - **Skill A parsing:** extraction is Claude's job, done in the skill. The schemas give it the target shape, and validation catches misses. What happens to copy that doesn't fit the chosen type: drop it, flag it, or suggest another type? Images are required on `article`, but copy docs often won't have them. Leave placeholders and let the editor's advisory validation surface them?
-- **Skill B in chat/Cowork:** the editor is a static page that loads from `localStorage` or a file import. In chat it would probably be published as an Artifact with the document injected as its starting state. The edited document then has to get back to Claude for Skill C: by export/paste, or through an artifact capability that lets Claude read the page's state. This needs checking against what artifacts can actually do.
-- **Skill C depends on the render layer**, which isn't built yet (`../specs/render-layer-tool.md`: Python 3 + Jinja2). Chat/Cowork can run Python in its sandbox, so the script and templates would ship inside the skill. The skill's copy of the schemas and templates can drift from this repo. Build a packaging step, or have the skill fetch them from here?
-- **Theme selection:** the render layer takes a theme. Ask the user in Skill C, or tie it to the email type chosen in Skill A?
+- **Skill B in chat/Cowork:** the editor is a statically hosted page that loads from `localStorage` or a file import. How does Skill A's document get into it, and how does the edited document get back to Claude for Skill C: file export/import, or something smoother? (Also an open question in the render layer spec.)
+- **Skill C depends on the render layer**, which isn't built yet (`../specs/render-layer-tool.md`). The renderer is a JavaScript module that runs under Node, and the skill can fetch it from the hosted site, so its copy can't drift from the editor's. It also needs Iterable API credentials in its environment.
+- **Theme selection:** the document records its theme. Should Skill A set it from the email type, or leave the default for the user to change in the editor?
 - **Relation to the existing campaign-strategy skill:** that skill covers the brief and the copywriting. This plugin could start where it stops, with its copy output as the "copy doc" input here.
 - **Packaging:** one plugin with three skills, or one skill with three stages? Separate skills let users rerun one step (re-render after editing) without restarting the whole flow.
 
 ## Prerequisites
 
 - Render layer tool (`../specs/render-layer-tool.md`).
-- Block-level `hidden` flag: done in the authoring tool (with `../completed/block-segmentation.md`). The render layer still needs to skip hidden blocks.
+- Block-level `hidden` flag: done in the authoring tool (with `../completed/block-segmentation.md`). The renderer still needs to skip hidden blocks.

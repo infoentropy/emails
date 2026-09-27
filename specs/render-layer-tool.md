@@ -1,122 +1,203 @@
-# Render layer tool
+# Render layer
 
 ## Problem
 
-The serverless email authoring tool (`serverless-email-authoring-tool.md`, in this folder) produces a JSON document describing an authored email: an ordered list of blocks, each with a `blockType` and `data` validated against that block's JSON Schema. That document needs to become actual email HTML. Rendering was explicitly kept out of scope for the authoring tool — this is that separate tool.
+The authoring tool (`../completed/serverless-email-authoring-tool.md`) produces a JSON document describing an email: campaign metadata plus an ordered list of blocks, each with a `blockType` and `data` validated against that block's JSON Schema. That document has to become email HTML, and the person authoring it has to be able to see the result while they work.
 
-## Core idea
+## The workflow it serves
 
-- Input: the authored email JSON document (blocks, in order, each with `id`, `blockType`, `data`) plus a **theme**.
-- Each `blockType` maps to an HTML template/partial that knows how to render that block's `data` into email-safe markup (table layout, inline styles, MSO conditionals — see `../CLAUDE.md` for the HTML conventions already used in this repo's templates).
-- The theme controls the visual styling applied on top (colors, fonts, spacing, etc.) without changing which blocks exist or their content — themes live entirely in this tool (per the authoring tool spec), not in the authored document.
-- Output: a single HTML file/string for the email, ready to send or preview — same as `flipboard/techdigest.html` and `traction/index.html` in shape, but generated rather than hand-written.
-- Medium is email only, matching the authoring tool's scope.
-- No server required — should work as a static/local tool, same constraint as the authoring tool.
+1. A writer produces the email copy. Some parts are meant for particular audiences only.
+2. The copy becomes a JSON document. An AI takes the first pass (the planned Claude plugin, `../ideas/claude-authoring-plugin.md`), or a person builds it in the block editor, which is slower.
+3. The email is rendered and its visuals reviewed.
+4. The author fine-tunes it in the block editor, re-rendering as they go. The audience logic (if/else per recipient) can only be tested reliably in the sending platform (Iterable), so rendering has to connect to it.
+5. The author can switch the whole email to a different theme and see it straight away: summer vs. spring, anxiety vs. sleep.
 
-## Relationship to the authoring tool
+Steps 3 to 5 form one loop: edit, look, tweak, switch theme, look again. **Rendering is part of the editor, not a separate batch step.** A script run outside the editor would break the loop on every pass.
 
-- `blockType` → template mapping is **code-defined**, mirroring how the authoring tool's block schemas are code-defined — the same set of block types should be known to both tools.
-- This tool **cannot** assume the input document is valid. The authoring tool's validation is advisory, not blocking (by design — half-finished emails need to be saveable), so a document that fails its block schemas can still be exported. Decide per case whether to validate on the way in or to render defensively; either way, "it was already validated" is not true.
-- Unknown `blockType` is a hard error: this tool has no template for it and cannot produce correct HTML. (The authoring tool takes the opposite line and preserves unknown blocks, so that round-tripping a document through an older copy never destroys content.)
+## What this changes in earlier specs
 
-### Themes and variants
+Later specs change earlier ones. This one overrides:
 
-A block may carry a `variant` (`primary` or `secondary` — see the authoring tool spec). The theme owns what each one looks like, resolving `(blockType, variant)` to an appearance; the document never names a colour.
+| Earlier decision | Where | Now |
+|---|---|---|
+| The render layer is a Python 3 + Jinja2 script. | earlier drafts of this spec | A **JavaScript** renderer, used by the editor in the browser and by Claude under Node. |
+| The authoring tool is a single file that works from `file://`, with no `fetch()` and no build step, so the block schemas are copied into it by hand. | `../completed/serverless-email-authoring-tool.md`, **Tool shape** | The editor is **statically hosted** and loads the schemas, templates and themes as files. Still no build step and no server-side code. |
+| No theme selection or storage in the authoring tool. Themes live outside the document. | same spec, **Target shape** and **Out of scope for v1** | The **document records its theme**, and the editor has a theme picker. |
+| No "view as segment" preview, since the editor can't evaluate free-text rulesets. | `../completed/block-segmentation.md`, **Switch groups in the authoring tool** | A **"preview as" picker** where the author chooses which rulesets count as true. It still evaluates nothing, so the platform remains the only real test of the logic. |
 
-When a theme has no styling for a variant in use, **render the block as `primary` and emit a warning** naming the block type and the missing variant. Failing hard would be worse than it looks: widening the `variant` enum is an allowed schema change, so a hard error would turn every such widening into a breaking change for every existing theme. A warning keeps the email building while leaving the gap visible to whoever maintains the theme.
+Everything else in those specs stands: content-only blocks, `variant`, schema evolution, `hidden` / `ruleset` / `switch` semantics, output flavors, and the translate-and-review step.
 
-### Compatibility with evolving schemas
+## Hosting
 
-The authoring tool's **Schema evolution** section fixes the rules that make version skew survivable, and they impose two requirements on templates here:
+- The site is this repo served as static files: **GitHub Pages**, from the repo root. The editor is `authoring/index.html`, and it loads `../blocks/*.json` and `../render/…` with `fetch()` and ES module imports.
+- Nothing authored is sent to the host. Documents stay in the browser (localStorage autosave, file export/import, as now), so a public site exposes only schemas, templates and themes.
+- Opening the editor from `file://` is no longer supported. Locally, serve the repo root with any static server (e.g. `python3 -m http.server`) and open `http://localhost:8000/authoring/`.
+- **The hand-inlined schemas in the editor go away.** `../blocks/*.json` becomes the only copy, which removes the "edit both copies" step from `../docs/blocks.md`.
+- Everyone uses the same deployed version, so the editor and renderer always ship together. Version skew now matters only for documents saved by older versions, and for Claude's copy of the renderer (see **The renderer**).
 
-- A field missing from a block's `data` takes the `default` declared in its schema. Old documents predate fields a newer template expects, and this is what fills the gap.
-- A field present in `data` that the template doesn't use is **ignored**, never an error. This is what lets a stale template render a newer document.
+## The document records its theme
 
-Because schemas may only ever gain optional fields — renames and removals become a new `blockType` instead — a template written for version *N* of a schema keeps working against every later version. Lockstep shipping is not required, which matters because the two tools have no shared distribution path: this one is a Python script, the other a static HTML file users keep local copies of.
+A new optional top-level key, next to `subject` and `preheader`:
 
-## Implementation
-
-- A **Python 3** script, run locally/on demand — no server process.
-- Templating via **Jinja2** (the standard, widely-used Python templating engine): one Jinja2 template per `blockType`, each block's `data` rendered through its template, then the rendered blocks concatenated into the final email HTML (wrapped in whatever outer document shell the theme provides).
-- Basic shape: a render function takes the authored JSON document, a theme and an output flavor, and returns the rendered HTML (see **Entry point**).
-
-### Theme structure
-
-A theme is a directory, not a single file — `render/themes/<theme_name>/`, containing:
-
-- `shell.html.j2` — the outer HTML document (doctype, `<head>`, MSO conditionals, media queries), wrapping a `{{ body }}` placeholder where the concatenated, rendered blocks go. The theme owns the shell rather than plugging values into one fixed shell: `flipboard/techdigest.html` and `traction/index.html` already diverge at the shell level (different meta tags, font stacks, breakpoints, doctype quirks), which is exactly the kind of brand-level variation a theme exists to own.
-- `style.json` — the `(blockType, variant)` → appearance lookup (colors, fonts, spacing), plus two theme-wide settings:
-  - `image_with_text.image_side`: `"left"` or `"right"`. Fixed per theme, not alternating — alternating would need each block template to know its position among same-type siblings, more context than the per-block rendering model in this spec provides. Worth revisiting only if a theme actually needs it.
-  - `date_format`: a strftime pattern (e.g. `"%B %-d, %Y"`) applied to any `date`-formatted field at render time, with a repo-wide default pattern if a theme omits it. The document keeps storing ISO `YYYY-MM-DD` (already fixed by the block schema conventions); how it displays is presentation, same as `bg_color` or spacing.
-
-Themes are code-defined and selected by name, looked up under `render/themes/`, not by arbitrary path — mirroring `blockType` → template being code-defined rather than user-supplied.
-
-### Entry point
-
-Marketers never run the renderer. Its callers are Skill C of the planned Claude plugin (`../ideas/claude-authoring-plugin.md`), which runs it in Claude's sandbox, and developers previewing templates and themes. So the interface is a function, not a CLI:
-
-```python
-render(document, theme, flavor, translations=None) -> str
+```json
+{ "version": 1, "name": "…", "subject": "…", "preheader": "…", "theme": "sleep", "blocks": [ … ] }
 ```
 
-- `document` — the parsed authored JSON document.
-- `theme` and `flavor` — names, looked up under `render/themes/` and `render/flavors/`.
-- `translations` — the approved ruleset translations. Needed only when the document contains a `ruleset`; a ruleset without an approved translation is still a hard error.
-- Returns the rendered HTML as a string. No file I/O happens inside `render`.
+- The value is a theme **name** from the registry, never a colour or style value. The content-only rule still holds: the document says which look to use, and the theme owns what that look is.
+- Missing `theme` (every existing document) means the registry's default theme. No format version bump is needed.
+- An unknown theme name is a **hard error** when producing a platform template, since sending in the wrong look isn't a safe fallback. The editor shows the problem and asks the author to pick a theme.
+- The editor's theme picker sits with the campaign fields. Changing it re-renders the preview immediately.
 
-A thin command wrapper in the same file reads the files, calls `render`, and prints the result, for callers that shell out:
+## The renderer
+
+One dependency-free JavaScript module, `render/render.js`, that runs unchanged in the browser and under Node. It exposes two functions sharing the same per-block rendering:
+
+```js
+renderPreview(document, { theme, rulesets })                // → plain HTML for the preview pane
+renderTemplate(document, { theme, flavor, translations })  // → a template for the sending platform
+```
+
+- `theme` defaults to the document's `theme`.
+- **`renderPreview`** resolves audience logic locally, from the author's "preview as" choice (`rulesets`: the ruleset texts treated as true). It emits no platform syntax and needs no translations, so steps 3 to 5 work before any AI or platform is involved.
+- **`renderTemplate`** wraps blocks in the flavor's conditional syntax, using approved translations. This is what goes to Iterable.
+- Neither function does I/O or calls an AI. The caller loads the files.
+
+Claude runs the same module under Node, fetched from the hosted site or from a checkout of this repo, so its output matches the editor's. That settles the plugin's worry about its copy of the renderer drifting from this repo.
+
+### Per block, in order
+
+1. `hidden: true`: skip.
+2. Unknown `blockType`: **hard error**, since there's no template for it. (The editor still preserves unknown blocks, so round-tripping never destroys content.)
+3. Fill missing fields from the schema's `default`, and ignore fields the template doesn't use (see **Compatibility with evolving schemas**). The document may be invalid, because the editor's validation is advisory, so templates render defensively. An empty optional field produces nothing.
+4. Resolve `(blockType, variant)` against the theme (see **Themes and variants**).
+5. Convert `markdown` fields to HTML with raw HTML escaped (see **Markdown**), and format `date` fields with the theme's date format.
+6. Render through the block's template.
+
+Audience handling then differs by function:
+
+- **Preview:** a block with a `ruleset` shows only if the author ticked that ruleset. A switch group shows its first case whose ruleset is ticked, otherwise its final case without a `ruleset` if it has one, otherwise nothing. The picker lists each distinct ruleset text in the document, and ticking none shows what someone matching no ruleset gets.
+- **Template:** as in `../completed/block-segmentation.md`. A block with a `ruleset` is wrapped in its approved condition, and a switch group becomes one if / else-if / else chain. A split switch group, or a ruleset with no approved translation, is a **hard error**.
+
+Finally, the rendered blocks go into the theme's shell.
+
+### Templates
+
+One module per block type, `render/blocks/<blockType>.js`, exporting a function from `(data, style)` to markup. Templates are written with an `html` tagged template literal that **escapes every interpolated value by default**. That gives the same autoescaping safety as Jinja2 without a dependency, and anything already safe (converted markdown, the rendered block list) is passed through explicitly with `raw()`.
+
+The escaper also applies the flavor's own escaping in `renderTemplate`, so a literal `{{` in copy can't become an Iterable tag. `renderPreview` escapes HTML only.
+
+Markup follows the repo's email conventions (table layout, inline styles, MSO conditionals; see `../CLAUDE.md`).
+
+### Themes
+
+A theme is a module, `render/themes/<name>/theme.js`, exporting:
+
+- `label`: display name for the picker, e.g. "Sleep".
+- `styles`: the `(blockType, variant)` → appearance lookup (colours, fonts, spacing, background images).
+- `imageSide`: `"left"` or `"right"` for `image_with_text`. Fixed per theme, not alternating, because alternating needs each block to know its position among its siblings. Revisit only if a theme actually needs it.
+- `dateFormat`: `Intl.DateTimeFormat` options, e.g. `{ month: "long", day: "numeric", year: "numeric" }`. Parse the document's `YYYY-MM-DD` as UTC so the day can't shift with the viewer's timezone. There's a default if the theme omits it.
+- `shell({ subject, preheader, body, styles })`: the outer HTML document (doctype, `<head>`, Outlook settings, media queries, the hidden preheader). The theme owns its shell: `flipboard/techdigest.html` and `traction/index.html` already differ at that level, and that's exactly the brand-level variation a theme exists for.
+
+Themes can also add assets (e.g. background images) under their directory, referenced by absolute URL from the hosted site or an image host.
+
+### Registry
+
+A static site can't list a directory, so `render/registry.js` names everything available: the block types (each has a schema in `../blocks/` and a template in `render/blocks/`), the themes, the default theme, and the flavors. Adding a block type, theme or flavor means adding one line there. This keeps templates, themes and flavors code-defined, the same way block schemas are.
+
+### Disk layout
 
 ```
-python render/render.py DOC.json --theme NAME --flavor NAME [--translations FILE] > out.html
-```
-
-Nothing else lives in the wrapper.
-
-### Delivery
-
-The output is a template for the email platform, not a finished email, and getting it there is part of the flow:
-
-- **v1: copy and paste** into the platform's template editor (Iterable first). No credentials, nothing to host.
-- **Later: upload through the platform's API.** It needs an API key held somewhere (the skill, the sandbox, or a small service), which sits badly with the no-server constraint, so it waits until pasting is the actual bottleneck.
-
-Opening the output in a browser is only a rough preview. With segmentation in play it contains the flavor's conditional syntax, so every branch of a switch group shows at once. A per-recipient preview is the platform's job.
-
-Disk layout:
-
-```
+blocks/<blockType>.json            schemas (unchanged)
+authoring/index.html               editor + preview pane
 render/
-  render.py
-  blocks/<blockType>.html.j2      — one Jinja2 template per block type, code-defined
-  themes/<theme_name>/            — shell.html.j2 + style.json, one dir per theme
-  flavors/<flavor_name>.py        — conditional-wrapping + syntax-escaping logic per flavor
+  render.js                        renderPreview, renderTemplate, html/raw
+  registry.js                      block types, themes, default theme, flavors
+  blocks/<blockType>.js            one template per block type
+  themes/<name>/theme.js           styles, imageSide, dateFormat, shell
+  flavors/<name>.js                conditional wrapping + syntax escaping per platform
+  vendor/                          the markdown library (see Markdown)
 ```
 
-### Output flavors
+## The editor
 
-The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block rulesets, see `../completed/block-segmentation.md`) is emitted in the flavor's own syntax.
+The authoring tool grows a preview pane next to the form:
 
-- **Iterable** is the first flavor: Handlebars as Iterable implements it, with Iterable's built-in helpers. SendGrid is expected to follow as its own flavor. It is also Handlebars-based, but its helpers differ, so "Handlebars" alone doesn't identify a flavor.
-- A flavor owns: how conditionals are wrapped around blocks, and **escaping its own syntax** in rendered content (e.g. a literal `{{` in copy must not become a Handlebars tag). The conditions themselves are not the flavor's job. They are AI-translated per environment and handed to the render layer already approved (see the segmentation idea), because which recipient attributes exist can't be known generically.
-- The authored document never names a flavor. The same document renders for any flavor.
-- Block-level fields the render layer must honour (from `../completed/block-segmentation.md`, already produced by the authoring tool): `hidden: true` blocks are skipped entirely; a block with a `ruleset` is wrapped in its approved condition; adjacent blocks sharing a `switch` value render as one if / else-if / else chain, first match wins, with a last case lacking a `ruleset` as the `else`. A split switch group is a hard error.
+- It re-renders on every change with `renderPreview`, so you see the email while you edit it.
+- A **theme picker** writes the document's `theme`.
+- A **"preview as" picker** lists the document's rulesets as checkboxes. Its label must make clear that it chooses what to *show* and tests nothing: whether a real recipient matches "US only" is decided by the approved translation, in the platform.
+- A **width toggle** (desktop / mobile) is cheap and worth having, since email layouts collapse at narrow widths.
+- The preview is rendered into an `<iframe srcdoc>`, so the email's styles can't leak into the editor or the other way round.
+- Validation stays advisory. A block that fails to render shows an inline error in the preview in place of that block, and the rest of the email still renders.
 
-### Ruleset translation (carried over from block segmentation)
+## Testing in Iterable
 
-Before rendering, each distinct `ruleset` needs an AI-translated and human-approved condition for the chosen flavor and environment. The design is in `../completed/block-segmentation.md` (**Translation: ruleset → conditional**). The parts that land here:
+The audience logic can only be trusted once it has run in the platform, against real or test user profiles. That needs Iterable credentials, and **the hosted page holds none**: a public static page has nowhere safe to keep an API key.
 
-- A **translate step** (AI, run before this script: Claude inside the plugin's Skill C, or a small script calling the Claude API) that writes a translations file of ruleset text → condition, cached by (ruleset text, environment, flavor).
-- A **review** of each ruleset, the AI's reading of it and the generated condition, before the file counts as approved.
-- This script **reads approved translations and never calls an AI**. A ruleset with no approved translation is a hard error.
-- Still open from that spec: where the translations file lives (inside the document or next to it), what form the environment context takes, and whether review should flag an audience left with no blocks.
+So Claude does this part, in the plugin (Skill C) or in Claude Code with an Iterable API key in its environment:
+
+1. **Translate** each distinct ruleset into an Iterable condition, then have the author **review** them (see **Ruleset translation**).
+2. **Render** with `renderTemplate` under Node.
+3. **Push** the template to Iterable through its template API, and **send proofs** to test users, or point the author at Iterable's preview with test user data. Confirm the exact endpoints against Iterable's API docs.
+
+This is only needed after the rulesets change, not after every copy edit.
+
+**Fallback without Claude:** the editor has a "Copy template" action that runs `renderTemplate` and copies the result for pasting into Iterable's template editor. It works only once every ruleset in the document has an approved translation available to the editor. For a document without rulesets it always works.
+
+## Output flavors
+
+The rendered template goes to the platform as a template, not as final HTML, so anything decided per recipient at send time is written in the platform's own syntax.
+
+- **Iterable** is the first flavor: Handlebars as Iterable implements it, with Iterable's helpers. SendGrid should follow as its own flavor. It's also Handlebars-based but its helpers differ, so "Handlebars" alone doesn't identify a flavor.
+- A flavor owns how conditionals wrap blocks, and **escaping its own syntax** in content. The conditions themselves come from the translate step.
+- The document never names a flavor. The same document renders for any flavor.
+
+## Ruleset translation (carried over from block segmentation)
+
+The design is in `../completed/block-segmentation.md` (**Translation: ruleset → conditional**):
+
+- A **translate step** (AI: Claude in the plugin, or Claude Code) writes ruleset text → condition, cached by (ruleset text, environment, flavor).
+- A **review** of each ruleset, the AI's reading of it, and the generated condition, before it counts as approved.
+- The renderer only **reads approved translations** and never calls an AI. A ruleset with no approved translation is a hard error in `renderTemplate`. `renderPreview` never needs one.
+
+## Themes and variants
+
+A block may carry a `variant` (`primary` or `secondary`). The theme resolves `(blockType, variant)` to an appearance, and the document never names a colour.
+
+When a theme has no styling for a variant in use, **render the block as `primary` and warn**, naming the block type and the missing variant. In the editor the warning shows in the validation panel. Failing hard would turn every allowed widening of the `variant` enum into a breaking change for every existing theme.
+
+## Compatibility with evolving schemas
+
+From the authoring tool's **Schema evolution** rules:
+
+- A field missing from `data` takes the `default` declared in its schema. Old documents predate fields that newer templates expect.
+- A field in `data` that the template doesn't use is **ignored**, never an error.
+
+Schemas may only gain optional fields; renames and removals become a new `blockType`. So a template written for version *N* of a schema works against every later version, and documents saved by older versions keep rendering.
+
+## Markdown
+
+`markdown` fields are converted to HTML with **raw HTML in the source escaped, not passed through**. Passing it through would quietly undo the editor's ban on raw HTML.
+
+Use **markdown-it** with `html: false`, vendored as a single file under `render/vendor/` (no package manager). It runs in both the browser and Node. The legacy `body` values in `content/weekly.json` are raw HTML and need a one-off conversion to markdown before they can round-trip.
 
 ## Open questions
 
-Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above. Theme structure/shell ownership, the `image_with_text` image side, `date` display formatting, how the renderer is invoked, and how its output reaches the platform are now settled too — see **Theme structure**, **Entry point** and **Delivery** above.
+- **Where do approved translations live?** Next to the document, or inside it? This now matters to the editor too: the "Copy template" fallback needs them, and inside the document is the only place a static page can reliably find them. The cost is platform-specific code in a document that's meant to be platform-neutral. (Carried over from block segmentation.)
+- **What form does the environment context take** for translation: a notes file, a sample user profile, or pulled from Iterable's API? (Carried over.)
+- **Should review flag an audience left with no blocks?** The "preview as" picker makes such an audience visible by hand; review could catch it automatically. (Carried over.)
+- **Theme vs. `feature_type`.** "Anxiety theme vs. sleep theme" overlaps with `content_feature_header.feature_type` (`meditate` / `sleep`), which the library spec says a theme keys its visuals off. Is the category content (a field), the look (a theme), or both, with the theme free to use the field?
+- **How the plugin hands a document to the hosted editor**: file import (works today), or something smoother such as a URL fragment.
 
-`markdown` is settled: convert to HTML here (a Python markdown library called from the Jinja2 template), configured so that **raw HTML in the source is escaped, not passed through**. The default passthrough behaviour would quietly undo the authoring tool's ban on raw HTML editing. Note that the legacy `body` values in `content/weekly.json` are raw HTML and need converting to markdown as a one-off before they can round-trip.
+## Build order
 
-Still open: where the ruleset translations file lives (inside the document or next to it), what form the environment context takes for translation, and whether translation review should flag an audience left with no blocks (carried over from `../completed/block-segmentation.md`, noted in **Ruleset translation** above).
+1. **Hosting.** Serve the repo on GitHub Pages. Switch the editor to load `../blocks/*.json` through the registry and delete the inlined schemas.
+2. **Renderer and preview.** Add `render.js` with `html`/`raw`, templates for the five block types, one theme (ported from an existing template), the preview pane, the document `theme` key and the theme picker. Add a second theme to prove switching works.
+3. **"Preview as".** Add the ruleset picker and switch-group resolution in `renderPreview`.
+4. **Iterable flavor.** Add `renderTemplate`, the Iterable flavor, and the "Copy template" action.
+5. **Claude + Iterable.** Translate, review, push and send proofs through Iterable's API.
+
+`../CLAUDE.md` and `../docs/blocks.md` are updated in the same change as each step that alters what they describe (hosting, the `theme` key, the renderer).
 
 ## Status
 
-Core shape, implementation approach (Python 3 + Jinja2), theme structure, entry point and delivery are now settled. The remaining open items are about ruleset translation tooling, not the render layer's own design — implementation can start.
+Design settled apart from the open questions above, none of which block steps 1 to 3. Implementation can start at step 1.
