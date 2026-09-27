@@ -17,6 +17,8 @@ The HTML files use classic email-safe markup: XHTML transitional doctype, inline
 
 There is no local server or renderer in this repo — preview the HTML files by opening them directly in a browser or an email client testing tool.
 
+The repo is published as-is by GitHub Pages from `master` at `https://infoentropy.github.io/emails/` (e.g. the authoring tool at `/emails/authoring/`). Keep the empty `.nojekyll` file at the root: without it Pages runs Jekyll, whose Liquid templating fails on the Handlebars `{{` examples in the specs and breaks the deploy.
+
 ## Project management
 
 Work is tracked as markdown files moving through four folders (see each folder's README for details):
