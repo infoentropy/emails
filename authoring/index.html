@@ -120,6 +120,11 @@ details.panel summary{cursor:pointer;list-style:none;padding:12px 14px}
 details.panel summary h2{display:inline;padding:0;margin:0}
 details.panel summary::after{content:" ▸";color:var(--muted);font-size:12px}
 details.panel[open] summary::after{content:" ▾"}
+.sync{border-top:1px solid var(--line);background:var(--accent-soft);color:var(--ink);font-size:13px}
+.sync.warn{background:var(--warn-soft);color:var(--warn)}
+.sync-in{max-width:1480px;margin:0 auto;padding:6px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sync-in .msg{margin-right:auto}
+.sync-in b{font-family:var(--mono);font-size:12.5px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -133,7 +138,9 @@ details.panel[open] summary::after{content:" ▾"}
   <input type="file" id="file" accept="application/json,.json" hidden>
   <button id="open">Open file</button>
   <button id="blank">New</button>
-</div></div>
+</div>
+<div class="sync" id="sync" hidden><div class="sync-in" id="sync-in"></div></div>
+</div>
 
 <div class="wrap"><div class="grid">
   <div>
@@ -216,9 +223,13 @@ catch(e){ doc = structuredClone(SAMPLE); }
 if(!doc || !Array.isArray(doc.blocks)) doc = structuredClone(SAMPLE);
 ensureNextId();
 
+function saveLocal(){
+  try{ localStorage.setItem(KEY, JSON.stringify(doc)); return true; }
+  catch(e){ return false; }
+}
 function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify(doc)); flash("saved"); }
-  catch(e){ flash("not saved"); }
+  flash(saveLocal() ? "saved" : "not saved");
+  scheduleFileWrite();
 }
 let flashT;
 function flash(word){
@@ -685,16 +696,20 @@ function filename(){
   return (base || "email-document") + ".json";
 }
 
+// The file format: 2-space indent, the tool's key order, trailing newline. A one-field change is a one-line diff.
+const docText = () => JSON.stringify(serialise(), null, 2) + "\n";
+const JSON_TYPES = [{description:"Email document", accept:{"application/json":[".json"]}}];
+
 async function saveAs(){
-  const text = JSON.stringify(serialise(), null, 2);
+  const text = docText();
   const name = filename();
   if(window.showSaveFilePicker){
     try {
-      const handle = await showSaveFilePicker({ suggestedName:name,
-        types:[{description:"Email document", accept:{"application/json":[".json"]}}] });
+      const handle = await showSaveFilePicker({ suggestedName:name, types:JSON_TYPES });
       const w = await handle.createWritable();
       await w.write(text);
       await w.close();
+      await attachFile(handle, text);              // from now on, edits save to this file
       flash("saved to disk");
       return;
     } catch(e){
@@ -725,7 +740,7 @@ document.getElementById("paste").addEventListener("click", () => {
   const text = prompt("Paste an email document (JSON). This replaces what's open.");
   if(text) load(text);
 });
-document.getElementById("open").addEventListener("click", () => document.getElementById("file").click());
+document.getElementById("open").addEventListener("click", openFile);
 document.getElementById("file").addEventListener("change", ev => {
   const f = ev.target.files[0]; if(!f) return;
   const r = new FileReader();
@@ -734,26 +749,224 @@ document.getElementById("file").addEventListener("change", ev => {
   ev.target.value = "";
 });
 document.getElementById("blank").addEventListener("click", () => {
-  if(confirm("Start an empty email? What's open now will be discarded.")){ doc = blank(); commit(); }
+  const also = sync.handle ? " The editor also disconnects from " + sync.name + ", which is left as it is." : "";
+  if(confirm("Start an empty email? What's open now will be discarded." + also)){ detachFile(); doc = blank(); commit(); }
 });
 
-function load(text){
+// Parses and tidies a document. Returns {doc} or {error}.
+function parseDocument(text){
   let next;
   try { next = JSON.parse(text); }
-  catch(e){ alert("That isn't valid JSON, so nothing was changed."); return; }
-  if(!next || !Array.isArray(next.blocks)){ alert("That JSON has no blocks array, so it isn't an email document."); return; }
-  if(!confirm("Replace what's open with this document?")) return;
-  next.blocks = next.blocks.map((b,i) => {
+  catch(e){ return {error:"isn't valid JSON"}; }
+  if(!next || !Array.isArray(next.blocks)) return {error:"has no blocks array, so it isn't an email document"};
+  const blocks = next.blocks.map((b,i) => {
     b = (b && typeof b === "object") ? b : {};
     return Object.assign({}, b, {id:b.id || ("b"+(i+1)), blockType:b.blockType, data:b.data ?? {}});
   });
-  doc = {version:next.version||1, name:next.name||"", subject:next.subject||"",
-         preheader:next.preheader||"", blocks:next.blocks};
-  if(typeof next.theme === "string" && next.theme) doc.theme = next.theme;
-  if(Number.isInteger(next.nextId)) doc.nextId = next.nextId;
-  ensureNextId();
+  const d = {version:next.version||1, name:next.name||"", subject:next.subject||"",
+             preheader:next.preheader||"", blocks};
+  if(typeof next.theme === "string" && next.theme) d.theme = next.theme;
+  if(Number.isInteger(next.nextId)) d.nextId = next.nextId;
+  return {doc:d};
+}
+
+function useDocument(d){ doc = d; ensureNextId(); }
+
+function load(text){
+  const r = parseDocument(text);
+  if(r.error){ alert("That " + r.error + ", so nothing was changed."); return; }
+  if(!confirm("Replace what's open with this document?")) return;
+  useDocument(r.doc);
   commit();
 }
+
+// ---- file sync: stay attached to a file on disk that someone else (an agent) may also edit ----
+// Needs the File System Access API (Chrome, Edge). Elsewhere Open file / Save as import and export only.
+const canSync = "showOpenFilePicker" in window;
+const sync = {
+  handle:null, name:"",
+  known:null,          // lastModified of the file when we last looked
+  synced:null,         // the file's text as of our last read or write
+  dirty:false,         // edits here not yet written to the file
+  invalid:"",          // why the file on disk can't be used; nothing is written while set
+  needsPermission:false, busy:false, timer:null
+};
+
+async function openFile(){
+  if(!canSync){ document.getElementById("file").click(); return; }
+  let handle;
+  try { [handle] = await showOpenFilePicker({types:JSON_TYPES, multiple:false}); }
+  catch(e){ if(e && e.name !== "AbortError") document.getElementById("file").click(); return; }
+  const text = await (await handle.getFile()).text();
+  const r = parseDocument(text);
+  if(r.error){ alert(handle.name + " " + r.error + ", so nothing was changed."); return; }
+  if(!confirm("Replace what's open with " + handle.name + "?\n\nThe editor stays connected to it: your changes save to the file, and changes made to it elsewhere (by an agent, say) show up here.")) return;
+  useDocument(r.doc);
+  saveLocal();
+  await attachFile(handle, text);
+  render();
+}
+
+async function attachFile(handle, text){
+  detachFile();
+  Object.assign(sync, {handle, name:handle.name, synced:text, dirty:false, invalid:"", needsPermission:false});
+  sync.known = (await handle.getFile()).lastModified;
+  rememberHandle(handle);
+  showSync();
+}
+
+function detachFile(){
+  if(!sync.handle) return;
+  clearTimeout(sync.timer);
+  Object.assign(sync, {handle:null, name:"", known:null, synced:null, dirty:false, invalid:"", needsPermission:false});
+  rememberHandle(null);
+  showSync();
+}
+
+function scheduleFileWrite(){
+  if(!sync.handle) return;
+  sync.dirty = true;
+  showSync();
+  clearTimeout(sync.timer);
+  sync.timer = setTimeout(flushFileWrite, 400);
+}
+
+const askTakeFile = () => confirm(sync.name + " changed on disk while you had unsaved edits here.\n\n" +
+  "OK: use the file's version (your latest edits here are discarded).\nCancel: keep your version and overwrite the file.");
+
+async function writeFile(text){
+  const w = await sync.handle.createWritable();
+  await w.write(text);
+  await w.close();
+  sync.synced = text;                 // the next check sees a new lastModified, reads this text back and ignores it
+  sync.dirty = false;
+}
+
+async function flushFileWrite(){
+  if(!sync.handle || !sync.dirty || sync.invalid || sync.needsPermission){ showSync(); return; }
+  if(sync.busy){ sync.timer = setTimeout(flushFileWrite, 200); return; }
+  sync.busy = true;
+  try {
+    const f = await sync.handle.getFile();
+    if(f.lastModified !== sync.known){
+      sync.known = f.lastModified;
+      const disk = await f.text();
+      if(disk !== sync.synced){ await diskChanged(disk); return; }   // someone else wrote since we last looked
+    }
+    await writeFile(docText());
+  } catch(e){ syncFailed(e); }
+  finally { sync.busy = false; showSync(); }
+}
+
+async function checkDisk(){
+  if(!sync.handle || sync.busy || sync.needsPermission || document.visibilityState !== "visible") return;
+  sync.busy = true;
+  try {
+    const f = await sync.handle.getFile();
+    if(f.lastModified === sync.known) return;
+    sync.known = f.lastModified;
+    const disk = await f.text();
+    if(disk !== sync.synced) await diskChanged(disk);   // otherwise it's our own write coming back
+  } catch(e){ syncFailed(e); }
+  finally { sync.busy = false; showSync(); }
+}
+
+// The file changed on disk. A file that doesn't parse (say, caught mid-write) is left alone, and so are
+// edits here, until it does. Then the file wins, unless there are unsaved edits here and the person keeps them.
+async function diskChanged(disk){
+  sync.synced = disk;
+  const r = parseDocument(disk);
+  if(r.error){ sync.invalid = r.error; return; }
+  sync.invalid = "";
+  if(sync.dirty && !askTakeFile()){ await writeFile(docText()); return; }
+  clearTimeout(sync.timer);
+  sync.dirty = false;
+  useDocument(r.doc);
+  saveLocal();
+  const active = document.activeElement;
+  if(active && active.id) focusAfter = active.id;
+  render();
+  flash("reloaded from " + sync.name);
+}
+
+function syncFailed(e){
+  if(e && e.name === "NotAllowedError"){ sync.needsPermission = true; return; }
+  const name = sync.name;
+  detachFile();
+  alert("Lost the connection to " + name + " (" + (e && e.message || e) + "). It may have been moved or deleted. " +
+        "Your work is still here; use Save as… to save it to a file again.");
+}
+
+// After a reload the browser needs the person to confirm access again (a click), unless it still has it.
+async function reconnectFile(){
+  if(!sync.handle) return;
+  let p = "denied";
+  try { p = await sync.handle.requestPermission({mode:"readwrite"}); } catch(e){}
+  if(p !== "granted"){ sync.needsPermission = true; showSync(); return; }
+  sync.needsPermission = false;
+  sync.busy = true;
+  try {
+    const f = await sync.handle.getFile();
+    sync.known = f.lastModified;
+    const disk = await f.text();
+    if(disk === docText()) sync.synced = disk;
+    else await diskChanged(disk);
+  } catch(e){ syncFailed(e); }
+  finally { sync.busy = false; showSync(); }
+}
+
+async function restoreFile(){
+  if(!canSync) return;
+  const handle = await recallHandle();
+  if(!handle) return;
+  Object.assign(sync, {handle, name:handle.name, needsPermission:true});
+  let p = "prompt";
+  try { p = await handle.queryPermission({mode:"readwrite"}); } catch(e){}
+  if(p === "granted") await reconnectFile(); else showSync();
+}
+
+function showSync(){
+  const bar = document.getElementById("sync"), host = document.getElementById("sync-in");
+  bar.hidden = !sync.handle;
+  if(!sync.handle) return;
+  const warn = !!(sync.invalid || sync.needsPermission);
+  bar.classList.toggle("warn", warn);
+  const msg = el("span","msg");
+  const file = el("b", null, sync.name);
+  if(sync.needsPermission)
+    msg.append("Connected to ", file, " before the page reloaded. The browser needs you to confirm access again.");
+  else if(sync.invalid)
+    msg.append(file, " on disk " + sync.invalid + ". Nothing is written to it until that's fixed" +
+               (sync.dirty ? "; your edits here are kept." : "."));
+  else if(sync.dirty)
+    msg.append("Saving to ", file, "…");
+  else
+    msg.append("Synced with ", file, ". Changes save to it, and edits made to it elsewhere load here.");
+  const buttons = [];
+  if(sync.needsPermission) buttons.push(mk("Reconnect", "Confirm access to " + sync.name, reconnectFile, false, "txt"));
+  buttons.push(mk("Disconnect", "Stop saving to " + sync.name + " (the file is left as it is)", detachFile, false, "txt"));
+  host.replaceChildren(msg, ...buttons);
+}
+
+document.addEventListener("visibilitychange", checkDisk);
+window.addEventListener("focus", checkDisk);
+setInterval(checkDisk, 1500);
+
+// The attached file's handle survives reloads in IndexedDB (localStorage can't hold it).
+function idb(mode, fn){
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open("email-block-composer", 1);
+    open.onupgradeneeded = () => open.result.createObjectStore("kv");
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const tx = open.result.transaction("kv", mode), req = fn(tx.objectStore("kv"));
+      tx.oncomplete = () => { open.result.close(); resolve(req.result); };
+      tx.onerror = () => reject(tx.error);
+    };
+  });
+}
+const rememberHandle = h => idb("readwrite", s => h ? s.put(h, "file") : s.delete("file")).catch(() => {});
+const recallHandle = () => idb("readonly", s => s.get("file")).catch(() => null);
 
 async function loadRenderer(){
   [REG, R] = await Promise.all([import("../render/registry.js"), import("../render/render.js")]);
@@ -764,7 +977,7 @@ async function loadRenderer(){
   });
 }
 
-loadRenderer().then(render, e => {
+loadRenderer().then(() => { render(); restoreFile(); }, e => {
   // Pages lets browsers cache files for 10 minutes, so just after a deploy a stale module can meet a new one.
   const fix = location.protocol === "file:"
     ? "The editor has to be served over http(s): use https://infoentropy.github.io/emails/authoring/, or run " +

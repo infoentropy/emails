@@ -70,7 +70,9 @@ Each block's fields are defined by its schema, `blocks/<blockType>.json`. Read o
    ```
 
    Fix errors. Mention warnings to the person rather than working around them (`variant_unstyled` is the theme's gap, not the document's).
-3. Hand back, saying which blocks changed, by id. The person opens the file in the editor to see it.
+3. Hand back, saying which blocks changed, by id. If the person has the file open in the editor (Chrome or Edge), your change is already on their screen: the editor reloads the file within a couple of seconds. Otherwise they open it with *Open file*.
+
+The person may also be editing the same file in the editor, which saves every change straight to it. So **read the file again before each change** rather than relying on an earlier read, and write it in one go. A half-written file is harmless: the editor waits until it parses.
 
 Hidden blocks aren't checked, so an empty hidden block is fine.
 
