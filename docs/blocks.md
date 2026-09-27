@@ -8,12 +8,13 @@ An email is a **document**: campaign metadata plus an ordered list of **blocks**
 
 ```
 authoring tool  ──►  document (.json)  ──►  render layer + theme  ──►  email HTML
-(authoring/)                                 (not built yet)
+(authoring/)                                 (render/: preview built; platform template not yet)
 ```
 
 - **Block schemas** (`../blocks/*.json`) define the block types. They're JSON Schema documents with a few custom keywords.
-- **The authoring tool** (`../authoring/index.html`) is a static page, served by GitHub Pages at `https://infoentropy.github.io/emails/authoring/`. It loads the schemas, builds a form from them and exports the document.
-- **The render layer** turns a document and a theme into email HTML. It's specified in `../specs/render-layer-tool.md` but **not built yet**. Everything below about rendering is what it must do, not what exists.
+- **The authoring tool** (`../authoring/index.html`) is a static page, served by GitHub Pages at `https://infoentropy.github.io/emails/authoring/`. It loads the schemas, builds a form from them, previews the email live and exports the document.
+- **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. The preview and `check` exist. The platform template (Iterable conditionals, ruleset translation) is **not built yet**: where this page describes it, that's what it must do. Plan: `../specs/render-layer-tool.md`.
+- **Agents** editing documents read `agents.md`, not this page.
 
 Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangement all belong to the theme, and never to the document. The single exception is image pixel dimensions (see [Field conventions](#field-conventions)).
 
@@ -25,6 +26,8 @@ Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangeme
   "name": "Sleep Stories — weekly",
   "subject": "Three new Sleep Stories for this week",
   "preheader": "Narrated by voices you'll actually drift off to",
+  "theme": "sleep",
+  "nextId": 3,
   "blocks": [
     { "id": "b1", "blockType": "content_feature_header",
       "data": { "heading": "New This Week", "feature_type": "sleep" } },
@@ -40,9 +43,11 @@ Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangeme
 | `name` | Internal campaign name, never sent. |
 | `subject` | Subject line. |
 | `preheader` | Inbox preview text. There's exactly one, and it lives here. No block may define a `preheader` field. |
+| `theme` | Optional. A theme **name** from `../render/registry.js` (`spring`, `sleep`), never a style value. Missing means the registry's default theme. An unknown name is an error. |
+| `nextId` | The number the next new block's id takes. It only ever goes up, so ids are never reused. Missing (older documents) means highest existing id + 1, and the tool adds it on export. |
 | `blocks` | Ordered array of block instances. Array order is render order. |
 
-These top-level keys are hard-coded in the tool, not driven by a schema.
+These top-level keys are hard-coded in the tool, not driven by a schema. The tool writes them in the order above.
 
 ## A block instance
 
@@ -59,7 +64,7 @@ These top-level keys are hard-coded in the tool, not driven by a schema.
 
 | Key | Required | Meaning |
 |---|---|---|
-| `id` | yes | Document-local id: `b1`, `b2`, … A new block gets `b` + (highest numeric suffix + 1). Ids aren't stable across exports, so nothing outside the document should reference them. After a delete, an id can be reused. |
+| `id` | yes | Document-local id: `b1`, `b2`, … A new block gets `b` + `nextId`, which then goes up by one, so an id is never reused, even after a delete. People and agents refer to blocks by id ("change b7"), and the tool shows it on each block. Ids are only meaningful within their document. |
 | `blockType` | yes | Which schema `data` follows. snake_case, named for what the block is, never for how it looks. |
 | `data` | yes | Field values, validated against the block type's schema. |
 | `hidden` | no | `true`: kept in the document but never sent. See [Visibility](#visibility). |
@@ -136,7 +141,7 @@ Add a `fieldType` only when a real field needs it. Image, colour and link picker
 | `button` | `text*`, `link*`, `variant` (default `primary`) | |
 | `divider` | `variant` (default `primary`) | |
 
-Why each block looks the way it does: `../specs/email-block-library.md`.
+Why each block looks the way it does: `../completed/email-block-library.md`.
 
 ## Field conventions
 
@@ -203,15 +208,53 @@ It adds a `{{else if …}}` for each further case, and omits `{{else}}` when the
 
 `../authoring/index.html` is one page with an inline `<style>` and `<script>` and no dependencies. It must be served over http(s): GitHub Pages publishes `master` at `https://infoentropy.github.io/emails/authoring/`, and locally you run `python3 -m http.server` in the repo root and open `http://localhost:8000/authoring/`. Opening the file directly shows an error, because browsers block loading files from `file://`.
 
-- **Schemas are loaded, not copied.** On start, `loadSchemas()` imports `../render/registry.js`, fetches `../blocks/<blockType>.json` for each type in its `blockTypes`, and fills `SCHEMAS`, keyed by `blockType`, in registry order. `../blocks/*.json` is the only copy.
+- **Schemas and renderer are loaded, not copied.** On start, `loadRenderer()` imports `../render/registry.js` and `../render/render.js`, then `registry.loadSchemas()` fetches `../blocks/<blockType>.json` for each registered type into `SCHEMAS`, in registry order. `../blocks/*.json` is the only copy.
 - **Paths are relative** (`../render/…`, `../blocks/…`), never root-absolute: on Pages the site lives under `/emails/`.
 - **The form is generated.** Each field renders through `control()`, chosen by `fieldType`, in `weight` order, labelled with `title` (plus `*` if required) and followed by the `description`/enum help text.
-- **Validation is advisory.** `issuesFor()` checks `required`, `type` (integer/number), `enum`, `format: uri` and `format: date` for each block. `structureIssues()` checks split switch groups and empty rulesets on non-final cases. Problems show inline and in the Validation panel, but never block export.
-- **`serialise()`** builds the exported document: `data` keys in `weight` order, numeric strings from `integer`/`float` fields converted to numbers, block-level keys as described above.
-- **Nothing unknown is lost.** A block whose `blockType` has no schema shows as a read-only placeholder and is written back out untouched. Block-level keys the tool doesn't recognise are kept too. Opening a newer document in an older copy of the tool and saving must never destroy content.
+- **The theme picker** sits with the campaign fields and writes the document's `theme`.
+- **Validation is advisory, and shared.** The Validation panel shows `check()` from `../render/render.js`: the same list agents get from `node render/check.js` (see [The render layer](#the-render-layer)). Errors show inline next to the field and mark the block; warnings are listed in grey. Nothing ever blocks export.
+- **Live preview.** Every change re-renders the email with `renderPreview()` into a sandboxed `<iframe srcdoc>`, scaled to fit the panel, with a Desktop/Mobile width toggle. It shows what someone matching no ruleset gets; hidden blocks are left out. A block that can't render shows an inline error in its place.
+- **`serialise()`** builds the exported document: top-level keys as above, `data` keys in `weight` order, numeric strings from `integer`/`float` fields converted to numbers, block-level keys as described above. Validation and the preview both run on its output.
+- **Nothing unknown is lost.** A block whose `blockType` has no schema shows as a read-only placeholder and is written back out untouched (it's still a `check` error, since it can't be rendered). Block-level keys the tool doesn't recognise are kept too. Opening a newer document in an older copy of the tool and saving must never destroy content.
 - **Persistence:** every change autosaves to `localStorage` under `email-block-composer/doc`. That's crash protection only: the `.json` file (via *Save as…* / *Copy JSON*) is the real format, and *Open file* / *Paste JSON* load one back in.
 - **Deprecated types can't be added.** `addableTypes()` filters `deprecated: true` schemas out of the palette and the add-case select. Everything else still uses `SCHEMAS` directly, so existing blocks of a deprecated type render and export as before.
 - **Structure in the UI:** `units()` splits the flat `blocks` array into plain blocks and switch groups. Groups move as one unit. A group can't be split from the UI, only by importing a document, and the *Regroup* fix then moves the cases back together.
+
+## The render layer
+
+Plain ES modules in `../render/`, with no dependencies. They run unchanged in the browser and under Node, and do no I/O: callers load the schemas with `registry.loadSchemas(readJson)` and pass them in.
+
+| File | What it is |
+|---|---|
+| `registry.js` | Every block type (`templates`), theme (`themes`, `defaultTheme`) and, later, flavor. Adding one means adding it here. Also `schemaUrl()` and `loadSchemas()`. |
+| `render.js` | `check(doc, {schemas, theme})` and `renderPreview(doc, {schemas, theme, rulesets})`. |
+| `html.js` | The `html` tagged template (escapes every value unless wrapped in `raw()`), plus `safeUrl`, `fit`, `altText` and `paragraphs`. |
+| `blocks/<blockType>.js` | One template per block type: `(data, style, theme)` → one table row. |
+| `themes/<name>/theme.js` | A theme: `label`, `styles`, `imageSide`, `dateFormat`, `shell()`. |
+| `themes/shell.js` | The email-safe outer document both themes use, plus `row()` and the width constants. |
+| `check.js`, `preview.js` | Node wrappers for agents: print `check()` as JSON; write `renderPreview()` HTML. |
+
+**Rendering one block:** a missing or empty field takes its schema `default`, and fields the schema doesn't know are ignored. Numeric strings become numbers and `date` fields are formatted with the theme's `dateFormat`. Then the theme resolves `(blockType, variant)` to a style, and a variant it doesn't style renders as `primary` with a warning. The template gets the data (with `variant` set to the one actually used), that style and the theme.
+
+**Templates** build markup with `html\`…\``, so authored text is always escaped. Only `http(s)` URLs reach `href`/`src` (`safeUrl`). Markup follows the email conventions in `../CLAUDE.md`: tables, inline styles, 600px wide (`WIDTH`, and `CONTENT` inside the gutters), with classes `fluid` / `stack` that the shell's media query uses at narrow widths.
+
+**`markdown` fields** aren't converted yet. They render as escaped plain text, with blank lines as paragraph breaks (`paragraphs()`). Real markdown is on the backlog.
+
+**`check()`** returns `[{severity, block, field, code, message}]` (plus `switch` for switch issues). Hidden blocks aren't checked.
+
+| Code | Severity | Meaning |
+|---|---|---|
+| `required`, `type`, `enum`, `format` | error | A field fails its schema. |
+| `unknown_block_type` | error | No schema or template for `blockType`. |
+| `unknown_theme` | error | `theme` isn't in the registry. |
+| `theme_missing_type` | error | The theme has no styles for this block type. |
+| `render_failed` | error | The block threw while rendering. |
+| `duplicate_id` | error | Two blocks share an id. |
+| `switch_split` | error | A switch group's cases aren't adjacent. |
+| `not_a_document` | error | No `blocks` array. |
+| `variant_unstyled` | warning | The theme doesn't style this variant; it renders as `primary`. |
+| `ruleset_empty` | warning | A non-final switch case matches everyone. |
+| `next_id` | warning | `nextId` isn't above every existing id. |
 
 ## Changing block types
 
@@ -229,10 +272,11 @@ The render layer's side of the contract: a field missing from `data` takes its s
 ### Adding a block type
 
 1. Write `../blocks/<blockType>.json`: `$id` `block:<blockType>`, `version: 1`, fields with `title`/`type`/`fieldType`/`weight`, and `required`. Content only.
-2. Add `<blockType>` to `blockTypes` in `../render/registry.js`. Its position there is its position in the palette.
-3. Serve the repo and open the tool, add the block from the palette, fill it in, and confirm the exported `data` is in `weight` order and validation behaves as expected.
-4. Add a row to [The block library](#the-block-library) above, and to `../specs/email-block-library.md`.
-5. Once the render layer exists: add the block's template, and theme styling for each `variant` it uses.
+2. Write its template, `../render/blocks/<blockType>.js` (see [The render layer](#the-render-layer)).
+3. Import it in `../render/registry.js` and add it to `templates`. Its position there is its position in the palette.
+4. Add styles for it to **every** theme under `../render/themes/`: a `primary` entry, plus one per other `variant` value. `check` reports an error for a type a theme doesn't style.
+5. Serve the repo and open the tool, add the block from the palette, fill it in, and confirm the exported `data` is in `weight` order, validation behaves as expected, and the preview looks right in each theme at both widths.
+6. Add a row to [The block library](#the-block-library) above, and to `../completed/email-block-library.md`.
 
 ### Changing an existing block type
 
@@ -247,6 +291,6 @@ Set `"deprecated": true` on the schema and bump `version`. Keep it in the regist
 | Topic | Spec |
 |---|---|
 | Document format, schema keywords, evolution rules, the tool | `../completed/serverless-email-authoring-tool.md` |
-| The block library and field conventions | `../specs/email-block-library.md` |
+| The block library and field conventions | `../completed/email-block-library.md` |
 | `hidden`, `ruleset`, switch groups | `../completed/block-segmentation.md` |
 | Rendering, themes, output flavors, ruleset translation | `../specs/render-layer-tool.md` |

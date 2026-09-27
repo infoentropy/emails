@@ -40,8 +40,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:550}
 .primary:hover{color:#fff;filter:brightness(1.08)}
 
-.wrap{max-width:1200px;margin:0 auto;padding-block:22px 64px;padding-left:20px;padding-right:20px}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:26px;align-items:start}
+.wrap{max-width:1480px;margin:0 auto;padding-block:22px 64px;padding-left:20px;padding-right:20px}
+.grid{display:grid;grid-template-columns:minmax(420px,1fr) minmax(360px,672px);gap:26px;align-items:start}
 @media (max-width:900px){ .grid{grid-template-columns:minmax(0,1fr)} }
 
 h2{font:600 13px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
@@ -103,9 +103,23 @@ select{font:inherit;color:inherit;background:var(--surface);border:1px solid var
 pre{margin:0;padding:0 14px 14px;font:12.5px/1.55 var(--mono);white-space:pre;overflow-x:auto;max-height:52vh;overflow-y:auto}
 .issues{padding:0 14px 14px;display:flex;flex-direction:column;gap:7px;font-size:13px;max-height:24vh;overflow-y:auto}
 .issue{color:var(--warn)}
+.issue.soft{color:var(--muted)}
 .issue b{font-family:var(--mono);font-size:12px;font-weight:600}
 .ok{padding:0 14px 14px;font-size:13px;color:var(--muted)}
 .note{font-size:12.5px;color:var(--muted);padding:0 14px 14px}
+.phead{display:flex;align-items:center;gap:8px;padding:10px 14px 8px}
+.phead h2{padding:0;margin:0 auto 0 0}
+.seg{display:flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:4px 10px;font-size:12.5px}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.pv-view{margin:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);
+         overflow:auto;max-height:calc(100vh - 330px);min-height:240px}
+.pv-box{margin:0 auto;overflow:hidden}
+.pv-box iframe{display:block;border:0;background:#fff;transform-origin:0 0}
+details.panel summary{cursor:pointer;list-style:none;padding:12px 14px}
+details.panel summary h2{display:inline;padding:0;margin:0}
+details.panel summary::after{content:" ▸";color:var(--muted);font-size:12px}
+details.panel[open] summary::after{content:" ▾"}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -139,16 +153,30 @@ pre{margin:0;padding:0 14px 14px;font:12.5px/1.55 var(--mono);white-space:pre;ov
       <div id="issues"></div>
     </div>
     <div class="panel">
-      <h2>Document</h2>
-      <pre id="json"></pre>
-      <div class="note">This is the output. There is no HTML preview — rendering belongs to the render layer.</div>
+      <div class="phead">
+        <h2>Preview</h2>
+        <div class="seg" role="group" aria-label="Preview width">
+          <button id="pv-desktop" aria-pressed="true">Desktop</button>
+          <button id="pv-mobile" aria-pressed="false">Mobile</button>
+        </div>
+      </div>
+      <div class="pv-view" id="pv-view"><div class="pv-box" id="pv-box">
+        <iframe id="pv" title="Email preview" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+      </div></div>
+      <div class="note" style="padding-top:8px">Shows what someone matching none of the rulesets gets. Hidden blocks are left out.</div>
     </div>
+    <details class="panel">
+      <summary><h2>Document</h2></summary>
+      <pre id="json"></pre>
+      <div class="note">This is the output: the JSON that Save as&hellip; and Copy JSON give you.</div>
+    </details>
   </div>
 </div></div>
 
 <script>
 "use strict";
-const SCHEMAS = {};   // filled from ../blocks/*.json by loadSchemas()
+let SCHEMAS = {};   // filled from ../blocks/*.json by loadRenderer()
+let REG = null, R = null;   // ../render/registry.js and ../render/render.js, once loaded
 const KEY = "email-block-composer/doc";
 
 const sorted = s => Object.entries(s.properties).sort((a,b) => a[1].weight - b[1].weight);
@@ -158,6 +186,8 @@ const SAMPLE = {
   name:"Sleep Stories — weekly (sample)",
   subject:"Three new Sleep Stories for this week",
   preheader:"Narrated by voices you'll actually drift off to",
+  theme:"sleep",
+  nextId:8,
   blocks:[
     {id:"b1",blockType:"content_feature_header",data:{heading:"New This Week",feature_type:"sleep"}},
     {id:"b2",blockType:"article",data:{headline:"A Slow Train Through the Alps",
@@ -178,12 +208,13 @@ const SAMPLE = {
   ]
 };
 
-const blank = () => ({version:1,name:"",subject:"",preheader:"",blocks:[]});
+const blank = () => ({version:1,name:"",subject:"",preheader:"",nextId:1,blocks:[]});
 
 let doc;
 try { const raw = localStorage.getItem(KEY); doc = raw ? JSON.parse(raw) : structuredClone(SAMPLE); }
 catch(e){ doc = structuredClone(SAMPLE); }
 if(!doc || !Array.isArray(doc.blocks)) doc = structuredClone(SAMPLE);
+ensureNextId();
 
 function save(){
   try{ localStorage.setItem(KEY, JSON.stringify(doc)); flash("saved"); }
@@ -197,13 +228,18 @@ function flash(word){
   flashT = setTimeout(()=>{ el.textContent = "·"; }, 1400);
 }
 
-function nextId(){
+// Ids are never reused: doc.nextId only goes up, and is at least one above every existing id.
+function ensureNextId(){
   let max = 0;
   for(const b of doc.blocks){
     const m = /^b(\d+)$/.exec(String(b.id||""));
     if(m) max = Math.max(max, +m[1]);
   }
-  return "b" + (max + 1);
+  if(!(Number.isInteger(doc.nextId) && doc.nextId > max)) doc.nextId = max + 1;
+}
+function nextId(){
+  ensureNextId();
+  return "b" + doc.nextId++;
 }
 
 // ---- visibility: hidden, ruleset, switch groups ----
@@ -260,24 +296,6 @@ function regroup(name){
   doc.blocks = rest;
 }
 
-// Structural problems: [id, field or null, message].
-function structureIssues(){
-  const out = [], reported = new Set();
-  for(const u of units()){
-    if(u.kind !== "group") continue;
-    if(u.split && !reported.has(u.name)){
-      reported.add(u.name);
-      out.push(["switch " + u.name, null, "This switch is split up. Its cases must sit together — use Regroup."]);
-    }
-    for(let i = u.start; i < u.end; i++){
-      const b = doc.blocks[i];
-      if(!b.hidden && !hasRule(b))
-        out.push([b.id, "ruleset", "Empty ruleset: this case matches everyone, so the cases below it never show."]);
-    }
-  }
-  return out;
-}
-
 function defaultsFor(type){
   const s = SCHEMAS[type], d = {};
   if(!s) return d;
@@ -285,31 +303,13 @@ function defaultsFor(type){
   return d;
 }
 
-// ---- validation: required / type / enum / format(uri,date). Advisory only. ----
-function issuesFor(block){
-  const s = SCHEMAS[block.blockType];
-  if(!s) return [];
-  const req = new Set(s.required || []), out = [];
-  for(const [k,f] of sorted(s)){
-    const v = block.data[k];
-    const empty = v === undefined || v === null || String(v).trim() === "";
-    if(req.has(k)){
-      if(empty){ out.push([k, f.title + " is required."]); continue; }
-    } else if(empty) continue;          // not filled in: skip every other check
-    const str = String(v).trim();
-    if(f.type === "integer" && !/^-?\d+$/.test(str)) out.push([k, "Must be a whole number."]);
-    else if(f.type === "number" && isNaN(Number(str))) out.push([k, "Must be a number."]);
-    if(f.enum && !f.enum.includes(v)) out.push([k, "Must be one of: " + f.enum.join(", ") + "."]);
-    if(f.format === "uri" && !/^https?:\/\/\S+$/i.test(str)) out.push([k, "Must start with http:// or https://"]);
-    if(f.format === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(str)) out.push([k, "Must be a date, as YYYY-MM-DD."]);
-  }
-  return out;
-}
-
 // ---- serialise: weight order, numbers as numbers, unknown blocks untouched ----
 function serialise(){
-  const out = {version:doc.version||1, name:doc.name||"", subject:doc.subject||"",
-               preheader:doc.preheader||"", blocks:[]};
+  ensureNextId();
+  const out = {version:doc.version||1, name:doc.name||"", subject:doc.subject||"", preheader:doc.preheader||""};
+  if(typeof doc.theme === "string" && doc.theme) out.theme = doc.theme;
+  out.nextId = doc.nextId;
+  out.blocks = [];
   for(const b of doc.blocks){
     const s = SCHEMAS[b.blockType];
     let data;
@@ -373,6 +373,17 @@ function renderMeta(){
     if(hint) row.append(el("div","help",hint));
     host.append(row);
   }
+  const row = el("div","row");
+  const lab = el("label", null, "Theme"); lab.htmlFor = "m-theme";
+  const sel = el("select"); sel.id = "m-theme";
+  const current = R.themeName(doc);
+  for(const [name, t] of Object.entries(REG.themes))
+    sel.append(new Option(t.label + (name === REG.defaultTheme ? " (default)" : ""), name, false, name === current));
+  if(!REG.themes[current]) sel.append(new Option("Unknown theme: " + current, current, false, true));
+  sel.addEventListener("change", () => { doc.theme = sel.value; save(); refreshLive(); });
+  const e = el("div","err"); e.id = "e-doc-theme"; e.hidden = true;
+  row.append(lab, sel, el("div","help","How the email looks. Switching keeps every block and its content."), e);
+  host.append(row);
 }
 
 const collapsed = new Set();   // case ids folded to a summary line; view state only, never saved
@@ -601,42 +612,69 @@ function renderPalette(){
   }
 }
 
+// Validation comes from the shared check() in ../render/render.js: the same list an agent gets.
 function refreshLive(){
-  document.getElementById("json").textContent = JSON.stringify(serialise(), null, 2);
+  const out = serialise();
+  document.getElementById("json").textContent = JSON.stringify(out, null, 2);
+  const issues = R.check(out, {schemas:SCHEMAS});
   const box = document.getElementById("issues");
   box.textContent = "";
+  for(const e of document.querySelectorAll(".err[id^='e-']")){ e.hidden = true; e.textContent = ""; }
+  for(const c of document.querySelectorAll(".block.bad")) c.classList.remove("bad");
   const list = el("div","issues");
-  const row = (label, msg) => {
-    const r = el("div","issue");
-    r.append(el("b",null,label + " "), document.createTextNode(msg));
+  for(const i of issues){
+    const where = i.block ? i.block + (i.field ? "." + i.field : "") : i.field ? i.field : "switch " + i.switch;
+    const r = el("div", i.severity === "error" ? "issue" : "issue soft");
+    r.append(el("b",null,(i.severity === "warning" ? "warning · " : "") + where + " "), document.createTextNode(i.message));
     list.append(r);
-  };
-  let n = 0;
-  for(const b of doc.blocks){
-    const found = b.hidden ? [] : issuesFor(b);   // hidden blocks are never sent, so they aren't checked
-    const s = SCHEMAS[b.blockType];
-    if(s) for(const [k] of sorted(s)){
-      const e = document.getElementById("e-" + b.id + "-" + k);
-      const hit = found.find(f => f[0] === k);
-      if(e){ e.hidden = !hit; e.textContent = hit ? hit[1] : ""; }
-    }
-    for(const [k,msg] of found){ n++; row(b.id + "." + k, msg); }
-    const card = document.querySelector('.block[data-bid="' + CSS.escape(String(b.id)) + '"]');
-    if(card) card.classList.toggle("bad", found.length > 0);
+    const e = document.getElementById(i.block ? "e-" + i.block + "-" + i.field : "e-doc-" + i.field);
+    if(e && i.field){ e.hidden = false; e.textContent = i.message; }
+    const card = i.block && i.severity === "error" && document.querySelector('.block[data-bid="' + CSS.escape(String(i.block)) + '"]');
+    if(card) card.classList.add("bad");
   }
-  for(const e of document.querySelectorAll(".rerr")){ e.hidden = true; e.textContent = ""; }
-  for(const [id,k,msg] of structureIssues()){
-    n++;
-    row(k ? id + "." + k : id, msg);
-    const e = k && document.getElementById("e-" + id + "-" + k);
-    if(e){ e.hidden = false; e.textContent = msg; }
-  }
-  if(n) box.append(list);
+  if(issues.length) box.append(list);
   else box.append(el("div","ok","Everything checks out. Validation never blocks export — a half-finished email still saves."));
+  schedulePreview(out);
+}
+
+// ---- preview: renderPreview() into a sandboxed iframe, scaled to fit the panel ----
+const PREVIEW_WIDTH = {desktop:640, mobile:375};
+let previewMode = "desktop", previewTimer = null;
+
+function schedulePreview(out){
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => {
+    const htmlText = R.renderPreview(out, {schemas:SCHEMAS});
+    document.getElementById("pv").srcdoc = htmlText.replace(/<head>/i, '<head><base target="_blank">');
+  }, 120);
+}
+
+function fitPreview(){
+  const frame = document.getElementById("pv"), box = document.getElementById("pv-box");
+  const view = document.getElementById("pv-view");
+  const w = PREVIEW_WIDTH[previewMode];
+  const scale = Math.min(1, (view.clientWidth - 2) / w);
+  let h = 600;
+  try { h = frame.contentDocument.documentElement.scrollHeight || h; } catch(e){}
+  frame.style.width = w + "px";
+  frame.style.height = h + "px";
+  frame.style.transform = "scale(" + scale + ")";
+  box.style.width = Math.floor(w * scale) + "px";
+  box.style.height = Math.ceil(h * scale) + "px";
+}
+document.getElementById("pv").addEventListener("load", fitPreview);
+new ResizeObserver(fitPreview).observe(document.getElementById("pv-view"));
+for(const mode of ["desktop","mobile"]){
+  document.getElementById("pv-" + mode).addEventListener("click", () => {
+    previewMode = mode;
+    for(const m of ["desktop","mobile"]) document.getElementById("pv-" + m).setAttribute("aria-pressed", String(m === mode));
+    fitPreview();
+  });
 }
 
 function commit(){ save(); render(); }
 function render(){
+  if(!R) return;                      // still loading schemas and the renderer
   renderMeta(); renderBlocks(); renderPalette(); refreshLive();
   if(focusAfter){ const n = document.getElementById(focusAfter); focusAfter = null; if(n) n.focus(); }
 }
@@ -711,20 +749,22 @@ function load(text){
   });
   doc = {version:next.version||1, name:next.name||"", subject:next.subject||"",
          preheader:next.preheader||"", blocks:next.blocks};
+  if(typeof next.theme === "string" && next.theme) doc.theme = next.theme;
+  if(Number.isInteger(next.nextId)) doc.nextId = next.nextId;
+  ensureNextId();
   commit();
 }
 
-async function loadSchemas(){
-  const { blockTypes, schemaUrl } = await import("../render/registry.js");
-  const loaded = await Promise.all(blockTypes.map(async type => {
-    const res = await fetch(schemaUrl(type));
-    if(!res.ok) throw new Error(type + ".json: HTTP " + res.status);
+async function loadRenderer(){
+  [REG, R] = await Promise.all([import("../render/registry.js"), import("../render/render.js")]);
+  SCHEMAS = await REG.loadSchemas(async url => {
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(url.pathname.split("/").pop() + ": HTTP " + res.status);
     return res.json();
-  }));
-  blockTypes.forEach((type, i) => { SCHEMAS[type] = loaded[i]; });
+  });
 }
 
-loadSchemas().then(render, e => {
+loadRenderer().then(render, e => {
   document.getElementById("stack").replaceChildren(el("div", "help",
     "Couldn't load the block schemas (" + e.message + "). The editor has to be served over http(s): " +
     "use https://infoentropy.github.io/emails/authoring/, or run `python3 -m http.server` in the repo root " +

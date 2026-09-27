@@ -60,11 +60,12 @@ A new optional top-level key, next to `subject` and `preheader`:
 One dependency-free JavaScript module, `render/render.js`, that runs unchanged in the browser and under Node. It exposes a check and two render functions sharing the same per-block rendering:
 
 ```js
-check(document, { flavor, translations })                  // → list of issues (see Working with agents)
-renderPreview(document, { theme, rulesets })                // → plain HTML for the preview pane
-renderTemplate(document, { theme, flavor, translations })  // → a template for the sending platform
+check(document, { schemas, theme, flavor, translations })           // → list of issues (see Working with agents)
+renderPreview(document, { schemas, theme, rulesets })                // → plain HTML for the preview pane
+renderTemplate(document, { schemas, theme, flavor, translations })  // → a template for the sending platform
 ```
 
+- `schemas` are the block schemas, loaded by the caller with `registry.loadSchemas(readJson)`: a `fetch` in the browser, a file read in Node.
 - `theme` defaults to the document's `theme`.
 - **`renderPreview`** resolves audience logic locally, from the author's "preview as" choice (`rulesets`: the ruleset texts treated as true). It emits no platform syntax and needs no translations, so steps 3 to 5 work before any AI or platform is involved.
 - **`renderTemplate`** wraps blocks in the flavor's conditional syntax, using approved translations. This is what goes to Iterable.
@@ -78,7 +79,7 @@ Claude runs the same module under Node, fetched from the hosted site or from a c
 2. Unknown `blockType`: **hard error**, since there's no template for it. (The editor still preserves unknown blocks, so round-tripping never destroys content.)
 3. Fill missing fields from the schema's `default`, and ignore fields the template doesn't use (see **Compatibility with evolving schemas**). The document may be invalid, because the editor's validation is advisory, so templates render defensively. An empty optional field produces nothing.
 4. Resolve `(blockType, variant)` against the theme (see **Themes and variants**).
-5. Convert `markdown` fields to HTML with raw HTML escaped (see **Markdown**), and format `date` fields with the theme's date format.
+5. Convert `markdown` fields (see **Markdown**: for now, escaped plain text), and format `date` fields with the theme's date format.
 6. Render through the block's template.
 
 Audience handling then differs by function:
@@ -90,7 +91,7 @@ Finally, the rendered blocks go into the theme's shell.
 
 ### Templates
 
-One module per block type, `render/blocks/<blockType>.js`, exporting a function from `(data, style)` to markup. Templates are written with an `html` tagged template literal that **escapes every interpolated value by default**. That gives the same autoescaping safety as Jinja2 without a dependency, and anything already safe (converted markdown, the rendered block list) is passed through explicitly with `raw()`.
+One module per block type, `render/blocks/<blockType>.js`, exporting a function from `(data, style, theme)` to one table row of markup. Templates are written with an `html` tagged template literal (in `render/html.js`) that **escapes every interpolated value by default**. That gives the same autoescaping safety as Jinja2 without a dependency, and anything already safe (converted markdown, the rendered block list) is passed through explicitly with `raw()`. Only `http(s)` URLs are written into `href` and `src`.
 
 The escaper also applies the flavor's own escaping in `renderTemplate`, so a literal `{{` in copy can't become an Iterable tag. `renderPreview` escapes HTML only.
 
@@ -104,7 +105,7 @@ A theme is a module, `render/themes/<name>/theme.js`, exporting:
 - `styles`: the `(blockType, variant)` → appearance lookup (colours, fonts, spacing, background images).
 - `imageSide`: `"left"` or `"right"` for `image_with_text`. Fixed per theme, not alternating, because alternating needs each block to know its position among its siblings. Revisit only if a theme actually needs it.
 - `dateFormat`: `Intl.DateTimeFormat` options, e.g. `{ month: "long", day: "numeric", year: "numeric" }`. Parse the document's `YYYY-MM-DD` as UTC so the day can't shift with the viewer's timezone. There's a default if the theme omits it.
-- `shell({ subject, preheader, body, styles })`: the outer HTML document (doctype, `<head>`, Outlook settings, media queries, the hidden preheader). The theme owns its shell: `flipboard/techdigest.html` and `traction/index.html` already differ at that level, and that's exactly the brand-level variation a theme exists for.
+- `shell({ subject, preheader, body })`: the outer HTML document (doctype, `<head>`, Outlook settings, media queries, the hidden preheader). The theme owns its shell: `flipboard/techdigest.html` and `traction/index.html` already differ at that level, and that's exactly the brand-level variation a theme exists for. The first two themes share one, `render/themes/shell.js`, with their own colours and fonts; a theme can replace it.
 
 Themes can also add assets (e.g. background images) under their directory, referenced by absolute URL from the hosted site or an image host.
 
@@ -119,13 +120,16 @@ blocks/<blockType>.json            schemas (unchanged)
 authoring/index.html               editor + preview pane
 docs/agents.md                     the one page agents read
 render/
-  render.js                        check, renderPreview, renderTemplate, html/raw
+  render.js                        check, renderPreview, renderTemplate
+  html.js                          html/raw and small markup helpers
   check.js                         Node wrapper: prints check's issues as JSON
-  registry.js                      block types, themes, default theme, flavors
+  preview.js                       Node wrapper: writes renderPreview's HTML
+  registry.js                      block types, themes, default theme, flavors, schema loading
+  package.json                     { "type": "module" } only, so Node treats render/ as ES modules
   blocks/<blockType>.js            one template per block type
+  themes/shell.js                  the email shell the current themes share
   themes/<name>/theme.js           styles, imageSide, dateFormat, shell
   flavors/<name>.js                conditional wrapping + syntax escaping per platform
-  vendor/                          the markdown library (see Markdown)
 ```
 
 ## The editor
@@ -177,7 +181,7 @@ Agents (Claude in the plugin, or Claude Code) do the first draft and many small 
 - `block` and `field` pin each issue to one place, so the fix is a targeted edit. `code` is stable and machine-readable. `message` is for people.
 - Hidden blocks aren't checked, as now.
 
-Agents run it through a thin Node wrapper, the one command in the design:
+Agents run it through a thin Node wrapper (`render/preview.js` is the only other one, for the milestone screenshots below):
 
 ```
 node render/check.js campaign.json [--flavor iterable --translations FILE]
@@ -260,9 +264,9 @@ Schemas may only gain optional fields; renames and removals become a new `blockT
 
 ## Markdown
 
-`markdown` fields are converted to HTML with **raw HTML in the source escaped, not passed through**. Passing it through would quietly undo the editor's ban on raw HTML.
+**Deferred (backlog).** For now `markdown` fields render as escaped plain text, with blank lines as paragraph breaks and single newlines as line breaks (`paragraphs()` in `render/html.js`). That's safe and needs no library; it just doesn't format.
 
-Use **markdown-it** with `html: false`, vendored as a single file under `render/vendor/` (no package manager). It runs in both the browser and Node. The legacy `body` values in `content/weekly.json` are raw HTML and need a one-off conversion to markdown before they can round-trip.
+The intended design, when it's picked up: convert to HTML with **raw HTML in the source escaped, not passed through**, since passing it through would quietly undo the editor's ban on raw HTML. The plan was **markdown-it** with `html: false`, vendored as a single file under `render/vendor/` (no package manager), running in both the browser and Node. It was deferred because the npm registry and CDNs weren't reachable from the build environment; vendoring it needs a machine that can download it, or a small hand-written converter for the subset email copy needs. The legacy `body` values in `content/weekly.json` are raw HTML and need a one-off conversion to markdown before they can round-trip.
 
 ## Open questions
 
@@ -275,19 +279,23 @@ Use **markdown-it** with `html: false`, vendored as a single file under `render/
 ## Build order
 
 1. **Hosting.** *Done.* GitHub Pages is on (deploying from `master`), and `.nojekyll` is in place. The editor loads `../blocks/*.json` through `render/registry.js` using relative paths, and the inlined schemas are gone.
-2. **Shared check and renderer, with preview.**
-   - Move the editor's validation into `check` and add `check.js`.
-   - Add `render.js` with `html`/`raw`, templates for the five block types, and one theme (ported from an existing template).
-   - Add the preview pane, the document `theme` key and the theme picker. Add a second theme to prove switching works.
-   - Add `nextId`, and show ids in the editor.
-   - Write `docs/agents.md`.
+2. **Shared check and renderer, with preview.** *Done.*
+   - The editor's validation moved into `check`; `check.js` and `preview.js` are the Node wrappers.
+   - `render.js` and `html.js`, templates for the five block types, and two themes, `spring` (default) and `sleep`, sharing a shell ported from the existing templates.
+   - The preview pane (Desktop/Mobile), the document `theme` key and the theme picker.
+   - `nextId`, so ids are never reused (ids were already shown in the editor).
+   - `docs/agents.md`.
 3. **File sync.** Open a file, autosave to it, and reload when it changes on disk.
-4. **"Preview as".** Add the ruleset picker and switch-group resolution in `renderPreview`.
+4. **"Preview as".** Add the ruleset picker to the editor. (`renderPreview` already resolves `rulesets` and switch groups, and `preview.js --as` exposes it.)
 5. **Iterable flavor.** Add `renderTemplate`, the Iterable flavor, translation coverage in `check`, and the "Copy template" action.
 6. **Claude + Iterable.** Translate, review, push and send proofs through Iterable's API.
 
 `../CLAUDE.md`, `../docs/blocks.md` and `../docs/agents.md` are updated in the same change as each step that alters what they describe (hosting, the `theme` and `nextId` keys, the renderer, `check`).
 
+**Backlog:**
+
+- **Markdown rendering** (see **Markdown**).
+
 ## Status
 
-Design settled apart from the open questions above, none of which block steps 1 to 4. Step 1 is done. Next is step 2.
+Design settled apart from the open questions above, none of which block steps 1 to 4. Steps 1 and 2 are done. Next is step 3.
