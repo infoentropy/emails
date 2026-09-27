@@ -70,4 +70,4 @@ Everything else dropped was either styling (`bg_color`, `bg_position`, `padding`
 
 ## Status
 
-All five schemas exist in `../blocks/` and validate against the conventions above. Nothing reads them yet, so this stays in `specs/` rather than `../completed/`; it moves once the render layer can consume them, which is also when the theme work may reshape the set again.
+Done. All five schemas exist in `../blocks/` and validate against the conventions above. The authoring tool loads them, and the render layer (`../render/`) has a template for each and renders them in two themes, so this moved to `completed/`. Markdown conversion of `body` is deferred: it renders as escaped plain text for now (see `../specs/render-layer-tool.md`, **Markdown**).
