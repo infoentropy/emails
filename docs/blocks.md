@@ -12,7 +12,7 @@ authoring tool  ──►  document (.json)  ──►  render layer + theme  �
 ```
 
 - **Block schemas** (`../blocks/*.json`) define the block types. They're JSON Schema documents with a few custom keywords.
-- **The authoring tool** (`../authoring/index.html`) is a single static page. It builds a form from the schemas and exports the document.
+- **The authoring tool** (`../authoring/index.html`) is a static page, served by GitHub Pages at `https://infoentropy.github.io/emails/authoring/`. It loads the schemas, builds a form from them and exports the document.
 - **The render layer** turns a document and a theme into email HTML. It's specified in `../specs/render-layer-tool.md` but **not built yet**. Everything below about rendering is what it must do, not what exists.
 
 Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangement all belong to the theme, and never to the document. The single exception is image pixel dimensions (see [Field conventions](#field-conventions)).
@@ -201,9 +201,10 @@ It adds a `{{else if …}}` for each further case, and omits `{{else}}` when the
 
 ## The authoring tool
 
-`../authoring/index.html` is one file with an inline `<style>` and `<script>`, no dependencies, and no `fetch()`, so it works from `file://`.
+`../authoring/index.html` is one page with an inline `<style>` and `<script>` and no dependencies. It must be served over http(s): GitHub Pages publishes `master` at `https://infoentropy.github.io/emails/authoring/`, and locally you run `python3 -m http.server` in the repo root and open `http://localhost:8000/authoring/`. Opening the file directly shows an error, because browsers block loading files from `file://`.
 
-- **Schemas are inlined.** The `SCHEMAS` object literal near the top of the script is a hand-copied version of `../blocks/*.json`, keyed by `blockType`. The two must match exactly; see [Changing block types](#changing-block-types).
+- **Schemas are loaded, not copied.** On start, `loadSchemas()` imports `../render/registry.js`, fetches `../blocks/<blockType>.json` for each type in its `blockTypes`, and fills `SCHEMAS`, keyed by `blockType`, in registry order. `../blocks/*.json` is the only copy.
+- **Paths are relative** (`../render/…`, `../blocks/…`), never root-absolute: on Pages the site lives under `/emails/`.
 - **The form is generated.** Each field renders through `control()`, chosen by `fieldType`, in `weight` order, labelled with `title` (plus `*` if required) and followed by the `description`/enum help text.
 - **Validation is advisory.** `issuesFor()` checks `required`, `type` (integer/number), `enum`, `format: uri` and `format: date` for each block. `structureIssues()` checks split switch groups and empty rulesets on non-final cases. Problems show inline and in the Validation panel, but never block export.
 - **`serialise()`** builds the exported document: `data` keys in `weight` order, numeric strings from `integer`/`float` fields converted to numbers, block-level keys as described above.
@@ -228,33 +229,18 @@ The render layer's side of the contract: a field missing from `data` takes its s
 ### Adding a block type
 
 1. Write `../blocks/<blockType>.json`: `$id` `block:<blockType>`, `version: 1`, fields with `title`/`type`/`fieldType`/`weight`, and `required`. Content only.
-2. Paste the same JSON into `SCHEMAS` in `../authoring/index.html` under the key `<blockType>`.
-3. Check that the two copies match:
-
-   ```sh
-   python3 - <<'EOF'
-   import json, glob
-   s = open('authoring/index.html').read()
-   a = s.index('const SCHEMAS = ') + len('const SCHEMAS = ')
-   inline = json.loads(s[a:s.index('\n};', a) + 2])
-   for f in sorted(glob.glob('blocks/*.json')):
-       d = json.load(open(f)); k = d['$id'].split(':', 1)[1]
-       print(k, 'ok' if inline.get(k) == d else 'MISMATCH')
-   print('inline only:', set(inline) - {json.load(open(f))['$id'].split(':', 1)[1] for f in glob.glob('blocks/*.json')} or 'none')
-   EOF
-   ```
-
-4. Open the tool, add the block from the palette, fill it in, and confirm the exported `data` is in `weight` order and validation behaves as expected.
-5. Add a row to [The block library](#the-block-library) above, and to `../specs/email-block-library.md`.
-6. Once the render layer exists: add the block's template, and theme styling for each `variant` it uses.
+2. Add `<blockType>` to `blockTypes` in `../render/registry.js`. Its position there is its position in the palette.
+3. Serve the repo and open the tool, add the block from the palette, fill it in, and confirm the exported `data` is in `weight` order and validation behaves as expected.
+4. Add a row to [The block library](#the-block-library) above, and to `../specs/email-block-library.md`.
+5. Once the render layer exists: add the block's template, and theme styling for each `variant` it uses.
 
 ### Changing an existing block type
 
-Check the change against the table above. If it's allowed, edit both copies, bump `version`, run the check in step 3, and update the library table here.
+Check the change against the table above. If it's allowed, edit the schema in `../blocks/`, bump `version`, and update the library table here.
 
 ### Retiring a block type
 
-Set `"deprecated": true` on the schema, in both copies, and bump `version`. The type disappears from the tool's add pickers, but existing blocks of that type stay editable and still export. *+ Add case* still copies an existing case, whatever its type. Don't delete the schema: documents that use the type would lose their form and fall back to the read-only unknown-type placeholder.
+Set `"deprecated": true` on the schema and bump `version`. Keep it in the registry. The type disappears from the tool's add pickers, but existing blocks of that type stay editable and still export. *+ Add case* still copies an existing case, whatever its type. Don't delete the schema: documents that use the type would lose their form and fall back to the read-only unknown-type placeholder.
 
 ## Where things are decided
 

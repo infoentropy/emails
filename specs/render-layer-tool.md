@@ -274,7 +274,7 @@ Use **markdown-it** with `html: false`, vendored as a single file under `render/
 
 ## Build order
 
-1. **Hosting.** GitHub Pages is on (deploying from `master`), and `.nojekyll` is in place. Switch the editor to load `../blocks/*.json` through the registry, using relative paths, and delete the inlined schemas.
+1. **Hosting.** *Done.* GitHub Pages is on (deploying from `master`), and `.nojekyll` is in place. The editor loads `../blocks/*.json` through `render/registry.js` using relative paths, and the inlined schemas are gone.
 2. **Shared check and renderer, with preview.**
    - Move the editor's validation into `check` and add `check.js`.
    - Add `render.js` with `html`/`raw`, templates for the five block types, and one theme (ported from an existing template).
@@ -290,4 +290,4 @@ Use **markdown-it** with `html: false`, vendored as a single file under `render/
 
 ## Status
 
-Design settled apart from the open questions above, none of which block steps 1 to 4. Implementation can start at step 1.
+Design settled apart from the open questions above, none of which block steps 1 to 4. Step 1 is done. Next is step 2.
