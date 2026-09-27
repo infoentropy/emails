@@ -24,6 +24,8 @@ Later specs change earlier ones. This one overrides:
 | The authoring tool is a single file that works from `file://`, with no `fetch()` and no build step, so the block schemas are copied into it by hand. | `../completed/serverless-email-authoring-tool.md`, **Tool shape** | The editor is **statically hosted** and loads the schemas, templates and themes as files. Still no build step and no server-side code. |
 | No theme selection or storage in the authoring tool. Themes live outside the document. | same spec, **Target shape** and **Out of scope for v1** | The **document records its theme**, and the editor has a theme picker. |
 | No "view as segment" preview, since the editor can't evaluate free-text rulesets. | `../completed/block-segmentation.md`, **Switch groups in the authoring tool** | A **"preview as" picker** where the author chooses which rulesets count as true. It still evaluates nothing, so the platform remains the only real test of the logic. |
+| Block ids are derived as highest + 1, so an id can be reused after the last block is deleted, and ids aren't stable. | `../completed/serverless-email-authoring-tool.md`, **Block instance ids** | **Ids are never reused**, and the editor shows them. The document stores the next id (see **Working with agents**). |
+| Validation lives inside the editor page. | same spec, **Validation** | Validation moves into the shared `check`, used by the editor and by agents. It stays advisory. |
 
 Everything else in those specs stands: content-only blocks, `variant`, schema evolution, `hidden` / `ruleset` / `switch` semantics, output flavors, and the translate-and-review step.
 
@@ -50,9 +52,10 @@ A new optional top-level key, next to `subject` and `preheader`:
 
 ## The renderer
 
-One dependency-free JavaScript module, `render/render.js`, that runs unchanged in the browser and under Node. It exposes two functions sharing the same per-block rendering:
+One dependency-free JavaScript module, `render/render.js`, that runs unchanged in the browser and under Node. It exposes a check and two render functions sharing the same per-block rendering:
 
 ```js
+check(document, { flavor, translations })                  // → list of issues (see Working with agents)
 renderPreview(document, { theme, rulesets })                // → plain HTML for the preview pane
 renderTemplate(document, { theme, flavor, translations })  // → a template for the sending platform
 ```
@@ -109,8 +112,10 @@ A static site can't list a directory, so `render/registry.js` names everything a
 ```
 blocks/<blockType>.json            schemas (unchanged)
 authoring/index.html               editor + preview pane
+docs/agents.md                     the one page agents read
 render/
-  render.js                        renderPreview, renderTemplate, html/raw
+  render.js                        check, renderPreview, renderTemplate, html/raw
+  check.js                         Node wrapper: prints check's issues as JSON
   registry.js                      block types, themes, default theme, flavors
   blocks/<blockType>.js            one template per block type
   themes/<name>/theme.js           styles, imageSide, dateFormat, shell
@@ -127,7 +132,81 @@ The authoring tool grows a preview pane next to the form:
 - A **"preview as" picker** lists the document's rulesets as checkboxes. Its label must make clear that it chooses what to *show* and tests nothing: whether a real recipient matches "US only" is decided by the approved translation, in the platform.
 - A **width toggle** (desktop / mobile) is cheap and worth having, since email layouts collapse at narrow widths.
 - The preview is rendered into an `<iframe srcdoc>`, so the email's styles can't leak into the editor or the other way round.
-- Validation stays advisory. A block that fails to render shows an inline error in the preview in place of that block, and the rest of the email still renders.
+- Validation stays advisory. The validation panel shows `check`'s issues, the same list an agent sees. A block that fails to render shows an inline error in the preview in place of that block, and the rest of the email still renders.
+- Each block shows its id (`b7`), so a person and an agent can refer to the same block.
+- The editor can work on a file on disk directly (see **File sync** below).
+
+### File sync
+
+The editor can **open a file on disk and stay attached to it**, so a person and an agent can take turns on the same `campaign.json` without exporting and importing:
+
+- **Open file** uses the browser's file picker and keeps the file handle. Every change is autosaved to the file (debounced), as well as to localStorage.
+- The editor **watches the file** while the tab is visible, checking its modified time every second or two. When it changes on disk, the editor reloads it and re-renders the preview, so an agent's edit shows up without the person doing anything.
+- **If the file on disk isn't valid JSON** (for example, caught mid-write), the editor keeps what it has, shows a notice, and doesn't write to the file until it parses again, so it never overwrites an agent's work with a stale copy.
+- **If both sides changed** (an edit is still waiting to autosave when the file changes on disk), the editor asks: take the file's version, or keep the editor's and overwrite the file.
+- The editor writes the same format as Save: 2-space indent, keys in the tool's order. A one-field change is a one-line diff.
+- The handle is remembered across reloads (stored in IndexedDB). The browser asks the person to confirm access again after a reload.
+- This needs the File System Access API, which is **Chrome and Edge only**. Other browsers, and Claude environments without local files (chat), keep using Open/Save and paste, as now.
+
+## Working with agents
+
+Agents (Claude in the plugin, or Claude Code) do the first draft and many small changes. People do the visual review and the fine-tuning. The design aims to keep each agent turn cheap in tokens.
+
+**The principle: agents work on the JSON and get text feedback. People judge the visuals.** A rendered email is large: `flipboard/techdigest.html` is 2,281 lines of table markup, while the JSON for a similar email is a few dozen lines. Screenshots are costly too, and need a headless browser. So in an agent's normal loop it reads and edits only the document, and learns whether the document is right from `check`, never from reading the rendered HTML.
+
+### `check`
+
+`check(document, options)` returns every problem with the document as a list, and an empty list means it's good:
+
+```json
+[
+  { "severity": "error",   "block": "b7", "field": "image_alt", "code": "required",
+    "message": "Image alt text is required." },
+  { "severity": "warning", "block": "b3", "field": "variant",   "code": "variant_unstyled",
+    "message": "Theme \"sleep\" has no style for button/secondary; rendering as primary." }
+]
+```
+
+- It covers everything the editor's validation covers today (`required`, `type`, `enum`, `format`), plus split switch groups, empty rulesets on non-final cases, an unknown `blockType`, an unknown `theme`, variants the theme doesn't style, and a trial render of every block that isn't hidden.
+- With a `flavor` and `translations`, it also reports each ruleset without an approved translation. So a clean `check` guarantees `renderTemplate` won't fail.
+- `block` and `field` pin each issue to one place, so the fix is a targeted edit. `code` is stable and machine-readable. `message` is for people.
+- Hidden blocks aren't checked, as now.
+
+Agents run it through a thin Node wrapper, the one command in the design:
+
+```
+node render/check.js campaign.json [--flavor iterable --translations FILE]
+```
+
+It prints the list as JSON and exits non-zero if there are errors. Warnings alone don't fail it.
+
+### Stable block ids
+
+Agents and people refer to blocks by id ("change b7's button text"), so an id must keep meaning the same block:
+
+- **Ids are never reused.** The document gains an optional top-level `nextId` (e.g. `"nextId": 12`) that only ever goes up. New blocks take it and increment it. When it's missing (existing documents), it's derived as today, from the highest existing id + 1.
+- An agent adding blocks does the same: take `nextId`, then increment it.
+- The editor shows each block's id.
+
+### Small edits
+
+- An agent changes only what it was asked to, editing the fields in place rather than rewriting the document. The fixed format makes that a one-line change for a one-field edit.
+- It then runs `check`, and hands back to the person, whose preview has already updated through **File sync**.
+- Switching theme is a one-key change (`"theme": "spring"`).
+
+### Visual checks by agents
+
+Only at milestones: after the first draft of a new email, or when trying a new theme. The agent renders the preview HTML to a file and takes one screenshot with whatever headless browser its environment has. It never does this after routine edits. Visual judgement is the person's job, in the editor.
+
+### What an agent reads
+
+An agent authoring or editing an email doesn't read the specs. It reads:
+
+- `docs/agents.md`: one page covering the document shape, the block-level keys (`hidden`, `ruleset`, `switch`), `nextId`, the theme names, `check`, and the rules above.
+- The schemas in `blocks/*.json` for the block types it uses.
+- The document itself, and `check`'s output.
+
+`docs/agents.md` is kept current in the same change as anything it describes, like `docs/blocks.md`.
 
 ## Testing in Iterable
 
@@ -186,18 +265,24 @@ Use **markdown-it** with `html: false`, vendored as a single file under `render/
 - **What form does the environment context take** for translation: a notes file, a sample user profile, or pulled from Iterable's API? (Carried over.)
 - **Should review flag an audience left with no blocks?** The "preview as" picker makes such an audience visible by hand; review could catch it automatically. (Carried over.)
 - **Theme vs. `feature_type`.** "Anxiety theme vs. sleep theme" overlaps with `content_feature_header.feature_type` (`meditate` / `sleep`), which the library spec says a theme keys its visuals off. Is the category content (a field), the look (a theme), or both, with the theme free to use the field?
-- **How the plugin hands a document to the hosted editor**: file import (works today), or something smoother such as a URL fragment.
+- **How the plugin hands a document to the hosted editor in chat**, where there's no shared file for **File sync**: file import (works today), or something smoother such as a URL fragment. With Claude Code and local files, File sync covers it.
 
 ## Build order
 
 1. **Hosting.** Serve the repo on GitHub Pages. Switch the editor to load `../blocks/*.json` through the registry and delete the inlined schemas.
-2. **Renderer and preview.** Add `render.js` with `html`/`raw`, templates for the five block types, one theme (ported from an existing template), the preview pane, the document `theme` key and the theme picker. Add a second theme to prove switching works.
-3. **"Preview as".** Add the ruleset picker and switch-group resolution in `renderPreview`.
-4. **Iterable flavor.** Add `renderTemplate`, the Iterable flavor, and the "Copy template" action.
-5. **Claude + Iterable.** Translate, review, push and send proofs through Iterable's API.
+2. **Shared check and renderer, with preview.**
+   - Move the editor's validation into `check` and add `check.js`.
+   - Add `render.js` with `html`/`raw`, templates for the five block types, and one theme (ported from an existing template).
+   - Add the preview pane, the document `theme` key and the theme picker. Add a second theme to prove switching works.
+   - Add `nextId`, and show ids in the editor.
+   - Write `docs/agents.md`.
+3. **File sync.** Open a file, autosave to it, and reload when it changes on disk.
+4. **"Preview as".** Add the ruleset picker and switch-group resolution in `renderPreview`.
+5. **Iterable flavor.** Add `renderTemplate`, the Iterable flavor, translation coverage in `check`, and the "Copy template" action.
+6. **Claude + Iterable.** Translate, review, push and send proofs through Iterable's API.
 
-`../CLAUDE.md` and `../docs/blocks.md` are updated in the same change as each step that alters what they describe (hosting, the `theme` key, the renderer).
+`../CLAUDE.md`, `../docs/blocks.md` and `../docs/agents.md` are updated in the same change as each step that alters what they describe (hosting, the `theme` and `nextId` keys, the renderer, `check`).
 
 ## Status
 
-Design settled apart from the open questions above, none of which block steps 1 to 3. Implementation can start at step 1.
+Design settled apart from the open questions above, none of which block steps 1 to 4. Implementation can start at step 1.
