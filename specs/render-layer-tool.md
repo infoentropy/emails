@@ -40,6 +40,39 @@ Because schemas may only ever gain optional fields — renames and removals beco
 - Templating via **Jinja2** (the standard, widely-used Python templating engine): one Jinja2 template per `blockType`, each block's `data` rendered through its template, then the rendered blocks concatenated into the final email HTML (wrapped in whatever outer document shell the theme provides).
 - Basic shape: script takes the authored JSON document (and a theme selection) as input, and writes the rendered HTML as output.
 
+### Theme structure
+
+A theme is a directory, not a single file — `render/themes/<theme_name>/`, containing:
+
+- `shell.html.j2` — the outer HTML document (doctype, `<head>`, MSO conditionals, media queries), wrapping a `{{ body }}` placeholder where the concatenated, rendered blocks go. The theme owns the shell rather than plugging values into one fixed shell: `flipboard/techdigest.html` and `traction/index.html` already diverge at the shell level (different meta tags, font stacks, breakpoints, doctype quirks), which is exactly the kind of brand-level variation a theme exists to own.
+- `style.json` — the `(blockType, variant)` → appearance lookup (colors, fonts, spacing), plus two theme-wide settings:
+  - `image_with_text.image_side`: `"left"` or `"right"`. Fixed per theme, not alternating — alternating would need each block template to know its position among same-type siblings, more context than the per-block rendering model in this spec provides. Worth revisiting only if a theme actually needs it.
+  - `date_format`: a strftime pattern (e.g. `"%B %-d, %Y"`) applied to any `date`-formatted field at render time, with a repo-wide default pattern if a theme omits it. The document keeps storing ISO `YYYY-MM-DD` (already fixed by the block schema conventions); how it displays is presentation, same as `bg_color` or spacing.
+
+Themes are code-defined and selected by name, looked up under `render/themes/`, not by arbitrary path — mirroring `blockType` → template being code-defined rather than user-supplied.
+
+### CLI shape
+
+```
+render/render.py INPUT.json --theme flipboard --flavor iterable [--translations translations.json] [--output OUT.html]
+```
+
+- `INPUT.json` — positional file argument, not stdin. Authored documents are always files (the authoring tool exports/saves one), so piping JSON in adds nothing.
+- `--theme` — theme name, looked up under `render/themes/<name>/`.
+- `--flavor` — flavor name, looked up in a code-defined flavor registry (`render/flavors/<name>.py`).
+- `--translations` — path to the approved ruleset-translation file. Required only when the document contains a `ruleset`; a required-but-missing translation is still the hard error the spec already calls for.
+- `--output` — optional, defaults to stdout so it composes in shell pipelines; pass a path to write directly to a file.
+
+Disk layout:
+
+```
+render/
+  render.py
+  blocks/<blockType>.html.j2      — one Jinja2 template per block type, code-defined
+  themes/<theme_name>/            — shell.html.j2 + style.json, one dir per theme
+  flavors/<flavor_name>.py        — conditional-wrapping + syntax-escaping logic per flavor
+```
+
 ### Output flavors
 
 The render layer is configured with an **output flavor**: which email platform's template language the HTML is written for. The rendered file goes to that platform as a template, not as final HTML, so anything decided per recipient at send time (currently: per-block rulesets, see `../completed/block-segmentation.md`) is emitted in the flavor's own syntax.
@@ -60,15 +93,12 @@ Before rendering, each distinct `ruleset` needs an AI-translated and human-appro
 
 ## Open questions
 
-Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above.
-
-- How is a theme structured/declared (a JSON/config document? a set of CSS variables? code)? Also: does a theme supply its own outer document shell/Jinja2 template, or only style values plugged into a fixed shell?
-- **Which side does an `image_with_text` image sit on?** The authoring document deliberately does not say — a `layout` field was drafted and removed to keep the schema content-only — so this is entirely the theme's call. A fixed side, or alternating down the email? Alternating needs the template to know a block's position among its siblings, which is more context than rendering one block in isolation provides.
-- Exact CLI shape: input/output as file arguments vs. stdin/stdout, how the theme and output flavor are selected, where block templates and themes are located on disk.
-- How should a `date` field be formatted for display? Still open.
+Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above. Theme structure/shell ownership, the `image_with_text` image side, `date` display formatting, and the CLI shape are now settled too — see **Theme structure** and **CLI shape** above.
 
 `markdown` is settled: convert to HTML here (a Python markdown library called from the Jinja2 template), configured so that **raw HTML in the source is escaped, not passed through**. The default passthrough behaviour would quietly undo the authoring tool's ban on raw HTML editing. Note that the legacy `body` values in `content/weekly.json` are raw HTML and need converting to markdown as a one-off before they can round-trip.
 
+Still open: where the ruleset translations file lives (inside the document or next to it), what form the environment context takes for translation, and whether translation review should flag an audience left with no blocks (carried over from `../completed/block-segmentation.md`, noted in **Ruleset translation** above).
+
 ## Status
 
-Early spec — core shape and implementation approach (Python 3 + Jinja2) agreed, but the open questions above need answers before implementation starts.
+Core shape, implementation approach (Python 3 + Jinja2), theme structure, and CLI shape are now settled. The remaining open items are about ruleset translation tooling, not the render layer's own design — implementation can start.
