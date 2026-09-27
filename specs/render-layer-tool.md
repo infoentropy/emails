@@ -38,7 +38,7 @@ Because schemas may only ever gain optional fields — renames and removals beco
 
 - A **Python 3** script, run locally/on demand — no server process.
 - Templating via **Jinja2** (the standard, widely-used Python templating engine): one Jinja2 template per `blockType`, each block's `data` rendered through its template, then the rendered blocks concatenated into the final email HTML (wrapped in whatever outer document shell the theme provides).
-- Basic shape: script takes the authored JSON document (and a theme selection) as input, and writes the rendered HTML as output.
+- Basic shape: a render function takes the authored JSON document, a theme and an output flavor, and returns the rendered HTML (see **Entry point**).
 
 ### Theme structure
 
@@ -51,17 +51,35 @@ A theme is a directory, not a single file — `render/themes/<theme_name>/`, con
 
 Themes are code-defined and selected by name, looked up under `render/themes/`, not by arbitrary path — mirroring `blockType` → template being code-defined rather than user-supplied.
 
-### CLI shape
+### Entry point
+
+Marketers never run the renderer. Its callers are Skill C of the planned Claude plugin (`../ideas/claude-authoring-plugin.md`), which runs it in Claude's sandbox, and developers previewing templates and themes. So the interface is a function, not a CLI:
+
+```python
+render(document, theme, flavor, translations=None) -> str
+```
+
+- `document` — the parsed authored JSON document.
+- `theme` and `flavor` — names, looked up under `render/themes/` and `render/flavors/`.
+- `translations` — the approved ruleset translations. Needed only when the document contains a `ruleset`; a ruleset without an approved translation is still a hard error.
+- Returns the rendered HTML as a string. No file I/O happens inside `render`.
+
+A thin command wrapper in the same file reads the files, calls `render`, and prints the result, for callers that shell out:
 
 ```
-render/render.py INPUT.json --theme flipboard --flavor iterable [--translations translations.json] [--output OUT.html]
+python render/render.py DOC.json --theme NAME --flavor NAME [--translations FILE] > out.html
 ```
 
-- `INPUT.json` — positional file argument, not stdin. Authored documents are always files (the authoring tool exports/saves one), so piping JSON in adds nothing.
-- `--theme` — theme name, looked up under `render/themes/<name>/`.
-- `--flavor` — flavor name, looked up in a code-defined flavor registry (`render/flavors/<name>.py`).
-- `--translations` — path to the approved ruleset-translation file. Required only when the document contains a `ruleset`; a required-but-missing translation is still the hard error the spec already calls for.
-- `--output` — optional, defaults to stdout so it composes in shell pipelines; pass a path to write directly to a file.
+Nothing else lives in the wrapper.
+
+### Delivery
+
+The output is a template for the email platform, not a finished email, and getting it there is part of the flow:
+
+- **v1: copy and paste** into the platform's template editor (Iterable first). No credentials, nothing to host.
+- **Later: upload through the platform's API.** It needs an API key held somewhere (the skill, the sandbox, or a small service), which sits badly with the no-server constraint, so it waits until pasting is the actual bottleneck.
+
+Opening the output in a browser is only a rough preview. With segmentation in play it contains the flavor's conditional syntax, so every branch of a switch group shows at once. A per-recipient preview is the platform's job.
 
 Disk layout:
 
@@ -93,7 +111,7 @@ Before rendering, each distinct `ruleset` needs an AI-translated and human-appro
 
 ## Open questions
 
-Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above. Theme structure/shell ownership, the `image_with_text` image side, `date` display formatting, and the CLI shape are now settled too — see **Theme structure** and **CLI shape** above.
+Schema evolution and version skew are now settled — see **Compatibility with evolving schemas** above. Theme structure/shell ownership, the `image_with_text` image side, `date` display formatting, how the renderer is invoked, and how its output reaches the platform are now settled too — see **Theme structure**, **Entry point** and **Delivery** above.
 
 `markdown` is settled: convert to HTML here (a Python markdown library called from the Jinja2 template), configured so that **raw HTML in the source is escaped, not passed through**. The default passthrough behaviour would quietly undo the authoring tool's ban on raw HTML editing. Note that the legacy `body` values in `content/weekly.json` are raw HTML and need converting to markdown as a one-off before they can round-trip.
 
@@ -101,4 +119,4 @@ Still open: where the ruleset translations file lives (inside the document or ne
 
 ## Status
 
-Core shape, implementation approach (Python 3 + Jinja2), theme structure, and CLI shape are now settled. The remaining open items are about ruleset translation tooling, not the render layer's own design — implementation can start.
+Core shape, implementation approach (Python 3 + Jinja2), theme structure, entry point and delivery are now settled. The remaining open items are about ruleset translation tooling, not the render layer's own design — implementation can start.
