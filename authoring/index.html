@@ -765,10 +765,14 @@ async function loadRenderer(){
 }
 
 loadRenderer().then(render, e => {
+  // Pages lets browsers cache files for 10 minutes, so just after a deploy a stale module can meet a new one.
+  const fix = location.protocol === "file:"
+    ? "The editor has to be served over http(s): use https://infoentropy.github.io/emails/authoring/, or run " +
+      "`python3 -m http.server` in the repo root and open http://localhost:8000/authoring/. Opening the file directly doesn't work."
+    : "If the site was just updated, your browser may be mixing cached and new files: do a hard refresh " +
+      "(Cmd+Shift+R on a Mac, Ctrl+Shift+R elsewhere).";
   document.getElementById("stack").replaceChildren(el("div", "help",
-    "Couldn't load the block schemas (" + e.message + "). The editor has to be served over http(s): " +
-    "use https://infoentropy.github.io/emails/authoring/, or run `python3 -m http.server` in the repo root " +
-    "and open http://localhost:8000/authoring/. Opening the file directly doesn't work."));
+    "Couldn't load the editor (" + e.message + "). " + fix));
 });
 </script>
 </body>
