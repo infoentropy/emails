@@ -31,7 +31,12 @@ Everything else in those specs stands: content-only blocks, `variant`, schema ev
 
 ## Hosting
 
-- The site is this repo served as static files: **GitHub Pages**, from the repo root. The editor is `authoring/index.html`, and it loads `../blocks/*.json` and `../render/…` with `fetch()` and ES module imports.
+- The site is this repo served as static files: **GitHub Pages**, deployed from the `master` branch at the repo root. It's a project site at `https://infoentropy.github.io/emails/`, so the editor is at `https://infoentropy.github.io/emails/authoring/`. Only what's merged to `master` is live.
+- The editor is `authoring/index.html`, and it loads `../blocks/*.json` and `../render/…` with `fetch()` and ES module imports. The JavaScript runs in the visitor's browser. Pages runs nothing on the server, which matches the design: no build step, and no secrets on the page.
+- **All paths between files are relative** (`../blocks/button.json`, never `/blocks/button.json`). The site lives under `/emails/`, so a root-absolute path would resolve to `infoentropy.github.io/blocks/…` and fail. Relative paths also work unchanged on a local server, which serves the repo at `/`.
+- **The repo root has an empty `.nojekyll` file.** Without it, Pages runs the repo through Jekyll, which drops files and folders starting with `_` and processes Markdown.
+- Pages serves over HTTPS, which **File sync** needs: the browser only offers file access on secure pages. IndexedDB and localStorage work as usual.
+- Pages' limits (1 GB per site, a soft 100 GB of bandwidth a month) are far above what this needs.
 - Nothing authored is sent to the host. Documents stay in the browser (localStorage autosave, file export/import, as now), so a public site exposes only schemas, templates and themes.
 - Opening the editor from `file://` is no longer supported. Locally, serve the repo root with any static server (e.g. `python3 -m http.server`) and open `http://localhost:8000/authoring/`.
 - **The hand-inlined schemas in the editor go away.** `../blocks/*.json` becomes the only copy, which removes the "edit both copies" step from `../docs/blocks.md`.
@@ -269,7 +274,7 @@ Use **markdown-it** with `html: false`, vendored as a single file under `render/
 
 ## Build order
 
-1. **Hosting.** Serve the repo on GitHub Pages. Switch the editor to load `../blocks/*.json` through the registry and delete the inlined schemas.
+1. **Hosting.** GitHub Pages is on (deploying from `master`). Add `.nojekyll`. Switch the editor to load `../blocks/*.json` through the registry, using relative paths, and delete the inlined schemas.
 2. **Shared check and renderer, with preview.**
    - Move the editor's validation into `check` and add `check.js`.
    - Add `render.js` with `html`/`raw`, templates for the five block types, and one theme (ported from an existing template).
