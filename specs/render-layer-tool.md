@@ -62,13 +62,13 @@ One dependency-free JavaScript module, `render/render.js`, that runs unchanged i
 
 ```js
 check(document, { schemas, theme, flavor, facets })                 // → list of issues (see Working with agents)
-renderPreview(document, { schemas, theme, rulesets })                // → plain HTML for the preview pane
+renderPreview(document, { schemas, theme, as })                      // → plain HTML for the preview pane
 renderTemplate(document, { schemas, theme, flavor, facets })        // → a template for the sending platform
 ```
 
 - `schemas` are the block schemas, loaded by the caller with `registry.loadSchemas(readJson)`: a `fetch` in the browser, a file read in Node.
 - `theme` defaults to the document's `theme`.
-- **`renderPreview`** resolves audience logic locally, from the author's "preview as" choice (`rulesets`: the ruleset texts treated as true). It emits no platform syntax and needs no facet library, so steps 3 to 5 work before any AI or platform is involved.
+- **`renderPreview`** resolves audience logic locally, from the author's "preview as" choice (`as`: the facet ids, and unsettled ruleset texts, the imagined recipient matches). It emits no platform syntax and needs no facet library, so steps 3 to 5 work before any AI or platform is involved.
 - **`renderTemplate`** wraps blocks in the flavor's conditional syntax, using the approved conditions of each ruleset's facets (see **Audiences**). This is what goes to Iterable.
 - Neither function does I/O or calls an AI. The caller loads the files.
 
@@ -139,7 +139,7 @@ The authoring tool grows a preview pane next to the form:
 
 - It re-renders on every change with `renderPreview`, so you see the email while you edit it.
 - A **theme picker** writes the document's `theme`.
-- A **"preview as" picker** lists the document's rulesets as checkboxes. Its label must make clear that it chooses what to *show* and tests nothing: whether a real recipient matches "US only" is decided by the facets' approved conditions, in the platform.
+- A **"preview as" picker** lists the facets in use by category, and unsettled rulesets whole, as checkboxes (see **Audiences**). Its label must make clear that it chooses what to *show* and tests nothing: whether a real recipient matches "US only" is decided by the facets' approved conditions, in the platform.
 - A **width toggle** (desktop / mobile) is cheap and worth having, since email layouts collapse at narrow widths.
 - The preview is rendered into an `<iframe srcdoc>`, so the email's styles can't leak into the editor or the other way round.
 - Validation stays advisory. The validation panel shows `check`'s issues, the same list an agent sees. A block that fails to render shows an inline error in the preview in place of that block, and the rest of the email still renders.
@@ -374,7 +374,7 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
    - `nextId`, so ids are never reused (ids were already shown in the editor).
    - `docs/agents.md`.
 3. **File sync.** *Done.* Open file and Save as… attach; edits autosave to the file; outside changes reload; invalid files and conflicts are handled as in **File sync**.
-4. **"Preview as".** Add the picker to the editor: facets grouped by category for settled rulesets, whole-ruleset checkboxes for unsettled ones, and facet-aware matching in `renderPreview` (a block shows when all its facets are ticked). `renderPreview` already resolves free-text `rulesets` and switch groups, and `preview.js --as` exposes it.
+4. **"Preview as".** *Done.* Add the picker to the editor: facets grouped by category for settled rulesets, whole-ruleset checkboxes for unsettled ones, and facet-aware matching in `renderPreview` (a block shows when all its facets are ticked). `renderPreview` already resolves free-text `rulesets` and switch groups, and `preview.js --as` exposes it.
 5. **Iterable flavor.** Add `renderTemplate`, the Iterable flavor, facet parsing and checks in `check` (`ruleset_unsettled`, `unknown_facet`, `facet_category_repeated`), and the "Copy template" action.
 6. **Claude + Iterable.** Set up the private campaign repo, the settling conversation (as a documented agent procedure), then push and send proofs through Iterable's API.
 
@@ -386,4 +386,4 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
 
 ## Status
 
-Design settled apart from the open questions above, none of which block steps 1 to 4. Steps 1 to 3 are done. Next is step 4.
+Steps 1 to 4 are done. Next is step 5, which first needs the open question on the exact Iterable form of a facet's condition answered from Iterable's Handlebars reference (not reachable from the environment these steps were built in, so it needs someone with access, or a pasted excerpt).

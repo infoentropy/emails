@@ -67,15 +67,48 @@ function renderBlock(block, schemas, theme, name) {
 const errorRow = (block, message) => html`
         <tr><td style="padding:8px 24px;"><div style="border:2px dashed #c0392b;border-radius:6px;padding:10px 12px;background:#fff5f4;color:#a93226;font:13px/1.4 Arial, sans-serif;">${block.id} (${block.blockType}): ${message}</div></td></tr>`;
 
-// Plain HTML for the preview pane. `rulesets` are the ruleset texts to treat as true;
-// a block with no ruleset always matches, and a hidden block never shows.
-export function renderPreview(document, { schemas, theme, rulesets = [] } = {}) {
+// A settled ruleset is facet ids ("category.name") joined with " + ", meaning and:
+// "region.us-ca-gb + subscription.not-paying". Anything else non-empty is unsettled free text.
+const FACET = /^[a-z0-9-]+\.[a-z0-9-]+$/;
+export function parseRuleset(ruleset) {
+  const text = typeof ruleset === "string" ? ruleset.trim() : "";
+  if (!text) return { empty: true };
+  const parts = text.split(/\s*\+\s*/);
+  return parts.every(p => FACET.test(p)) ? { facets: parts } : { text };
+}
+
+// What the "preview as" picker offers: the facets in use, by category (in order of first use),
+// and the unsettled rulesets. Hidden blocks are left out, since they never show.
+export function audienceOptions(document) {
+  const facets = new Map(), rulesets = [];
+  for (const b of document.blocks || []) {
+    if (!b || typeof b !== "object" || b.hidden === true) continue;
+    const r = parseRuleset(b.ruleset);
+    if (r.text && !rulesets.includes(r.text)) rulesets.push(r.text);
+    for (const f of r.facets || []) {
+      const [category, name] = f.split(".");
+      if (!facets.has(category)) facets.set(category, []);
+      if (!facets.get(category).includes(name)) facets.get(category).push(name);
+    }
+  }
+  return { facets: Object.fromEntries(facets), rulesets };
+}
+
+// Plain HTML for the preview pane, for someone who matches `as`: facet ids, whole settled rulesets
+// (their facets), or unsettled ruleset texts. A block matches when it has no ruleset, when all its
+// facets are in `as`, or when its unsettled text is. A hidden block never shows.
+export function renderPreview(document, { schemas, theme, as = [] } = {}) {
   const name = theme ?? themeName(document), th = themes[name];
   if (!th) {
     return String(html`<!DOCTYPE html><html><body style="font:15px/1.5 Arial, sans-serif;padding:24px;color:#a93226;">Unknown theme "${name}". Pick a theme to preview this email.</body></html>`);
   }
-  const on = new Set(rulesets.map(r => String(r).trim()));
-  const matches = b => b.hidden !== true && (!ruleOf(b) || on.has(ruleOf(b)));
+  const on = new Set();
+  for (const a of as) { const r = parseRuleset(a); for (const k of r.facets || [r.text]) if (k) on.add(k); }
+  const matches = b => {
+    if (b.hidden === true) return false;
+    const r = parseRuleset(b.ruleset);
+    return r.empty || (r.facets ? r.facets.every(f => on.has(f)) : on.has(r.text));
+  };
   const shown = [];
   for (const u of units(document.blocks || [])) {
     const hit = u.block ? (matches(u.block) ? u.block : null) : u.cases.find(matches);

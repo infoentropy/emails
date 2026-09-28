@@ -168,8 +168,9 @@ Free text saying who sees the block, in the author's own words:
 "ruleset": "users in US, CA, GB. not a paying subscriber"
 ```
 
-- There's no grammar, and nothing in this repo knows which recipient attributes exist. Those depend on the sending platform and its setup.
-- The authoring tool stores the text as typed (trimmed on export) and doesn't parse it.
+- While drafting there's no grammar, and nothing in this repo knows which recipient attributes exist. Those depend on the sending platform and its setup.
+- The authoring tool stores the text as typed (trimmed on export).
+- **Settled form:** facet ids (`category.name`: lower-case letters, digits, hyphens) joined with ` + `, meaning *and*, e.g. `region.us-ca-gb + subscription.not-paying`. `parseRuleset()` in `../render/render.js` recognises it; anything else is unsettled free text. The preview understands both (see *Preview as* below).
 - Before a platform template is built, each free-text ruleset is **settled** into **facets**, in a conversation between Claude and the person: canned, approved conditions per category (region, subscription, behaviour), combined with ` + `, e.g. `region.us-ca-gb + subscription.not-paying`. The render layer uses only settled rulesets. An unsettled one is a hard error for the template, never an unconditional block. *(Not built. See the render layer spec, **Audiences**.)*
 - No `ruleset`: the block goes to everyone.
 
@@ -213,7 +214,8 @@ It adds a `{{else if …}}` for each further case, and omits `{{else}}` when the
 - **The form is generated.** Each field renders through `control()`, chosen by `fieldType`, in `weight` order, labelled with `title` (plus `*` if required) and followed by the `description`/enum help text.
 - **The theme picker** sits with the campaign fields and writes the document's `theme`.
 - **Validation is advisory, and shared.** The Validation panel shows `check()` from `../render/render.js`: the same list agents get from `node render/check.js` (see [The render layer](#the-render-layer)). Errors show inline next to the field and mark the block; warnings are listed in grey. Nothing ever blocks export.
-- **Live preview.** Every change re-renders the email with `renderPreview()` into a sandboxed `<iframe srcdoc>`, scaled to fit the panel, with a Desktop/Mobile width toggle. It shows what someone matching no ruleset gets; hidden blocks are left out. A block that can't render shows an inline error in its place.
+- **Live preview.** Every change re-renders the email with `renderPreview()` into a sandboxed `<iframe srcdoc>`, scaled to fit the panel, with a Desktop/Mobile width toggle. Hidden blocks are left out, and a block that can't render shows an inline error in its place.
+- **Preview as.** Above the preview, when the email has rulesets, a picker lists the facets in use, one row per category, and each unsettled ruleset as a whole. Ticks say what the imagined recipient matches. A block shows when it has no ruleset, when all its facets are ticked, or when its unsettled text is ticked; a switch group shows its first matching case. Ticks are view state only (never saved), and the note under the preview says who it's showing. It tests nothing: real matching happens in the platform.
 - **`serialise()`** builds the exported document: top-level keys as above, `data` keys in `weight` order, numeric strings from `integer`/`float` fields converted to numbers, block-level keys as described above. Validation and the preview both run on its output.
 - **Nothing unknown is lost.** A block whose `blockType` has no schema shows as a read-only placeholder and is written back out untouched (it's still a `check` error, since it can't be rendered). Block-level keys the tool doesn't recognise are kept too. Opening a newer document in an older copy of the tool and saving must never destroy content.
 - **Persistence:** every change autosaves to `localStorage` under `email-block-composer/doc`. That's crash protection only: the `.json` file is the real format. `docText()` writes it: 2-space indent, the tool's key order, a trailing newline.
@@ -235,7 +237,7 @@ Plain ES modules in `../render/`, with no dependencies. They run unchanged in th
 | File | What it is |
 |---|---|
 | `registry.js` | Every block type (`templates`), theme (`themes`, `defaultTheme`) and, later, flavor. Adding one means adding it here. Also `schemaUrl()` and `loadSchemas()`. |
-| `render.js` | `check(doc, {schemas, theme})` and `renderPreview(doc, {schemas, theme, rulesets})`. |
+| `render.js` | `check(doc, {schemas, theme})`, `renderPreview(doc, {schemas, theme, as})` (`as`: facet ids, settled rulesets or unsettled ruleset texts the recipient matches), `parseRuleset()` and `audienceOptions()` (what *Preview as* offers). |
 | `html.js` | The `html` tagged template (escapes every value unless wrapped in `raw()`), plus `safeUrl`, `fit`, `altText` and `paragraphs`. |
 | `blocks/<blockType>.js` | One template per block type: `(data, style, theme)` → one table row. |
 | `themes/<name>/theme.js` | A theme: `label`, `styles`, `imageSide`, `dateFormat`, `shell()`. |
