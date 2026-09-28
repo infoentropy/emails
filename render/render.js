@@ -1,7 +1,7 @@
 // check() and renderPreview(): shared by the editor (browser) and agents (Node). No I/O, no AI.
 // Callers load the schemas (registry.loadSchemas) and pass them in.
 import { templates, themes, defaultTheme } from "./registry.js";
-import { html, raw } from "./html.js";
+import { html, raw, escapeHtml } from "./html.js";
 
 export { html, raw };
 
@@ -138,6 +138,16 @@ function fieldIssues(b, schema, add) {
   }
 }
 
+// A ruleset's own problems: still free text (normal while drafting, but it must be settled into facets
+// before sending), or two facets from one category.
+function rulesetIssues(b, add) {
+  const r = parseRuleset(b.ruleset), at = { block: b.id, field: "ruleset" };
+  if (r.text) add("warning", "ruleset_unsettled", "Not settled into facets yet. Claude settles rulesets with you before the email is sent.", at);
+  const categories = (r.facets || []).map(f => f.split(".")[0]);
+  if (new Set(categories).size < categories.length)
+    add("error", "facet_category_repeated", "Two facets from one category in one ruleset; use at most one per category.", at);
+}
+
 // Every problem with the document, as [{severity, block, field, code, message}]. Empty means good.
 // Errors make the email wrong or unrenderable; warnings are worth a look. Hidden blocks aren't checked.
 export function check(document, { schemas, theme } = {}) {
@@ -172,6 +182,7 @@ export function check(document, { schemas, theme } = {}) {
       add("error", "unknown_block_type", `Unknown block type "${b.blockType}". Known types: ${Object.keys(templates).join(", ")}.`, { block: b.id, field: "blockType" });
       continue;
     }
+    rulesetIssues(b, add);
     const before = issues.length;
     fieldIssues(b, schema, add);
     if (!th) continue;
@@ -197,4 +208,44 @@ export function check(document, { schemas, theme } = {}) {
         add("warning", "ruleset_empty", "Empty ruleset: this case matches everyone, so the cases below it never show.", { block: b.id, field: "ruleset", switch: u.switch });
   }
   return issues;
+}
+
+// Templating languages (Handlebars and the like) read "{{" as a tag. An entity renders the same in any
+// email, so authored text can never become one, whichever platform the HTML ends up in.
+const noBraces = text => String(text).replaceAll("{", "&#123;");
+const markerText = ruleset => escapeHtml(ruleset.trim()).replace(/-{2,}/g, m => "&#45;".repeat(m.length));
+
+// The email's HTML for sending: every block that isn't hidden, with audiences as neutral markers that the
+// platform's conditionals replace when the email is pushed (see docs/agents.md):
+//   <!--audience if="region.us-ca-gb + subscription.not-paying"-->  …  <!--audience elseif="…"-->  …
+//   <!--audience else-->  …  <!--audience end-->
+// A block with a ruleset is an if…end; a switch group is one chain. Throws if check() finds errors.
+export function renderHtml(document, { schemas, theme } = {}) {
+  const issues = check(document, { schemas, theme });
+  const errors = issues.filter(i => i.severity === "error");
+  if (errors.length) {
+    const e = new Error(`Can't build the email: ${errors.length} error${errors.length === 1 ? "" : "s"}. ` +
+                        errors.map(i => (i.block ? i.block + ": " : "") + i.message).join(" "));
+    e.issues = issues;
+    throw e;
+  }
+  const name = theme ?? themeName(document), th = themes[name];
+  const content = b => noBraces(renderBlock(b, schemas, th, name));
+  const rows = [];
+  for (const u of units(document.blocks.filter(b => b && typeof b === "object"))) {
+    const cases = (u.block ? [u.block] : u.cases).filter(b => b.hidden !== true);
+    let open = false;
+    for (const b of cases) {
+      const rule = ruleOf(b);
+      if (!rule) {                                   // matches everyone: it's the else, and ends the chain
+        rows.push(open ? `\n<!--audience else-->${content(b)}` : content(b));
+        break;
+      }
+      rows.push(`\n<!--audience ${open ? "elseif" : "if"}="${markerText(rule)}"-->${content(b)}`);
+      open = true;
+    }
+    if (open) rows.push("\n<!--audience end-->");
+  }
+  const text = v => raw(noBraces(escapeHtml(v ?? "")));
+  return String(th.shell({ subject: text(document.subject), preheader: text(document.preheader), body: rows.join("") }));
 }

@@ -8,12 +8,12 @@ An email is a **document**: campaign metadata plus an ordered list of **blocks**
 
 ```
 authoring tool  ──►  document (.json)  ──►  render layer + theme  ──►  email HTML
-(authoring/)                                 (render/: preview built; platform template not yet)
+(authoring/)                                 (render/: preview, and HTML with audience markers)
 ```
 
 - **Block schemas** (`../blocks/*.json`) define the block types. They're JSON Schema documents with a few custom keywords.
 - **The authoring tool** (`../authoring/index.html`) is a static page, served by GitHub Pages at `https://infoentropy.github.io/emails/authoring/`. It loads the schemas, builds a form from them, previews the email live and exports the document.
-- **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. The preview and `check` exist. The platform template (Iterable conditionals, writing conditions for rulesets) is **not built yet**: where this page describes it, that's what it must do. Plan: `../specs/render-layer-tool.md`.
+- **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. It never writes a sending platform's syntax: audiences go out as neutral `<!--audience …-->` markers that Claude converts when pushing. Plan and remaining steps: `../specs/render-layer-tool.md`.
 - **Agents** editing documents read `agents.md`, not this page.
 
 Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangement all belong to the theme, and never to the document. The single exception is image pixel dimensions (see [Field conventions](#field-conventions)).
@@ -171,7 +171,7 @@ Free text saying who sees the block, in the author's own words:
 - While drafting there's no grammar, and nothing in this repo knows which recipient attributes exist. Those depend on the sending platform and its setup.
 - The authoring tool stores the text as typed (trimmed on export).
 - **Settled form:** facet ids (`category.name`: lower-case letters, digits, hyphens) joined with ` + `, meaning *and*, e.g. `region.us-ca-gb + subscription.not-paying`. `parseRuleset()` in `../render/render.js` recognises it; anything else is unsettled free text. The preview understands both (see *Preview as* below).
-- Before a platform template is built, each free-text ruleset is **settled** into **facets**, in a conversation between Claude and the person: canned, approved conditions per category (region, subscription, behaviour), combined with ` + `, e.g. `region.us-ca-gb + subscription.not-paying`. The render layer uses only settled rulesets. An unsettled one is a hard error for the template, never an unconditional block. *(Not built. See the render layer spec, **Audiences**.)*
+- Before an email is sent, each free-text ruleset is **settled** into **facets**, in a conversation between Claude and the person: canned, approved conditions per category (region, subscription, behaviour), combined with ` + `, e.g. `region.us-ca-gb + subscription.not-paying`. `check` warns about an unsettled ruleset (`ruleset_unsettled`); converting markers into platform conditions stops on one. *(The settling and conversion procedures come in step 6. See the render layer spec, **Audiences**.)*
 - No `ruleset`: the block goes to everyone.
 
 ### Switch groups
@@ -193,17 +193,15 @@ Semantics:
 6. `hidden` on a case removes just that case. A hidden fallback means no fallback.
 7. The `switch` value is only a label, unique per group within the document. The tool generates `s1`, `s2`, … and never shows it.
 
-The render layer outputs a group as one conditional chain in the platform's syntax. For Iterable:
+In the HTML for sending (`renderHtml`), a group becomes one marked chain:
 
-```handlebars
-{{#if <condition for b7>}}
-  …b7…
-{{else}}
-  …b6…
-{{/if}}
+```html
+<!--audience if="users in US, CA, GB. not a paying subscriber"-->  …b7…
+<!--audience else-->                                               …b6…
+<!--audience end-->
 ```
 
-It adds a `{{else if …}}` for each further case, and omits `{{else}}` when there's no fallback.
+Further cases with a ruleset add `<!--audience elseif="…"-->`, and a group with no fallback has no `else`. A single block with a ruleset is `if` … `end`. When the email is pushed, Claude replaces the markers with the platform's own conditionals (for Iterable, Handlebars), built from the facets' approved conditions.
 
 ## The authoring tool
 
@@ -216,6 +214,7 @@ It adds a `{{else if …}}` for each further case, and omits `{{else}}` when the
 - **Validation is advisory, and shared.** The Validation panel shows `check()` from `../render/render.js`: the same list agents get from `node render/check.js` (see [The render layer](#the-render-layer)). Errors show inline next to the field and mark the block; warnings are listed in grey. Nothing ever blocks export.
 - **Live preview.** Every change re-renders the email with `renderPreview()` into a sandboxed `<iframe srcdoc>`, scaled to fit the panel, with a Desktop/Mobile width toggle. Hidden blocks are left out, and a block that can't render shows an inline error in its place.
 - **Preview as.** Above the preview, when the email has rulesets, a picker lists the facets in use, one row per category, and each unsettled ruleset as a whole. Ticks say what the imagined recipient matches. A block shows when it has no ruleset, when all its facets are ticked, or when its unsettled text is ticked; a switch group shows its first matching case. Ticks are view state only (never saved), and the note under the preview says who it's showing. It tests nothing: real matching happens in the platform.
+- **Copy HTML** (preview panel) copies `renderHtml()`'s output, or downloads it if the clipboard is blocked: every block that isn't hidden, audiences as `<!--audience …-->` markers. An email without rulesets can be pasted into a sending platform as it is; one with audiences needs its markers converted first (normally by Claude). Validation errors block it.
 - **`serialise()`** builds the exported document: top-level keys as above, `data` keys in `weight` order, numeric strings from `integer`/`float` fields converted to numbers, block-level keys as described above. Validation and the preview both run on its output.
 - **Nothing unknown is lost.** A block whose `blockType` has no schema shows as a read-only placeholder and is written back out untouched (it's still a `check` error, since it can't be rendered). Block-level keys the tool doesn't recognise are kept too. Opening a newer document in an older copy of the tool and saving must never destroy content.
 - **Persistence:** every change autosaves to `localStorage` under `email-block-composer/doc`. That's crash protection only: the `.json` file is the real format. `docText()` writes it: 2-space indent, the tool's key order, a trailing newline.
@@ -236,13 +235,13 @@ Plain ES modules in `../render/`, with no dependencies. They run unchanged in th
 
 | File | What it is |
 |---|---|
-| `registry.js` | Every block type (`templates`), theme (`themes`, `defaultTheme`) and, later, flavor. Adding one means adding it here. Also `schemaUrl()` and `loadSchemas()`. |
-| `render.js` | `check(doc, {schemas, theme})`, `renderPreview(doc, {schemas, theme, as})` (`as`: facet ids, settled rulesets or unsettled ruleset texts the recipient matches), `parseRuleset()` and `audienceOptions()` (what *Preview as* offers). |
+| `registry.js` | Every block type (`templates`) and theme (`themes`, `defaultTheme`). Adding one means adding it here. Also `schemaUrl()` and `loadSchemas()`. |
+| `render.js` | `check(doc, {schemas, theme})`, `renderHtml(doc, {schemas, theme})` (the email for sending, with audience markers; throws on `check` errors), `renderPreview(doc, {schemas, theme, as})` (`as`: facet ids, settled rulesets or unsettled ruleset texts the recipient matches), `parseRuleset()` and `audienceOptions()` (what *Preview as* offers). |
 | `html.js` | The `html` tagged template (escapes every value unless wrapped in `raw()`), plus `safeUrl`, `fit`, `altText` and `paragraphs`. |
 | `blocks/<blockType>.js` | One template per block type: `(data, style, theme)` → one table row. |
 | `themes/<name>/theme.js` | A theme: `label`, `styles`, `imageSide`, `dateFormat`, `shell()`. |
 | `themes/shell.js` | The email-safe outer document both themes use, plus `row()` and the width constants. |
-| `check.js`, `preview.js` | Node wrappers for agents: print `check()` as JSON; write `renderPreview()` HTML. |
+| `check.js`, `preview.js`, `email.js` | Node wrappers: print `check()` as JSON; write `renderPreview()` HTML; write `renderHtml()` HTML (issues to stderr and exit 1 on errors). |
 
 **Rendering one block:** a missing or empty field takes its schema `default`, and fields the schema doesn't know are ignored. Numeric strings become numbers and `date` fields are formatted with the theme's `dateFormat`. Then the theme resolves `(blockType, variant)` to a style, and a variant it doesn't style renders as `primary` with a warning. The template gets the data (with `variant` set to the one actually used), that style and the theme.
 
@@ -265,6 +264,10 @@ Plain ES modules in `../render/`, with no dependencies. They run unchanged in th
 | `variant_unstyled` | warning | The theme doesn't style this variant; it renders as `primary`. |
 | `ruleset_empty` | warning | A non-final switch case matches everyone. |
 | `next_id` | warning | `nextId` isn't above every existing id. |
+| `ruleset_unsettled` | warning | A ruleset is still free text; it must be settled into facets before sending. |
+| `facet_category_repeated` | error | Two facets from one category in one ruleset. |
+
+**HTML for sending** (`renderHtml`): every block that isn't hidden, audiences as `<!--audience if|elseif="…"-->` / `<!--audience else-->` / `<!--audience end-->` comments (ruleset text HTML-escaped, `--` as entities), and every `{` in content, subject and preheader written as `&#123;` so templating languages can't read authored text as a tag. No platform syntax: see *Switch groups* above for the markers and who converts them.
 
 ## Changing block types
 
@@ -303,4 +306,4 @@ Set `"deprecated": true` on the schema and bump `version`. Keep it in the regist
 | Document format, schema keywords, evolution rules, the tool | `../completed/serverless-email-authoring-tool.md` |
 | The block library and field conventions | `../completed/email-block-library.md` |
 | `hidden`, `ruleset`, switch groups | `../completed/block-segmentation.md` |
-| Rendering, themes, output flavors, conditions for rulesets | `../specs/render-layer-tool.md` |
+| Rendering, themes, audience markers, settling rulesets into facets | `../specs/render-layer-tool.md` |

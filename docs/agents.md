@@ -16,7 +16,7 @@ Everything an agent needs to draft or change an email document. You don't need t
   "nextId": 4,
   "blocks": [
     { "id": "b1", "blockType": "content_feature_header", "data": { "heading": "New This Week", "feature_type": "sleep" } },
-    { "id": "b2", "blockType": "button", "switch": "s1", "ruleset": "users in US, CA, GB. not a paying subscriber",
+    { "id": "b2", "blockType": "button", "switch": "s1", "ruleset": "region.us-ca-gb + subscription.not-paying",
       "data": { "text": "Start your free trial", "link": "https://www.calm.com/trial" } },
     { "id": "b3", "blockType": "button", "switch": "s1", "data": { "text": "Open tonight's story", "link": "https://www.calm.com/sleep" } }
   ]
@@ -52,6 +52,7 @@ Each block's fields are defined by its schema, `blocks/<blockType>.json`. Read o
 
 - `"hidden": true`: the block stays in the document but is never sent. Use it for a block the copy has nothing for yet.
 - `"ruleset": "…"`: free text, in the copy's own words, saying who sees the block ("US only", "paying subscribers"). Copy it across as written; don't turn it into code. No `ruleset` means everyone.
+  Once settled with the person, a ruleset becomes facet ids joined with ` + ` (`region.us-ca-gb + subscription.not-paying`). Don't settle one or invent facets on your own; `check` warns about unsettled rulesets (`ruleset_unsettled`), which is normal while drafting.
 - **Switch group:** adjacent blocks with the same `"switch"` value (`s1`, `s2`, …). Each recipient sees the first case whose ruleset matches. A last case without a `ruleset` is the fallback for everyone else. Keep a group's blocks next to each other.
 
 ## Making a change
@@ -75,6 +76,14 @@ Each block's fields are defined by its schema, `blocks/<blockType>.json`. Read o
 The person may also be editing the same file in the editor, which saves every change straight to it. So **read the file again before each change** rather than relying on an earlier read, and write it in one go. A half-written file is harmless: the editor waits until it parses.
 
 Hidden blocks aren't checked, so an empty hidden block is fine.
+
+## The HTML for sending
+
+```
+node render/email.js campaign.json > /tmp/email.html
+```
+
+This writes the email's HTML with every hidden block left out and each audience wrapped in `<!--audience …-->` markers. It never contains a sending platform's syntax; converting the markers is a separate step when pushing. Like `check`, it stops on errors.
 
 ## Looking at it yourself (rarely)
 

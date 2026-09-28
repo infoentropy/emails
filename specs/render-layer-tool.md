@@ -26,9 +26,10 @@ Later specs change earlier ones. This one overrides:
 | No "view as segment" preview, since the editor can't evaluate free-text rulesets. | `../completed/block-segmentation.md`, **Switch groups in the authoring tool** | A **"preview as" picker** where the author chooses which rulesets count as true. It still evaluates nothing, so the platform remains the only real test of the logic. |
 | Block ids are derived as highest + 1, so an id can be reused after the last block is deleted, and ids aren't stable. | `../completed/serverless-email-authoring-tool.md`, **Block instance ids** | **Ids are never reused**, and the editor shows them. The document stores the next id (see **Working with agents**). |
 | Each ruleset's text gets its own AI-written condition ("translation"), cached by exact text, stored inside or next to the document. | `../completed/block-segmentation.md`, **Translation: ruleset → conditional** | Rulesets are **settled into facets**, reusable approved conditions, in a conversation with the person. The facet library lives in a private campaign repo (see **Audiences** and **Campaign storage**). |
+| The render layer writes the platform's own conditional syntax ("output flavors"). | `../completed/block-segmentation.md`, **Evaluation**, and earlier drafts of this spec | The render layer stays **platform-neutral**: audiences become `<!--audience …-->` markers in plain HTML, and Claude replaces them with the platform's conditions when pushing (see **Audience markers**). Vendor code never enters the render layer. |
 | Validation lives inside the editor page. | same spec, **Validation** | Validation moves into the shared `check`, used by the editor and by agents. It stays advisory. |
 
-Everything else in those specs stands: content-only blocks, `variant`, schema evolution, `hidden` / `ruleset` / `switch` semantics, output flavors, and the principle that a person approves every condition before it's used (the "translation" step, now **Audiences: settling rulesets into facets**).
+Everything else in those specs stands: content-only blocks, `variant`, schema evolution, `hidden` / `ruleset` / `switch` semantics, and the principle that a person approves every condition before it's used (the "translation" step, now **Audiences: settling rulesets into facets**).
 
 ## Hosting
 
@@ -61,15 +62,15 @@ A new optional top-level key, next to `subject` and `preheader`:
 One dependency-free JavaScript module, `render/render.js`, that runs unchanged in the browser and under Node. It exposes a check and two render functions sharing the same per-block rendering:
 
 ```js
-check(document, { schemas, theme, flavor, facets })                 // → list of issues (see Working with agents)
-renderPreview(document, { schemas, theme, as })                      // → plain HTML for the preview pane
-renderTemplate(document, { schemas, theme, flavor, facets })        // → a template for the sending platform
+check(document, { schemas, theme })          // → list of issues (see Working with agents)
+renderPreview(document, { schemas, theme, as }) // → plain HTML for the preview pane, for one imagined recipient
+renderHtml(document, { schemas, theme })     // → the email's HTML for sending, audiences as markers
 ```
 
 - `schemas` are the block schemas, loaded by the caller with `registry.loadSchemas(readJson)`: a `fetch` in the browser, a file read in Node.
 - `theme` defaults to the document's `theme`.
-- **`renderPreview`** resolves audience logic locally, from the author's "preview as" choice (`as`: the facet ids, and unsettled ruleset texts, the imagined recipient matches). It emits no platform syntax and needs no facet library, so steps 3 to 5 work before any AI or platform is involved.
-- **`renderTemplate`** wraps blocks in the flavor's conditional syntax, using the approved conditions of each ruleset's facets (see **Audiences**). This is what goes to Iterable.
+- **`renderPreview`** resolves audience logic locally, from the author's "preview as" choice (`as`: the facet ids, and unsettled ruleset texts, the imagined recipient matches). It needs no facet library, so it works before any AI or platform is involved.
+- **`renderHtml`** renders every block that isn't hidden, and wraps audiences in neutral `<!--audience …-->` markers (see **Audience markers**). It knows no platform. It throws while `check` finds any error.
 - Neither function does I/O or calls an AI. The caller loads the files.
 
 Claude runs the same module under Node, fetched from the hosted site or from a checkout of this repo, so its output matches the editor's. That settles the plugin's worry about its copy of the renderer drifting from this repo.
@@ -94,7 +95,7 @@ Finally, the rendered blocks go into the theme's shell.
 
 One module per block type, `render/blocks/<blockType>.js`, exporting a function from `(data, style, theme)` to one table row of markup. Templates are written with an `html` tagged template literal (in `render/html.js`) that **escapes every interpolated value by default**. That gives the same autoescaping safety as Jinja2 without a dependency, and anything already safe (converted markdown, the rendered block list) is passed through explicitly with `raw()`. Only `http(s)` URLs are written into `href` and `src`.
 
-The escaper also applies the flavor's own escaping in `renderTemplate`, so a literal `{{` in copy can't become an Iterable tag. `renderPreview` escapes HTML only.
+`renderHtml` also writes every `{` in content, subject and preheader as `&#123;`. It renders the same in any email, but templating languages (Handlebars and the like) can't read authored text as a tag, whichever platform the HTML ends up in.
 
 Markup follows the repo's email conventions (table layout, inline styles, MSO conditionals; see `../CLAUDE.md`).
 
@@ -112,7 +113,7 @@ Themes can also add assets (e.g. background images) under their directory, refer
 
 ### Registry
 
-A static site can't list a directory, so `render/registry.js` names everything available: the block types (each has a schema in `../blocks/` and a template in `render/blocks/`), the themes, the default theme, and the flavors. Adding a block type, theme or flavor means adding one line there. This keeps templates, themes and flavors code-defined, the same way block schemas are.
+A static site can't list a directory, so `render/registry.js` names everything available: the block types (each has a schema in `../blocks/` and a template in `render/blocks/`), the themes and the default theme. Adding a block type or theme means adding one line there. This keeps templates and themes code-defined, the same way block schemas are.
 
 ### Disk layout
 
@@ -121,16 +122,16 @@ blocks/<blockType>.json            schemas (unchanged)
 authoring/index.html               editor + preview pane
 docs/agents.md                     the one page agents read
 render/
-  render.js                        check, renderPreview, renderTemplate
+  render.js                        check, renderPreview, renderHtml
   html.js                          html/raw and small markup helpers
   check.js                         Node wrapper: prints check's issues as JSON
   preview.js                       Node wrapper: writes renderPreview's HTML
-  registry.js                      block types, themes, default theme, flavors, schema loading
+  email.js                         Node wrapper: writes renderHtml's HTML (for sending)
+  registry.js                      block types, themes, default theme, schema loading
   package.json                     { "type": "module" } only, so Node treats render/ as ES modules
   blocks/<blockType>.js            one template per block type
   themes/shell.js                  the email shell the current themes share
   themes/<name>/theme.js           styles, imageSide, dateFormat, shell
-  flavors/<name>.js                conditional wrapping + syntax escaping per platform
 ```
 
 ## The editor
@@ -180,14 +181,14 @@ Agents (Claude in the plugin, or Claude Code) do the first draft and many small 
 ```
 
 - It covers everything the editor's validation covers today (`required`, `type`, `enum`, `format`), plus split switch groups, empty rulesets on non-final cases, an unknown `blockType`, an unknown `theme`, variants the theme doesn't style, and a trial render of every block that isn't hidden.
-- With a `flavor` and `facets`, it also checks rulesets against the facet library (see **Audiences**). So a clean `check` guarantees `renderTemplate` won't fail.
+- It also checks each ruleset on its own terms: still free text (`ruleset_unsettled`, a warning) or two facets from one category (`facet_category_repeated`, an error). Whether facets exist and are approved is checked by Claude against `facets.json` when pushing, since the render layer never reads the facet library.
 - `block` and `field` pin each issue to one place, so the fix is a targeted edit. `code` is stable and machine-readable. `message` is for people.
 - Hidden blocks aren't checked, as now.
 
-Agents run it through a thin Node wrapper (`render/preview.js` is the only other one, for the milestone screenshots below):
+Agents run it through a thin Node wrapper (the others are `render/preview.js`, for the milestone screenshots below, and `render/email.js`, for sending):
 
 ```
-node render/check.js campaign.json [--flavor iterable]
+node render/check.js campaign.json
 ```
 
 It prints the list as JSON and exits non-zero if there are errors. Warnings alone don't fail it.
@@ -227,20 +228,30 @@ The audience logic can only be trusted once it has run in the platform, against 
 So Claude does this part, in the plugin (Skill C) or in Claude Code with an Iterable API key in its environment:
 
 1. **Settle audiences:** turn each free-text ruleset into facets, with the author, in conversation (see **Audiences**).
-2. **Render** with `renderTemplate` under Node.
-3. **Push** the template to Iterable through its template API, and **send proofs** to test users, or point the author at Iterable's preview with test user data. Confirm the exact endpoints against Iterable's API docs.
+2. **Render** the email's HTML with `node render/email.js campaign.json`, audiences as markers.
+3. **Convert** the markers into Iterable's conditions, using each facet's approved condition from `facets.json` (see **Audience markers**). This is the only place Iterable syntax is written.
+4. **Push** the template to Iterable through its template API, and **send proofs** to test users, or point the author at Iterable's preview with test user data. Confirm the exact endpoints against Iterable's API docs.
 
 This is only needed after the rulesets change, not after every copy edit.
 
-**Fallback without Claude:** the editor has a "Copy template" action that runs `renderTemplate` and copies the result for pasting into Iterable's template editor. It works only once every ruleset in the document is settled and the editor can read the facet library (which needs folder access; see **Campaign storage**). For a document without rulesets it always works.
+**Without Claude:** the editor's **Copy HTML** copies `renderHtml`'s output. An email with no rulesets can be pasted into Iterable as it is. One with audiences carries markers, which someone (normally Claude) must convert first.
 
-## Output flavors
+## Audience markers
 
-The rendered template goes to the platform as a template, not as final HTML, so anything decided per recipient at send time is written in the platform's own syntax.
+The render layer never writes a sending platform's syntax: vendor conditionals get complicated quickly (and differently per platform), and would bloat shared code that the editor also loads. `renderHtml` marks audiences with neutral HTML comments instead, and Claude converts them when pushing.
 
-- **Iterable** is the first flavor: Handlebars as Iterable implements it, with Iterable's helpers. SendGrid should follow as its own flavor. It's also Handlebars-based but its helpers differ, so "Handlebars" alone doesn't identify a flavor.
-- A flavor owns how conditionals wrap blocks, and **escaping its own syntax** in content. The conditions themselves come from the facet library (see **Audiences**).
-- The document never names a flavor. The same document renders for any flavor.
+```html
+<!--audience if="region.us-ca-gb + subscription.not-paying"-->   …trial button row…
+<!--audience elseif="subscription.paying"-->                     …thanks button row…
+<!--audience else-->                                             …fallback row…
+<!--audience end-->
+```
+
+- A block with a `ruleset` becomes `if` … `end`. A switch group becomes one chain: its first case with a ruleset is `if`, later ones `elseif`, and a case without a ruleset is `else` and ends the chain (anything after it could never show). A switch whose first case has no ruleset renders just that case, unmarked.
+- Hidden blocks are left out. The ruleset text goes into the marker as-is, HTML-escaped and with `--` written as entities so it can't end the comment.
+- The markers are valid HTML comments, so the file also opens in a browser (every version shows at once there).
+- **Converting** is a procedure Claude follows, documented in `../docs/agents.md` in step 6: replace each marker with the platform's conditionals, built from the facets' approved conditions in `facets.json`. For Iterable, **and** across facets is nesting, and `elseif` is a nested chain in the `{{else}}` of the previous test. A marker whose ruleset isn't settled into approved facets stops the push.
+- The document never names a platform, and neither does the HTML. A second platform needs only its own conversion notes and `facets.json` conditions.
 
 ## Audiences: settling rulesets into facets
 
@@ -273,7 +284,7 @@ In the private campaign repo (see **Campaign storage**), one folder per sending 
       "us-ca-gb": {
         "description": "Country is US, Canada or the UK.",
         "fields": ["country"],
-        "condition": "…Iterable code; exact form settled in step 5…",
+        "condition": "…the facet's Iterable test; form written up in step 6…",
         "approved": "2026-09-28",
         "examples": ["users in US, CA, GB", "US/Canada/UK folks"]
       }
@@ -314,8 +325,8 @@ Rules that keep the library consistent:
 ### Rendering and checking
 
 - **`renderPreview`** needs no library. The "preview as" picker shows the document's facets grouped by category, and a block shows when all its facets are ticked. Unsettled rulesets appear as whole-ruleset checkboxes, as now.
-- **`renderTemplate`** combines a ruleset's facet conditions with **and**, which is nesting in Handlebars. For a switch group, each case's **else** leads on to the remaining cases. The exact output depends on the shape of Iterable's conditions, which step 5 settles.
-- **`check`** warns about an unsettled ruleset (`ruleset_unsettled`). With the facet library loaded, it reports an unknown or unapproved facet (`unknown_facet`) and two facets from one category in a ruleset (`facet_category_repeated`) as errors. The renderer never calls an AI.
+- **`renderHtml`** writes each settled ruleset into its `<!--audience …-->` marker (see **Audience markers**). Turning the facets into the platform's conditions happens when Claude pushes, from the facets' approved conditions.
+- **`check`** warns about an unsettled ruleset (`ruleset_unsettled`) and reports two facets from one category (`facet_category_repeated`) as an error. It doesn't read the facet library; when pushing, Claude checks every facet exists in `facets.json` and is approved, and stops otherwise. The renderer never calls an AI.
 
 ## Campaign storage
 
@@ -333,7 +344,7 @@ email-campaigns/
 - Git gives every agent edit a reviewable, revertible diff.
 - The editor opens `campaigns/….json` with **File sync**. The private repo doesn't need Pages.
 - Agents run this repo's `render/check.js` and `render/preview.js` against those files: from a checkout of this repo alongside the campaign repo, or fetched from the hosted site.
-- The editor reads one file at a time, so it can't see `facets.json`. Until it can open the whole campaign folder (Chrome/Edge, a later extension of **File sync**), templates with audiences come from Claude, and "Copy template" covers emails without rulesets.
+- The editor reads one file at a time and never needs `facets.json`: its preview and **Copy HTML** work from the document alone. The facet library matters only when Claude settles rulesets and converts markers.
 
 ## Themes and variants
 
@@ -358,7 +369,7 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
 
 ## Open questions
 
-- **The exact Iterable form of a facet's condition** (a wrapping block helper, or an expression usable in an else-if), and whether Iterable can combine conditions in one place. It decides how nesting and switch groups render (see **Audiences**). To confirm against Iterable's Handlebars reference in step 5.
+- **The exact Iterable form of a facet's condition**, and how conversion combines them (nesting for **and**, else-chains for switch groups). It's now part of the step 6 agent procedure, not code, and the first proof send confirms it.
 - **Behavioural facets** ("played a Sleep Story in the last 30 days") can only use what Iterable can evaluate at send time: a user field, possibly precomputed, or list membership. Which ones exist is for `fields.md` to say.
 - **Should review flag an audience left with no blocks?** The "preview as" picker makes such an audience visible by hand; review could catch it automatically. (Carried over.)
 - **Theme vs. `feature_type`.** "Anxiety theme vs. sleep theme" overlaps with `content_feature_header.feature_type` (`meditate` / `sleep`), which the library spec says a theme keys its visuals off. Is the category content (a field), the look (a theme), or both, with the theme free to use the field?
@@ -375,8 +386,8 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
    - `docs/agents.md`.
 3. **File sync.** *Done.* Open file and Save as… attach; edits autosave to the file; outside changes reload; invalid files and conflicts are handled as in **File sync**.
 4. **"Preview as".** *Done.* Add the picker to the editor: facets grouped by category for settled rulesets, whole-ruleset checkboxes for unsettled ones, and facet-aware matching in `renderPreview` (a block shows when all its facets are ticked). `renderPreview` already resolves free-text `rulesets` and switch groups, and `preview.js --as` exposes it.
-5. **Iterable flavor.** Add `renderTemplate`, the Iterable flavor, facet parsing and checks in `check` (`ruleset_unsettled`, `unknown_facet`, `facet_category_repeated`), and the "Copy template" action.
-6. **Claude + Iterable.** Set up the private campaign repo, the settling conversation (as a documented agent procedure), then push and send proofs through Iterable's API.
+5. **Sendable HTML with audience markers.** *Done.* `renderHtml` (markers, hidden blocks left out, `{` escaped), `render/email.js`, `ruleset_unsettled` and `facet_category_repeated` in `check`, and the editor's **Copy HTML**. (An earlier draft wrote Iterable syntax from a flavor module; replaced, see **Audience markers**.)
+6. **Claude + Iterable.** Set up the private campaign repo; document the settling conversation and the marker conversion as agent procedures; then push and send proofs through Iterable's API.
 
 `../CLAUDE.md`, `../docs/blocks.md` and `../docs/agents.md` are updated in the same change as each step that alters what they describe (hosting, the `theme` and `nextId` keys, the renderer, `check`).
 
@@ -386,4 +397,4 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
 
 ## Status
 
-Steps 1 to 4 are done. Next is step 5, which first needs the open question on the exact Iterable form of a facet's condition answered from Iterable's Handlebars reference (not reachable from the environment these steps were built in, so it needs someone with access, or a pasted excerpt).
+Steps 1 to 5 are done. Next is step 6: the private campaign repo, the settling and marker-conversion procedures, and pushing to Iterable (which needs an Iterable API key in Claude's environment, and network access to Iterable).

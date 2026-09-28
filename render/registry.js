@@ -1,4 +1,4 @@
-// Everything the tools know about. Adding a block type, theme or flavor means adding it here.
+// Everything the tools know about. Adding a block type or theme means adding it here.
 import article from "./blocks/article.js";
 import button from "./blocks/button.js";
 import content_feature_header from "./blocks/content_feature_header.js";
