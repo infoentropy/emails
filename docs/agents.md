@@ -81,7 +81,7 @@ Hidden blocks aren't checked, so an empty hidden block is fine.
 Only at milestones: after a first draft, or when trying a new theme. Never after routine edits.
 
 ```
-node render/preview.js campaign.json [--theme sleep] [--as "users in US, CA, GB. not a paying subscriber"] > /tmp/preview.html
+node render/preview.js campaign.json [--theme sleep] [--as region.us-ca-gb --as subscription.not-paying] > /tmp/preview.html
 ```
 
-Each `--as` treats one ruleset as matching. Take one screenshot of the file with a headless browser, if your environment has one, rather than reading the HTML.
+Each `--as` is something the imagined recipient matches: a facet id, a whole settled ruleset, or an unsettled ruleset's exact text. Without `--as`, you see what someone matching no ruleset gets. Take one screenshot of the file with a headless browser, if your environment has one, rather than reading the HTML.

@@ -115,6 +115,19 @@ pre{margin:0;padding:0 14px 14px;font:12.5px/1.55 var(--mono);white-space:pre;ov
 .pv-view{margin:0 14px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);
          overflow:auto;max-height:calc(100vh - 330px);min-height:240px}
 .pv-box{margin:0 auto;overflow:hidden}
+.pv-as{margin:0 14px 10px;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);
+       display:grid;grid-template-columns:minmax(0,1fr);gap:7px;font-size:13px}
+.as-head{font-weight:600}
+.as-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.as-cat{font:600 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:92px}
+.chk{display:inline-flex;gap:5px;align-items:center;padding:3px 8px;border:1px solid var(--line-strong);border-radius:999px;
+     background:var(--surface);cursor:pointer;font:13px/1.3 var(--sans);letter-spacing:0;text-transform:none;color:var(--ink);max-width:100%;
+     white-space:nowrap;flex:0 0 auto}
+.chk.free{flex:0 1 auto;min-width:0}
+.chk span{overflow:hidden;text-overflow:ellipsis;min-width:0}
+.chk:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.chk input{margin:0;width:auto;padding:0;flex:none}
+.chk.free{font-style:italic}
 .pv-box iframe{display:block;border:0;background:#fff;transform-origin:0 0}
 details.panel summary{cursor:pointer;list-style:none;padding:12px 14px}
 details.panel summary h2{display:inline;padding:0;margin:0}
@@ -167,10 +180,11 @@ details.panel[open] summary::after{content:" ▾"}
           <button id="pv-mobile" aria-pressed="false">Mobile</button>
         </div>
       </div>
+      <div class="pv-as" id="pv-as" hidden></div>
       <div class="pv-view" id="pv-view"><div class="pv-box" id="pv-box">
         <iframe id="pv" title="Email preview" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
       </div></div>
-      <div class="note" style="padding-top:8px">Shows what someone matching none of the rulesets gets. Hidden blocks are left out.</div>
+      <div class="note" style="padding-top:8px" id="pv-note">Hidden blocks are left out.</div>
     </div>
     <details class="panel">
       <summary><h2>Document</h2></summary>
@@ -208,7 +222,7 @@ const SAMPLE = {
       body:"Every story is narrated just below resting heart rate.\n\nIt is slower than feels natural to read aloud — which is the point.",
       image:"https://assets.example.com/sleep/studio.jpg",image_alt:"A recording booth lit by a single warm lamp",
       image_width:800,image_height:500}},
-    {id:"b6",blockType:"button",switch:"s1",ruleset:"users in US, CA, GB. not a paying subscriber",
+    {id:"b6",blockType:"button",switch:"s1",ruleset:"region.us-ca-gb + subscription.not-paying",
       data:{text:"Start your free trial",link:"https://www.calm.com/trial",variant:"primary"}},
     {id:"b7",blockType:"button",switch:"s1",
       data:{text:"Open tonight's story",link:"https://www.calm.com/sleep",variant:"primary"}}
@@ -645,19 +659,59 @@ function refreshLive(){
   }
   if(issues.length) box.append(list);
   else box.append(el("div","ok","Everything checks out. Validation never blocks export — a half-finished email still saves."));
+  renderAsPicker(out);
   schedulePreview(out);
 }
 
 // ---- preview: renderPreview() into a sandboxed iframe, scaled to fit the panel ----
 const PREVIEW_WIDTH = {desktop:640, mobile:375};
 let previewMode = "desktop", previewTimer = null;
+const previewAs = new Set();   // facet ids and unsettled ruleset texts ticked in "Preview as"; view state only
 
 function schedulePreview(out){
   clearTimeout(previewTimer);
   previewTimer = setTimeout(() => {
-    const htmlText = R.renderPreview(out, {schemas:SCHEMAS});
+    const htmlText = R.renderPreview(out, {schemas:SCHEMAS, as:[...previewAs]});
     document.getElementById("pv").srcdoc = htmlText.replace(/<head>/i, '<head><base target="_blank">');
   }, 120);
+  const who = [...previewAs];
+  document.getElementById("pv-note").textContent =
+    (who.length ? "Showing someone who matches: " + who.join(", ") + "." : "Showing someone who matches none of the rulesets.") +
+    " Hidden blocks are left out.";
+}
+
+// "Preview as": the facets in use, a row per category, and unsettled rulesets as whole checkboxes.
+// Ticking says what the imagined recipient matches; a block shows when all its facets are ticked.
+function renderAsPicker(out){
+  const host = document.getElementById("pv-as");
+  const opts = R.audienceOptions(out);
+  const keys = new Set(opts.rulesets);
+  for(const [cat, names] of Object.entries(opts.facets)) for(const n of names) keys.add(cat + "." + n);
+  for(const k of [...previewAs]) if(!keys.has(k)) previewAs.delete(k);
+  host.hidden = keys.size === 0;
+  if(!keys.size){ host.replaceChildren(); return; }
+  const chip = (key, label, cls) => {
+    const l = el("label", cls);
+    const c = el("input"); c.type = "checkbox"; c.checked = previewAs.has(key);
+    c.addEventListener("change", () => { if(c.checked) previewAs.add(key); else previewAs.delete(key); schedulePreview(serialise()); });
+    l.title = key;
+    l.append(c, el("span", null, label));
+    return l;
+  };
+  const rows = [];
+  for(const [cat, names] of Object.entries(opts.facets)){
+    const r = el("div","as-row");
+    r.append(el("span","as-cat",cat), ...names.map(n => chip(cat + "." + n, n, "chk")));
+    rows.push(r);
+  }
+  if(opts.rulesets.length){
+    const r = el("div","as-row");
+    r.append(el("span","as-cat","not settled"),
+             ...opts.rulesets.map(t => chip(t, t, "chk free")));
+    rows.push(r);
+  }
+  host.replaceChildren(el("div","as-head","Preview as someone who matches"), ...rows,
+    el("div","help","This only picks which version to show. Whether a real recipient matches is decided in Iterable."));
 }
 
 function fitPreview(){
