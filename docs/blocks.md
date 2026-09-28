@@ -13,7 +13,7 @@ authoring tool  ──►  document (.json)  ──►  render layer + theme  �
 
 - **Block schemas** (`../blocks/*.json`) define the block types. They're JSON Schema documents with a few custom keywords.
 - **The authoring tool** (`../authoring/index.html`) is a static page, served by GitHub Pages at `https://infoentropy.github.io/emails/authoring/`. It loads the schemas, builds a form from them, previews the email live and exports the document.
-- **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. The preview and `check` exist. The platform template (Iterable conditionals, ruleset translation) is **not built yet**: where this page describes it, that's what it must do. Plan: `../specs/render-layer-tool.md`.
+- **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. The preview and `check` exist. The platform template (Iterable conditionals, writing conditions for rulesets) is **not built yet**: where this page describes it, that's what it must do. Plan: `../specs/render-layer-tool.md`.
 - **Agents** editing documents read `agents.md`, not this page.
 
 Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangement all belong to the theme, and never to the document. The single exception is image pixel dimensions (see [Field conventions](#field-conventions)).
@@ -170,7 +170,7 @@ Free text saying who sees the block, in the author's own words:
 
 - There's no grammar, and nothing in this repo knows which recipient attributes exist. Those depend on the sending platform and its setup.
 - The authoring tool stores the text as typed (trimmed on export) and doesn't parse it.
-- Before rendering, an AI translates each distinct ruleset into the platform's condition syntax, using context about the user's environment. A person reviews the translation, and the render layer uses only approved translations. A ruleset with no approved translation is a hard error, never an unconditional block. *(Not built. See the render layer spec.)*
+- Before a platform template is built, each free-text ruleset is **settled** into **facets**, in a conversation between Claude and the person: canned, approved conditions per category (region, subscription, behaviour), combined with ` + `, e.g. `region.us-ca-gb + subscription.not-paying`. The render layer uses only settled rulesets. An unsettled one is a hard error for the template, never an unconditional block. *(Not built. See the render layer spec, **Audiences**.)*
 - No `ruleset`: the block goes to everyone.
 
 ### Switch groups
@@ -301,4 +301,4 @@ Set `"deprecated": true` on the schema and bump `version`. Keep it in the regist
 | Document format, schema keywords, evolution rules, the tool | `../completed/serverless-email-authoring-tool.md` |
 | The block library and field conventions | `../completed/email-block-library.md` |
 | `hidden`, `ruleset`, switch groups | `../completed/block-segmentation.md` |
-| Rendering, themes, output flavors, ruleset translation | `../specs/render-layer-tool.md` |
+| Rendering, themes, output flavors, conditions for rulesets | `../specs/render-layer-tool.md` |
