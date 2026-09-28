@@ -10,7 +10,7 @@ Now that the authoring tool exists, wrap the whole pipeline in a Claude plugin, 
    1. Offers a series of options: what kind of email is this (e.g. weekly digest, single feature announcement, newsletter).
    2. Parses the copy doc into the authored-email JSON document (see `../completed/serverless-email-authoring-tool.md`) for the chosen option: blocks in order, each `data` filled to its schema in `../blocks/`.
 4. **Skill B: open the editor.** Opens the authoring tool (`../authoring/index.html`) loaded with Skill A's document. The user fixes typos and makes structural changes (reorder, add or drop blocks).
-5. **Skill C: test in Iterable.** Writes a condition for each ruleset, has the user review them, renders the platform template, pushes it to Iterable and sends proofs (`../specs/render-layer-tool.md`, **Testing in Iterable**). The visual review happens earlier, in the editor's live preview.
+5. **Skill C: test in Iterable.** Settles each ruleset into facets with the user, renders the platform template, pushes it to Iterable and sends proofs (`../specs/render-layer-tool.md`, **Testing in Iterable**). The visual review happens earlier, in the editor's live preview.
 
 ## Email types
 

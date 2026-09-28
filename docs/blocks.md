@@ -170,7 +170,7 @@ Free text saying who sees the block, in the author's own words:
 
 - There's no grammar, and nothing in this repo knows which recipient attributes exist. Those depend on the sending platform and its setup.
 - The authoring tool stores the text as typed (trimmed on export) and doesn't parse it.
-- Before rendering, an AI writes a **condition** for each distinct ruleset: the platform's code for it, using context about the user's environment. A person reviews each condition, and the render layer uses only approved ones. A ruleset with no approved condition is a hard error, never an unconditional block. *(Not built. See the render layer spec.)*
+- Before a platform template is built, each free-text ruleset is **settled** into **facets**, in a conversation between Claude and the person: canned, approved conditions per category (region, subscription, behaviour), combined with ` + `, e.g. `region.us-ca-gb + subscription.not-paying`. The render layer uses only settled rulesets. An unsettled one is a hard error for the template, never an unconditional block. *(Not built. See the render layer spec, **Audiences**.)*
 - No `ruleset`: the block goes to everyone.
 
 ### Switch groups
