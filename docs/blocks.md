@@ -216,7 +216,15 @@ It adds a `{{else if …}}` for each further case, and omits `{{else}}` when the
 - **Live preview.** Every change re-renders the email with `renderPreview()` into a sandboxed `<iframe srcdoc>`, scaled to fit the panel, with a Desktop/Mobile width toggle. It shows what someone matching no ruleset gets; hidden blocks are left out. A block that can't render shows an inline error in its place.
 - **`serialise()`** builds the exported document: top-level keys as above, `data` keys in `weight` order, numeric strings from `integer`/`float` fields converted to numbers, block-level keys as described above. Validation and the preview both run on its output.
 - **Nothing unknown is lost.** A block whose `blockType` has no schema shows as a read-only placeholder and is written back out untouched (it's still a `check` error, since it can't be rendered). Block-level keys the tool doesn't recognise are kept too. Opening a newer document in an older copy of the tool and saving must never destroy content.
-- **Persistence:** every change autosaves to `localStorage` under `email-block-composer/doc`. That's crash protection only: the `.json` file (via *Save as…* / *Copy JSON*) is the real format, and *Open file* / *Paste JSON* load one back in.
+- **Persistence:** every change autosaves to `localStorage` under `email-block-composer/doc`. That's crash protection only: the `.json` file is the real format. `docText()` writes it: 2-space indent, the tool's key order, a trailing newline.
+- **File sync** (Chrome and Edge, via the File System Access API). *Open file* and *Save as…* attach the editor to that file, shown in a bar under the toolbar:
+  - Every change is written to the file 400ms after the last edit.
+  - While the tab is visible, the file is checked every 1.5s (and on focus). A change made elsewhere, by an agent say, loads and re-renders. The editor never writes back just because it loaded, so an agent's formatting survives until the person edits.
+  - A file that isn't a valid document (caught mid-write, say) is left alone: nothing is written to it, edits here are kept, and the bar says why.
+  - If the file changes while edits here haven't been written yet, the editor asks which version wins.
+  - The file handle is kept in IndexedDB. After a reload the browser may need the person to click *Reconnect*. Then the file wins, unless edits were made here since the reload.
+  - *Disconnect* and *New* detach; the file is left as it is.
+  - In other browsers, *Open file* imports and *Save as…* downloads, as before. *Copy JSON* / *Paste JSON* work everywhere.
 - **Deprecated types can't be added.** `addableTypes()` filters `deprecated: true` schemas out of the palette and the add-case select. Everything else still uses `SCHEMAS` directly, so existing blocks of a deprecated type render and export as before.
 - **Structure in the UI:** `units()` splits the flat `blocks` array into plain blocks and switch groups. Groups move as one unit. A group can't be split from the UI, only by importing a document, and the *Regroup* fix then moves the cases back together.
 

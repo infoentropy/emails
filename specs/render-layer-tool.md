@@ -150,11 +150,13 @@ The authoring tool grows a preview pane next to the form:
 The editor can **open a file on disk and stay attached to it**, so a person and an agent can take turns on the same `campaign.json` without exporting and importing:
 
 - **Open file** uses the browser's file picker and keeps the file handle. Every change is autosaved to the file (debounced), as well as to localStorage.
-- The editor **watches the file** while the tab is visible, checking its modified time every second or two. When it changes on disk, the editor reloads it and re-renders the preview, so an agent's edit shows up without the person doing anything.
+- **Save as…** attaches too, to the file it just wrote.
+- The editor **watches the file** while the tab is visible, checking its modified time every second or two (1.5s, plus on focus). It compares the text with what it last read or wrote, so its own writes aren't mistaken for outside changes, and loading a file never writes it back. When it changes on disk, the editor reloads it and re-renders the preview, so an agent's edit shows up without the person doing anything.
 - **If the file on disk isn't valid JSON** (for example, caught mid-write), the editor keeps what it has, shows a notice, and doesn't write to the file until it parses again, so it never overwrites an agent's work with a stale copy.
 - **If both sides changed** (an edit is still waiting to autosave when the file changes on disk), the editor asks: take the file's version, or keep the editor's and overwrite the file.
-- The editor writes the same format as Save: 2-space indent, keys in the tool's order. A one-field change is a one-line diff.
-- The handle is remembered across reloads (stored in IndexedDB). The browser asks the person to confirm access again after a reload.
+- The editor writes the same format as Save: 2-space indent, keys in the tool's order, trailing newline. A one-field change is a one-line diff.
+- The handle is remembered across reloads (stored in IndexedDB). The browser may ask the person to confirm access again after a reload (a *Reconnect* button). Then the file wins, unless edits were made in the tab since the reload, in which case the editor asks.
+- **Disconnect** and **New** detach, leaving the file as it is. A file that disappears (moved, deleted) detaches with a message; the work stays in the editor.
 - This needs the File System Access API, which is **Chrome and Edge only**. Other browsers, and Claude environments without local files (chat), keep using Open/Save and paste, as now.
 
 ## Working with agents
@@ -285,7 +287,7 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
    - The preview pane (Desktop/Mobile), the document `theme` key and the theme picker.
    - `nextId`, so ids are never reused (ids were already shown in the editor).
    - `docs/agents.md`.
-3. **File sync.** Open a file, autosave to it, and reload when it changes on disk.
+3. **File sync.** *Done.* Open file and Save as… attach; edits autosave to the file; outside changes reload; invalid files and conflicts are handled as in **File sync**.
 4. **"Preview as".** Add the ruleset picker to the editor. (`renderPreview` already resolves `rulesets` and switch groups, and `preview.js --as` exposes it.)
 5. **Iterable flavor.** Add `renderTemplate`, the Iterable flavor, translation coverage in `check`, and the "Copy template" action.
 6. **Claude + Iterable.** Translate, review, push and send proofs through Iterable's API.
@@ -298,4 +300,4 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
 
 ## Status
 
-Design settled apart from the open questions above, none of which block steps 1 to 4. Steps 1 and 2 are done. Next is step 3.
+Design settled apart from the open questions above, none of which block steps 1 to 4. Steps 1 to 3 are done. Next is step 4.
