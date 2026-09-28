@@ -51,7 +51,7 @@ Each block's fields are defined by its schema, `blocks/<blockType>.json`. Read o
 ## Audiences: `hidden`, `ruleset`, `switch`
 
 - `"hidden": true`: the block stays in the document but is never sent. Use it for a block the copy has nothing for yet.
-- `"ruleset": "…"`: free text, in the copy's own words, saying who sees the block ("US only", "paying subscribers"). Copy it across as written; don't translate it into code. No `ruleset` means everyone.
+- `"ruleset": "…"`: free text, in the copy's own words, saying who sees the block ("US only", "paying subscribers"). Copy it across as written; don't turn it into code. No `ruleset` means everyone.
 - **Switch group:** adjacent blocks with the same `"switch"` value (`s1`, `s2`, …). Each recipient sees the first case whose ruleset matches. A last case without a `ruleset` is the fallback for everyone else. Keep a group's blocks next to each other.
 
 ## Making a change
