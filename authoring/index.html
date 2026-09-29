@@ -175,6 +175,7 @@ details.panel[open] summary::after{content:" ▾"}
     <div class="panel">
       <div class="phead">
         <h2>Preview</h2>
+        <button id="copy-html" class="txt" title="Copy the email's HTML for sending. Audiences are included as &lt;!--audience--&gt; markers, which become the platform's conditions when the email is pushed.">Copy HTML</button>
         <div class="seg" role="group" aria-label="Preview width">
           <button id="pv-desktop" aria-pressed="true">Desktop</button>
           <button id="pv-mobile" aria-pressed="false">Mobile</button>
@@ -782,6 +783,27 @@ async function saveAs(){
   flash("downloaded");
 }
 document.getElementById("save").addEventListener("click", saveAs);
+
+// The email's HTML for sending (renderHtml): audiences stay as <!--audience …--> markers, for Claude to turn
+// into the platform's conditions when pushing. Blocked by validation errors, like any send would be.
+document.getElementById("copy-html").addEventListener("click", async () => {
+  let text;
+  try { text = R.renderHtml(serialise(), {schemas:SCHEMAS}); }
+  catch(e){
+    if(!e.issues) throw e;
+    alert("Fix the errors in the Validation panel first; the email can't be built until they're gone.");
+    return;
+  }
+  try { await navigator.clipboard.writeText(text); flash("HTML copied"); }
+  catch(e){
+    const url = URL.createObjectURL(new Blob([text], {type:"text/html"}));
+    const a = document.createElement("a");
+    a.href = url; a.download = filename().replace(/\.json$/, "") + ".html";
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    flash("HTML downloaded");
+  }
+});
 
 document.getElementById("copy").addEventListener("click", async () => {
   const text = JSON.stringify(serialise(), null, 2);
