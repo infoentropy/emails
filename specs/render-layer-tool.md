@@ -344,6 +344,7 @@ email-campaigns/
 - Git gives every agent edit a reviewable, revertible diff.
 - The editor opens `campaigns/….json` with **File sync**. The private repo doesn't need Pages.
 - Agents run this repo's `render/check.js` and `render/preview.js` against those files: from a checkout of this repo alongside the campaign repo, or fetched from the hosted site.
+- **`campaign-repo-template/`** in this repo is a starter for that private repo: an example campaign that passes `check`, example `fields.md` and `facets.json`, a `CLAUDE.md` telling Claude sessions there where the tool is (`../emails`) and which procedures to follow, and a README for people.
 - The editor reads one file at a time and never needs `facets.json`: its preview and **Copy HTML** work from the document alone. The facet library matters only when Claude settles rulesets and converts markers.
 
 ## Themes and variants
@@ -387,7 +388,7 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
 3. **File sync.** *Done.* Open file and Save as… attach; edits autosave to the file; outside changes reload; invalid files and conflicts are handled as in **File sync**.
 4. **"Preview as".** *Done.* Add the picker to the editor: facets grouped by category for settled rulesets, whole-ruleset checkboxes for unsettled ones, and facet-aware matching in `renderPreview` (a block shows when all its facets are ticked). `renderPreview` already resolves free-text `rulesets` and switch groups, and `preview.js --as` exposes it.
 5. **Sendable HTML with audience markers.** *Done.* `renderHtml` (markers, hidden blocks left out, `{` escaped), `render/email.js`, `ruleset_unsettled` and `facet_category_repeated` in `check`, and the editor's **Copy HTML**. (An earlier draft wrote Iterable syntax from a flavor module; replaced, see **Audience markers**.)
-6. **Claude + Iterable.** Set up the private campaign repo; document the settling conversation and the marker conversion as agent procedures; then push and send proofs through Iterable's API.
+6. **Claude + Iterable.** *In progress.* Done: the settling and marker-conversion procedures in `docs/agents.md` (the conversion checked against the preview for sample recipients), and `campaign-repo-template/`. Remaining: setting up the real private campaign repo with real `fields.md`, and pushing and sending proofs through Iterable's API.
 
 `../CLAUDE.md`, `../docs/blocks.md` and `../docs/agents.md` are updated in the same change as each step that alters what they describe (hosting, the `theme` and `nextId` keys, the renderer, `check`).
 
@@ -397,4 +398,4 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
 
 ## Status
 
-Steps 1 to 5 are done. Next is step 6: the private campaign repo, the settling and marker-conversion procedures, and pushing to Iterable (which needs an Iterable API key in Claude's environment, and network access to Iterable).
+Steps 1 to 5 are done, and step 6's procedures and starter template are in place. What's left needs the user: a private campaign repo with the real Iterable fields, and for pushing, an Iterable API key in Claude's environment plus network access to Iterable. The first proof send also confirms the facet condition form.
