@@ -2,7 +2,21 @@
 
 A starting point for the **private** repo that holds your campaigns: the email documents, your Iterable fields, and the approved audience facets. The tool (editor, render layer, docs) stays in the public repo, [`infoentropy/emails`](https://github.com/infoentropy/emails). Keep content out of it: that repo is public and published on GitHub Pages.
 
+A live copy of this folder is published as the public example repo [`infoentropy/email-campaigns`](https://github.com/infoentropy/email-campaigns) (sample data only, no Iterable keys). Keep the two in step: when this folder changes, copy the change there.
+
 ## Set up
+
+**Quick way:** clone both repos side by side, detach the example from its history, and push it to a new private repo:
+
+```sh
+mkdir work && cd work
+git clone https://github.com/infoentropy/emails
+git clone https://github.com/infoentropy/email-campaigns my-campaigns
+cd my-campaigns && rm -rf .git && git init -b main
+gh repo create my-campaigns --private --source=. --push
+```
+
+Then do steps 4 to 6 below. (Don't fork the example: a fork of a public repo is public.) The manual way:
 
 1. **Create a private repo**, e.g. `email-campaigns`.
 2. **Copy this folder's contents** into it: `campaigns/`, `iterable/`, `CLAUDE.md`, `.gitignore` and this README.
