@@ -3,7 +3,7 @@
 A block-based email authoring tool. Emails are JSON documents made of content blocks. The tool previews them live in switchable themes, shows each audience's version, and produces email-safe HTML for your sending platform (Iterable first). People and Claude work on the same documents.
 
 - **The editor:** <https://infoentropy.github.io/emails/authoring/> (use Chrome or Edge to stay attached to a file on disk)
-- **Your campaigns** live in a separate **private** repo, never in this one: this repo is public and published on GitHub Pages. Start one from [`campaign-repo-template/`](campaign-repo-template/); its README walks through setup and a first email.
+- **Your campaigns** live in a separate **private** repo, never in this one: this repo is public and published on GitHub Pages. Start one from [`campaign-repo-template/`](campaign-repo-template/); its README walks through setup and a first email. A public, cloneable copy is at [`infoentropy/email-campaigns`](https://github.com/infoentropy/email-campaigns).
 
 ## How an email gets made
 
