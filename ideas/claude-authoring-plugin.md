@@ -45,7 +45,7 @@ The JSON document is the only thing passed between steps. Each skill reads it an
 - **Skill C depends on the render layer**, which isn't built yet (`../specs/render-layer-tool.md`). The renderer is a JavaScript module that runs under Node, and the skill can fetch it from the hosted site, so its copy can't drift from the editor's. It also needs Iterable API credentials in its environment.
 - **Theme selection:** the document records its theme. Should Skill A set it from the email type, or leave the default for the user to change in the editor?
 - **Relation to the existing campaign-strategy skill:** that skill covers the brief and the copywriting. This plugin could start where it stops, with its copy output as the "copy doc" input here.
-- **Packaging:** one plugin with three skills, or one skill with three stages? Separate skills let users rerun one step (re-render after editing) without restarting the whole flow.
+- **Packaging:** *settled.* The repo root is the plugin (`.claude-plugin/plugin.json`, listed by `.claude-plugin/marketplace.json`), with separate skills under `../skills/`: `email-document` (drafting and editing; Skill A's email types would go here), `settle-audiences` and `send-to-iterable` (Skill C, minus the API push), and `campaign-setup`. Separate skills let users rerun one step (re-render after editing) without restarting the whole flow.
 
 ## Prerequisites
 

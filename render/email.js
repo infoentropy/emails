@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // node render/email.js campaign.json [--theme NAME] > email.html
-// Writes the email's HTML for sending, with audiences as <!--audience …--> markers (see docs/agents.md).
+// Writes the email's HTML for sending, with audiences as <!--audience …--> markers (see skills/send-to-iterable/SKILL.md).
 // If the document has errors, prints check()'s issues as JSON to stderr and exits 1.
 import { readFileSync } from "node:fs";
 import { loadSchemas } from "./registry.js";

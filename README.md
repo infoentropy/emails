@@ -3,7 +3,13 @@
 A block-based email authoring tool. Emails are JSON documents made of content blocks. The tool previews them live in switchable themes, shows each audience's version, and produces email-safe HTML for your sending platform (Iterable first). People and Claude work on the same documents.
 
 - **The editor:** <https://infoentropy.github.io/emails/authoring/> (use Chrome or Edge to stay attached to a file on disk)
-- **Your campaigns** live in a separate **private** repo, never in this one: this repo is public and published on GitHub Pages. Start one from [`campaign-repo-template/`](campaign-repo-template/); its README walks through setup and a first email. A public, cloneable copy is at [`infoentropy/email-campaigns`](https://github.com/infoentropy/email-campaigns).
+- **The Claude plugin:** this repo is also a Claude plugin marketplace. In Claude Code:
+  ```
+  /plugin marketplace add infoentropy/emails
+  /plugin install emails@infoentropy
+  ```
+  Its skills: `email-document` (draft and edit), `settle-audiences`, `send-to-iterable`, and `campaign-setup`.
+- **Your campaigns** live in a separate **private** repo, never in this one: this repo is public and published on GitHub Pages. Ask Claude to set one up (`campaign-setup`), or start from [`skills/campaign-setup/template/`](skills/campaign-setup/template/); its README walks through setup and a first email. A public, cloneable copy is at [`infoentropy/email-campaigns`](https://github.com/infoentropy/email-campaigns).
 
 ## How an email gets made
 
@@ -17,11 +23,12 @@ A block-based email authoring tool. Emails are JSON documents made of content bl
 
 | Path | What it is |
 |---|---|
+| `.claude-plugin/` | The plugin manifest (`plugin.json`) and the marketplace that lists it (`marketplace.json`). |
+| `skills/` | The plugin's skills: the procedures Claude follows. `campaign-setup/template/` is the starter for your private campaign repo: example email, `fields.md`, `facets.json`, and a `CLAUDE.md` and `.claude/settings.json` that enable the plugin there. |
 | `authoring/` | The editor: one dependency-free page. |
 | `blocks/` | Block schemas: which content fields each block type has. |
 | `render/` | The render layer (browser and Node): `check`, the preview, the HTML for sending, block templates and themes. Commands: `check.js`, `preview.js`, `email.js`. |
-| `campaign-repo-template/` | A starter for your private campaign repo: example email, `fields.md`, `facets.json`, and `CLAUDE.md` for Claude sessions there. |
-| `docs/agents.md` | The guide Claude follows: editing documents, settling audiences, converting markers for Iterable. |
+| `docs/agents.md` | An index of the skills, for agents working without the plugin. |
 | `docs/blocks.md` | The developer guide: document format, block library, render layer, adding block types. |
 | `specs/`, `completed/`, `ideas/`, `feedback/` | How things were decided (see `CLAUDE.md`, **Project management**). |
 | `flipboard/`, `traction/`, `content/` | Older hand-written templates and sample data. |

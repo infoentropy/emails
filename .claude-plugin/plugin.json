@@ -1,0 +1,9 @@
+{
+  "name": "emails",
+  "version": "0.1.0",
+  "description": "Block-based email authoring: draft and edit email documents, settle audiences into facets, and build email-safe HTML for Iterable.",
+  "author": { "name": "infoentropy" },
+  "homepage": "https://infoentropy.github.io/emails/authoring/",
+  "repository": "https://github.com/infoentropy/emails",
+  "keywords": ["email", "iterable", "authoring", "campaigns"]
+}

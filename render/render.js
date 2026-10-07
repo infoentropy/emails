@@ -216,7 +216,7 @@ const noBraces = text => String(text).replaceAll("{", "&#123;");
 const markerText = ruleset => escapeHtml(ruleset.trim()).replace(/-{2,}/g, m => "&#45;".repeat(m.length));
 
 // The email's HTML for sending: every block that isn't hidden, with audiences as neutral markers that the
-// platform's conditionals replace when the email is pushed (see docs/agents.md):
+// platform's conditionals replace when the email is pushed (see skills/send-to-iterable/SKILL.md):
 //   <!--audience if="region.us-ca-gb + subscription.not-paying"-->  …  <!--audience elseif="…"-->  …
 //   <!--audience else-->  …  <!--audience end-->
 // A block with a ruleset is an if…end; a switch group is one chain. Throws if check() finds errors.

@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "infoentropy": {
+      "source": { "source": "github", "repo": "infoentropy/emails" }
+    }
+  },
+  "enabledPlugins": {
+    "emails@infoentropy": true
+  }
+}
