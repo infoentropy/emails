@@ -219,7 +219,7 @@ An agent authoring or editing an email doesn't read the specs. It reads:
 - The schemas in `blocks/*.json` for the block types it uses.
 - The document itself, and `check`'s output.
 
-`docs/agents.md` is kept current in the same change as anything it describes, like `docs/blocks.md`.
+`docs/agents.md` is kept current in the same change as anything it describes, like `docs/blocks.md`. (Since the repo became a Claude plugin, its procedures live in the skills under `skills/`, and `docs/agents.md` indexes them.)
 
 ## Testing in Iterable
 
@@ -344,7 +344,7 @@ email-campaigns/
 - Git gives every agent edit a reviewable, revertible diff.
 - The editor opens `campaigns/….json` with **File sync**. The private repo doesn't need Pages.
 - Agents run this repo's `render/check.js` and `render/preview.js` against those files: from a checkout of this repo alongside the campaign repo, or fetched from the hosted site.
-- **`campaign-repo-template/`** in this repo is a starter for that private repo: an example campaign that passes `check`, example `fields.md` and `facets.json`, a `CLAUDE.md` telling Claude sessions there where the tool is (`../emails`) and which procedures to follow, and a README for people.
+- **`campaign-repo-template/`** (now `skills/campaign-setup/template/`) in this repo is a starter for that private repo: an example campaign that passes `check`, example `fields.md` and `facets.json`, a `CLAUDE.md` telling Claude sessions there where the tool is (`../emails`) and which procedures to follow, and a README for people.
 - The editor reads one file at a time and never needs `facets.json`: its preview and **Copy HTML** work from the document alone. The facet library matters only when Claude settles rulesets and converts markers.
 
 ## Themes and variants
@@ -388,9 +388,9 @@ The intended design, when it's picked up: convert to HTML with **raw HTML in the
 3. **File sync.** *Done.* Open file and Save as… attach; edits autosave to the file; outside changes reload; invalid files and conflicts are handled as in **File sync**.
 4. **"Preview as".** *Done.* Add the picker to the editor: facets grouped by category for settled rulesets, whole-ruleset checkboxes for unsettled ones, and facet-aware matching in `renderPreview` (a block shows when all its facets are ticked). `renderPreview` already resolves free-text `rulesets` and switch groups, and `preview.js --as` exposes it.
 5. **Sendable HTML with audience markers.** *Done.* `renderHtml` (markers, hidden blocks left out, `{` escaped), `render/email.js`, `ruleset_unsettled` and `facet_category_repeated` in `check`, and the editor's **Copy HTML**. (An earlier draft wrote Iterable syntax from a flavor module; replaced, see **Audience markers**.)
-6. **Claude + Iterable.** *In progress.* Done: the settling and marker-conversion procedures in `docs/agents.md` (the conversion checked against the preview for sample recipients), and `campaign-repo-template/`. Remaining: setting up the real private campaign repo with real `fields.md`, and pushing and sending proofs through Iterable's API.
+6. **Claude + Iterable.** *In progress.* Done: the settling and marker-conversion procedures (now the `settle-audiences` and `send-to-iterable` skills) (the conversion checked against the preview for sample recipients), and the campaign repo starter (now `skills/campaign-setup/template/`). The repo is packaged as a Claude plugin (`.claude-plugin/`). Remaining: setting up the real private campaign repo with real `fields.md`, and pushing and sending proofs through Iterable's API.
 
-`../CLAUDE.md`, `../docs/blocks.md` and `../docs/agents.md` are updated in the same change as each step that alters what they describe (hosting, the `theme` and `nextId` keys, the renderer, `check`).
+`../CLAUDE.md`, `../docs/blocks.md` and the skills in `../skills/` are updated in the same change as each step that alters what they describe (hosting, the `theme` and `nextId` keys, the renderer, `check`).
 
 **Backlog:**
 

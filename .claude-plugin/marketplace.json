@@ -1,0 +1,14 @@
+{
+  "name": "infoentropy",
+  "description": "The infoentropy email authoring tool, as a Claude plugin.",
+  "owner": {
+    "name": "infoentropy"
+  },
+  "plugins": [
+    {
+      "name": "emails",
+      "source": "./",
+      "description": "Block-based email authoring: draft and edit email documents, settle audiences into facets, and build email-safe HTML for Iterable."
+    }
+  ]
+}

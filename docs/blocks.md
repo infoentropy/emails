@@ -14,7 +14,7 @@ authoring tool  ──►  document (.json)  ──►  render layer + theme  �
 - **Block schemas** (`../blocks/*.json`) define the block types. They're JSON Schema documents with a few custom keywords.
 - **The authoring tool** (`../authoring/index.html`) is a static page, served by GitHub Pages at `https://infoentropy.github.io/emails/authoring/`. It loads the schemas, builds a form from them, previews the email live and exports the document.
 - **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. It never writes a sending platform's syntax: audiences go out as neutral `<!--audience …-->` markers that Claude converts when pushing. Plan and remaining steps: `../specs/render-layer-tool.md`.
-- **Agents** editing documents read `agents.md`, not this page.
+- **Agents** editing documents use the plugin's skills (`../skills/`, indexed in `agents.md`), not this page.
 
 Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangement all belong to the theme, and never to the document. The single exception is image pixel dimensions (see [Field conventions](#field-conventions)).
 
@@ -289,11 +289,11 @@ The render layer's side of the contract: a field missing from `data` takes its s
 3. Import it in `../render/registry.js` and add it to `templates`. Its position there is its position in the palette.
 4. Add styles for it to **every** theme under `../render/themes/`: a `primary` entry, plus one per other `variant` value. `check` reports an error for a type a theme doesn't style.
 5. Serve the repo and open the tool, add the block from the palette, fill it in, and confirm the exported `data` is in `weight` order, validation behaves as expected, and the preview looks right in each theme at both widths.
-6. Add a row to [The block library](#the-block-library) above, and to `../completed/email-block-library.md`.
+6. Add a row to [The block library](#the-block-library) above, and to `../completed/email-block-library.md`. Add it to the block table in `../skills/email-document/SKILL.md` too, so agents can use it, and bump `version` in `../.claude-plugin/plugin.json`.
 
 ### Changing an existing block type
 
-Check the change against the table above. If it's allowed, edit the schema in `../blocks/`, bump `version`, and update the library table here.
+Check the change against the table above. If it's allowed, edit the schema in `../blocks/`, bump `version`, and update the library table here and in `../skills/email-document/SKILL.md`.
 
 ### Retiring a block type
 
