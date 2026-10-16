@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository contents
 
-This repository holds an email authoring tool, its render layer, and sample campaign data. The repo root is also a Claude plugin (`emails`) and a one-plugin marketplace (`infoentropy`), so the skills and the render layer they run ship together. There is no build system, package manager, linter, or test suite; `render/package.json` exists only to mark `render/` as ES modules for Node.
+This repository holds an email authoring tool, and its render layer. The repo root is also a Claude plugin (`emails`) and a one-plugin marketplace (`infoentropy`), so the skills and the render layer they run ship together. There is no build system, package manager, linter, or test suite; `render/package.json` exists only to mark `render/` as ES modules for Node.
 
 - `authoring/index.html` — the block authoring tool: a dependency-free page that loads the block schemas and the render layer, and produces the campaign JSON document with a live preview. In Chrome/Edge it can stay attached to a file on disk that an agent edits too (file sync). It must be served over http(s), not opened from `file://` (see below).
 - `blocks/*.json` — the block schema library: one JSON Schema document per block type. The only copy: the authoring tool fetches them at startup.
@@ -17,7 +17,6 @@ This repository holds an email authoring tool, its render layer, and sample camp
 - `README.md` — the entry point for people cloning this repo.
 
 To check a document, run `node render/check.js <doc.json>` (prints issues as JSON; exits 1 on errors). Test render-layer changes by running it against a sample document and by loading the authoring tool, whose Validation panel and preview use the same code.
-- `content/weekly.json` / `content/weekly.xml` — the same sample campaign data (a snippet-based email campaign structure: name, subject, preheader, and a list of content snippets with per-snippet data like background image/color, copy, and CTA text) expressed in JSON and XML respectively.
 
 Rendered email markup (templates in `render/blocks/`, the shell in `render/themes/shell.js`) uses classic email-safe patterns: XHTML transitional doctype, inline `<style>` blocks, table layouts, and Outlook (`mso`)/`ExternalClass` conditional CSS. When editing it, preserve these email-client compatibility patterns rather than modernizing to standard responsive/CSS-grid techniques, which many email clients don't support. The authoring tool needs a server: run `python3 -m http.server` in the repo root and open `http://localhost:8000/authoring/`. All paths between files must be relative (never `/blocks/…`), because on Pages the site lives under `/emails/`.
 
