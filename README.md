@@ -30,7 +30,7 @@ A block-based email authoring tool. Emails are JSON documents made of content bl
 | `render/` | The render layer (browser and Node): `check`, the preview, the HTML for sending, block templates and themes. Commands: `check.js`, `preview.js`, `email.js`. |
 | `docs/agents.md` | An index of the skills, for agents working without the plugin. |
 | `docs/blocks.md` | The developer guide: document format, block library, render layer, adding block types. |
-| `specs/`, `completed/`, `ideas/`, `feedback/` | How things were decided (see `CLAUDE.md`, **Project management**). |
+| `feedback/` | Requested refinements to launched features. |
 | `content/` | Older sample campaign data. |
 
 ## Running locally

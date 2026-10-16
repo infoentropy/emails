@@ -5,7 +5,7 @@ description: Draft a new email document from copy, or edit an existing one (camp
 
 # Drafting and editing email documents
 
-Everything you need to draft or change an email document. You don't need the tool's specs or developer docs.
+Everything you need to draft or change an email document. You don't need the tool's developer docs.
 
 **The rule: work on the JSON, get feedback from `check`, leave visual judgement to the person.** Don't read rendered HTML (it's large and says little that `check` doesn't). A person watches the live preview in the editor.
 
