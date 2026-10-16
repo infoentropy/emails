@@ -31,7 +31,7 @@ A block-based email authoring tool. Emails are JSON documents made of content bl
 | `docs/agents.md` | An index of the skills, for agents working without the plugin. |
 | `docs/blocks.md` | The developer guide: document format, block library, render layer, adding block types. |
 | `specs/`, `completed/`, `ideas/`, `feedback/` | How things were decided (see `CLAUDE.md`, **Project management**). |
-| `flipboard/`, `traction/`, `content/` | Older hand-written templates and sample data. |
+| `content/` | Older sample campaign data. |
 
 ## Running locally
 

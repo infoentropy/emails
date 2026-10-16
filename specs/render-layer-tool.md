@@ -107,7 +107,7 @@ A theme is a module, `render/themes/<name>/theme.js`, exporting:
 - `styles`: the `(blockType, variant)` → appearance lookup (colours, fonts, spacing, background images).
 - `imageSide`: `"left"` or `"right"` for `image_with_text`. Fixed per theme, not alternating, because alternating needs each block to know its position among its siblings. Revisit only if a theme actually needs it.
 - `dateFormat`: `Intl.DateTimeFormat` options, e.g. `{ month: "long", day: "numeric", year: "numeric" }`. Parse the document's `YYYY-MM-DD` as UTC so the day can't shift with the viewer's timezone. There's a default if the theme omits it.
-- `shell({ subject, preheader, body })`: the outer HTML document (doctype, `<head>`, Outlook settings, media queries, the hidden preheader). The theme owns its shell: `flipboard/techdigest.html` and `traction/index.html` already differ at that level, and that's exactly the brand-level variation a theme exists for. The first two themes share one, `render/themes/shell.js`, with their own colours and fonts; a theme can replace it.
+- `shell({ subject, preheader, body })`: the outer HTML document (doctype, `<head>`, Outlook settings, media queries, the hidden preheader). The theme owns its shell: the hand-written Flipboard and Traction templates this repo used to hold already differed at that level, and that's exactly the brand-level variation a theme exists for. The first two themes share one, `render/themes/shell.js`, with their own colours and fonts; a theme can replace it.
 
 Themes can also add assets (e.g. background images) under their directory, referenced by absolute URL from the hosted site or an image host.
 
@@ -165,7 +165,7 @@ The editor can **open a file on disk and stay attached to it**, so a person and 
 
 Agents (Claude in the plugin, or Claude Code) do the first draft and many small changes. People do the visual review and the fine-tuning. The design aims to keep each agent turn cheap in tokens.
 
-**The principle: agents work on the JSON and get text feedback. People judge the visuals.** A rendered email is large: `flipboard/techdigest.html` is 2,281 lines of table markup, while the JSON for a similar email is a few dozen lines. Screenshots are costly too, and need a headless browser. So in an agent's normal loop it reads and edits only the document, and learns whether the document is right from `check`, never from reading the rendered HTML.
+**The principle: agents work on the JSON and get text feedback. People judge the visuals.** A rendered email is large: the hand-written Flipboard digest this repo used to hold was 2,281 lines of table markup, while the JSON for a similar email is a few dozen lines. Screenshots are costly too, and need a headless browser. So in an agent's normal loop it reads and edits only the document, and learns whether the document is right from `check`, never from reading the rendered HTML.
 
 ### `check`
 
