@@ -1,6 +1,6 @@
 # Blocks: developer guide
 
-How blocks work **as the code stands today**. The specs in `../specs/` and `../completed/` record how each piece was decided and why, and later specs change earlier ones. This page is the current-state summary: when behaviour changes, update this page in the same change. For the reasoning behind a rule, follow the links to the specs.
+How blocks work **as the code stands today**. When behaviour changes, update this page in the same change.
 
 ## Overview
 
@@ -13,7 +13,7 @@ authoring tool  ──►  document (.json)  ──►  render layer + theme  �
 
 - **Block schemas** (`../blocks/*.json`) define the block types. They're JSON Schema documents with a few custom keywords.
 - **The authoring tool** (`../authoring/index.html`) is a static page, served by GitHub Pages at `https://infoentropy.github.io/emails/authoring/`. It loads the schemas, builds a form from them, previews the email live and exports the document.
-- **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. It never writes a sending platform's syntax: audiences go out as neutral `<!--audience …-->` markers that Claude converts when pushing. Plan and remaining steps: `../specs/render-layer-tool.md`.
+- **The render layer** (`../render/`) turns a document and a theme into email HTML, and checks documents. It never writes a sending platform's syntax: audiences go out as neutral `<!--audience …-->` markers that Claude converts when pushing.
 - **Agents** editing documents use the plugin's skills (`../skills/`, indexed in `agents.md`), not this page.
 
 Blocks hold **content only**. Colour, spacing, sizing, backgrounds and arrangement all belong to the theme, and never to the document. The single exception is image pixel dimensions (see [Field conventions](#field-conventions)).
@@ -141,8 +141,6 @@ Add a `fieldType` only when a real field needs it. Image, colour and link picker
 | `button` | `text*`, `link*`, `variant` (default `primary`) | |
 | `divider` | `variant` (default `primary`) | |
 
-Why each block looks the way it does: `../completed/email-block-library.md`.
-
 ## Field conventions
 
 - **`variant`** is the one shared vocabulary for emphasis: `enum: ["primary", "secondary"]`, `fieldType: text`, always optional with a default. The default is chosen per block type. The theme maps `(blockType, variant)` to an appearance, so a button's `primary` and a divider's `primary` needn't look alike. Use `variant` rather than inventing a size or colour field.
@@ -154,7 +152,7 @@ Why each block looks the way it does: `../completed/email-block-library.md`.
 
 ## Visibility
 
-Three optional block-level keys control whether a block is sent, and to whom. Design and rationale: `../completed/block-segmentation.md`.
+Three optional block-level keys control whether a block is sent, and to whom.
 
 ### `hidden`
 
@@ -171,7 +169,7 @@ Free text saying who sees the block, in the author's own words:
 - While drafting there's no grammar, and nothing in this repo knows which recipient attributes exist. Those depend on the sending platform and its setup.
 - The authoring tool stores the text as typed (trimmed on export).
 - **Settled form:** facet ids (`category.name`: lower-case letters, digits, hyphens) joined with ` + `, meaning *and*, e.g. `region.us-ca-gb + subscription.not-paying`. `parseRuleset()` in `../render/render.js` recognises it; anything else is unsettled free text. The preview understands both (see *Preview as* below).
-- Before an email is sent, each free-text ruleset is **settled** into **facets**, in a conversation between Claude and the person: canned, approved conditions per category (region, subscription, behaviour), combined with ` + `, e.g. `region.us-ca-gb + subscription.not-paying`. `check` warns about an unsettled ruleset (`ruleset_unsettled`); converting markers into platform conditions stops on one. *(The settling and conversion procedures come in step 6. See the render layer spec, **Audiences**.)*
+- Before an email is sent, each free-text ruleset is **settled** into **facets**, in a conversation between Claude and the person: canned, approved conditions per category (region, subscription, behaviour), combined with ` + `, e.g. `region.us-ca-gb + subscription.not-paying`. `check` warns about an unsettled ruleset (`ruleset_unsettled`); converting markers into platform conditions stops on one. *(The settling and conversion procedures come in step 6. The procedure is the `settle-audiences` skill (`../skills/settle-audiences/SKILL.md`).)*
 - No `ruleset`: the block goes to everyone.
 
 ### Switch groups
@@ -271,7 +269,7 @@ Plain ES modules in `../render/`, with no dependencies. They run unchanged in th
 
 ## Changing block types
 
-Block schemas evolve **additively**. A document written against version *N* of a schema must stay valid against every later version, with no migration. Full rules: `../completed/serverless-email-authoring-tool.md`, **Schema evolution**.
+Block schemas evolve **additively**. A document written against version *N* of a schema must stay valid against every later version, with no migration.
 
 | Allowed (bump `version`) | Forbidden (make a new `blockType` instead) |
 |---|---|
@@ -289,7 +287,7 @@ The render layer's side of the contract: a field missing from `data` takes its s
 3. Import it in `../render/registry.js` and add it to `templates`. Its position there is its position in the palette.
 4. Add styles for it to **every** theme under `../render/themes/`: a `primary` entry, plus one per other `variant` value. `check` reports an error for a type a theme doesn't style.
 5. Serve the repo and open the tool, add the block from the palette, fill it in, and confirm the exported `data` is in `weight` order, validation behaves as expected, and the preview looks right in each theme at both widths.
-6. Add a row to [The block library](#the-block-library) above, and to `../completed/email-block-library.md`. Add it to the block table in `../skills/email-document/SKILL.md` too, so agents can use it, and bump `version` in `../.claude-plugin/plugin.json`.
+6. Add a row to [The block library](#the-block-library) above. Add it to the block table in `../skills/email-document/SKILL.md` too, so agents can use it, and bump `version` in `../.claude-plugin/plugin.json`.
 
 ### Changing an existing block type
 
@@ -298,12 +296,3 @@ Check the change against the table above. If it's allowed, edit the schema in `.
 ### Retiring a block type
 
 Set `"deprecated": true` on the schema and bump `version`. Keep it in the registry. The type disappears from the tool's add pickers, but existing blocks of that type stay editable and still export. *+ Add case* still copies an existing case, whatever its type. Don't delete the schema: documents that use the type would lose their form and fall back to the read-only unknown-type placeholder.
-
-## Where things are decided
-
-| Topic | Spec |
-|---|---|
-| Document format, schema keywords, evolution rules, the tool | `../completed/serverless-email-authoring-tool.md` |
-| The block library and field conventions | `../completed/email-block-library.md` |
-| `hidden`, `ruleset`, switch groups | `../completed/block-segmentation.md` |
-| Rendering, themes, audience markers, settling rulesets into facets | `../specs/render-layer-tool.md` |

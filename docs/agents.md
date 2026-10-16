@@ -1,6 +1,6 @@
 # Guide for agents
 
-The procedures agents follow live in this repo's Claude plugin, as skills. Each one is self-contained: you don't need the specs or `blocks.md`.
+The procedures agents follow live in this repo's Claude plugin, as skills. Each one is self-contained: you don't need `blocks.md`.
 
 | Skill | For |
 |---|---|

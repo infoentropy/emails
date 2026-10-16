@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "block:button",
   "title": "Button",
-  "version": 1,
+  "version": 2,
   "type": "object",
   "properties": {
     "text": {
@@ -28,7 +28,7 @@
         "secondary"
       ],
       "default": "primary",
-      "description": "Emphasis, resolved to an appearance by the theme. Shared vocabulary; see the authoring tool spec."
+      "description": "Emphasis, resolved to an appearance by the theme. Shared vocabulary; see docs/blocks.md."
     }
   },
   "required": [
