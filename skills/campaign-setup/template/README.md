@@ -1,37 +1,39 @@
-# Campaign repo template
+# Campaign folder template
 
-A starting point for the **private** repo that holds your campaigns: the email documents, your Iterable fields, and the approved audience facets. The tool (editor, render layer, Claude skills) stays in the public repo, [`infoentropy/emails`](https://github.com/infoentropy/emails), and reaches Claude as the `emails` plugin. Keep content out of that repo: it's public and published on GitHub Pages.
-
-A live copy of this folder is published as the public example repo [`infoentropy/email-campaigns`](https://github.com/infoentropy/email-campaigns) (sample data only, no Iterable keys). Keep the two in step: when this folder changes, copy the change there.
+A starting point for the **private** folder (or repo) that holds your campaigns: the email documents, your Iterable fields, and the approved audience facets. The tool (editor, render layer, Claude skills) stays in the public repo, [`infoentropy/emails`](https://github.com/infoentropy/emails), and reaches Claude as the `emails` plugin. Keep content out of that repo: it's public and published on GitHub Pages.
 
 ## Set up
 
-**Easiest:** in Claude Code, install the plugin and ask Claude to set up a campaign repo (the `campaign-setup` skill copies this folder for you):
+**Easiest:** in Claude Code, install the plugin and ask Claude to set up a campaign folder (the `campaign-setup` skill copies this template for you):
 
 ```
 /plugin marketplace add infoentropy/emails
 /plugin install emails@infoentropy
 ```
 
-**By hand:** copy the example and push it to a new private repo:
+**By hand:** make a folder of your own with this structure, or copy this template folder ([`skills/campaign-setup/template/`](https://github.com/infoentropy/emails/tree/master/skills/campaign-setup/template) in the tool repo), hidden files included:
 
-```sh
-git clone https://github.com/infoentropy/email-campaigns my-campaigns
-cd my-campaigns && rm -rf .git && git init -b main
-gh repo create my-campaigns --private --source=. --push
+```
+campaigns/<date>-<slug>.json   one email document each
+iterable/fields.md             your Iterable user fields and how their values are coded
+iterable/facets.json           approved audience facets
+out/                           built HTML (keep it out of git)
+.claude/settings.json          enables the emails plugin for Claude Code
+CLAUDE.md                      tells Claude sessions how to work here
+.gitignore                     ignores out/ and .env
 ```
 
-(Don't fork the example: a fork of a public repo is public.) `.claude/settings.json` enables the plugin for anyone who opens the repo in Claude Code, so the tool repo doesn't need cloning. Then:
+If you keep it in git, make the repository **private**. `.claude/settings.json` enables the plugin for anyone who opens the folder in Claude Code, so the tool repo doesn't need cloning. Then:
 
 1. **Rewrite `iterable/fields.md`** for your Iterable project: the user fields that exist, and how their values are coded. The example rows are made up. Everything about audiences depends on this file being right.
 2. **Empty or trim `iterable/facets.json`.** The example facets use the example fields. Facets get added as you settle audiences with Claude.
-3. Delete `campaigns/2026-10-sleep-stories.json` once you've tried it, or keep it as a reference.
+3. If you copied the template, delete `campaigns/2026-10-sleep-stories.json` once you've tried it, or keep it as a reference.
 
 Never commit an Iterable API key. Keep it in your environment (e.g. `ITERABLE_API_KEY`).
 
 ## Try the example
 
-Ask Claude to check `campaigns/2026-10-sleep-stories.json` and build its HTML. To run the commands yourself, clone [`infoentropy/emails`](https://github.com/infoentropy/emails) anywhere (Node is the only requirement) and, from this repo:
+Ask Claude to check `campaigns/2026-10-sleep-stories.json` and build its HTML. To run the commands yourself, clone [`infoentropy/emails`](https://github.com/infoentropy/emails) anywhere (Node is the only requirement) and, from this folder:
 
 ```sh
 node <path-to-emails>/render/check.js campaigns/2026-10-sleep-stories.json          # [] = no problems

@@ -9,7 +9,7 @@ A block-based email authoring tool. Emails are JSON documents made of content bl
   /plugin install emails@infoentropy
   ```
   Its skills: `email-document` (draft and edit), `settle-audiences`, `send-to-iterable`, and `campaign-setup`.
-- **Your campaigns** live in a separate **private** repo, never in this one: this repo is public and published on GitHub Pages. Ask Claude to set one up (`campaign-setup`), or start from [`skills/campaign-setup/template/`](skills/campaign-setup/template/); its README walks through setup and a first email. A public, cloneable copy is at [`infoentropy/email-campaigns`](https://github.com/infoentropy/email-campaigns).
+- **Your campaigns** live in a separate **private** repo, never in this one: this repo is public and published on GitHub Pages. Ask Claude to set one up (`campaign-setup`), or start from [`skills/campaign-setup/template/`](skills/campaign-setup/template/); its README walks through setup and a first email.
 
 ## How an email gets made
 
